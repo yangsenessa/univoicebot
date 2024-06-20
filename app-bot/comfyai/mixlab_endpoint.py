@@ -133,6 +133,12 @@ def read_workflow_json_files(folder_path ):
     sorted_data = sorted(data, key=lambda x: x['date'], reverse=True)
     return sorted_data
 
+
+#prompt for UNIVOICE
+async def prompts_origin(userId:str, voice_base64:str):
+    return 
+
+
 #prompt
 @router.post("/mixlab/prompt")
 async def do_prompts_process(request:Request,db:Session = Depends(get_db)):

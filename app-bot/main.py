@@ -1,5 +1,5 @@
 import random
-from telegram import Update
+from telegram import Update,File
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler ,filters, MessageHandler
 
 from fastapi import FastAPI
@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from comfyai import usermanner_endpoint
 from comfyai import mixlab_endpoint
 from comfyai import wsserver_endpoint
+from comfyai.core.media import parsewav
 from loguru import logger
 import uvicorn
 
@@ -42,8 +43,11 @@ async def ohayo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def voice(update:Update, context:ContextTypes.DEFAULT_TYPE):
-    texts = update.effective_message.voice.file_id
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="我听到了~"+texts)
+     
+     if(update.message.chat.type == "private"):
+        voice_file = await update.effective_message.voice.get_file()
+        await parsewav(voice_file)
+        await context.bot.send_message(chat_id=update.effective_chat.id,text="AIGC ...")
 
 
 
