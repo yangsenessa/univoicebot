@@ -307,12 +307,12 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
 #   },
 #   "prompt_id": "2f857632-c0be-4275-a15b-8ec0333e848e"
 #}
-        elif  "gifts" in output.keys():
-            filenames = json.dumps(output["gifts"])
+        elif  "gifs" in output.keys():
+            filenames = json.dumps(output["gifs"])
         if not filenames:
             return False
     if filenames:   
-       logger.debug("FILENAME:"+ str(filenames[0]))
+       logger.debug("FILENAME:"+ filenames)
 
     logger.debug("DATA:", json.dumps(data))
     if ("prompt_id" in  data.keys()):

@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 
 #SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://mixlab:mixlab@host.docker.internal:3306/standard?charset=utf8"
-SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://mixlabdb:mixlab_DB@mixlib-mid-gw.rwlb.rds.aliyuncs.com/mixlabdb?charset=utf8"
+SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://mixlabdb:mixlab_DB@8.141.81.75:3306/mixlabdb?charset=utf8"
 POOL_SIZE = 20
 POOL_RECYCLE = 3600
 POOL_TIMEOUT = 150

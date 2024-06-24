@@ -17,6 +17,7 @@ def update_wk_router(db:Session, client_id:str,prompts_id:str,ori_body:str,filen
     db_wkrouter = db.query(WorkFlowRouterInfo).filter(
                        WorkFlowRouterInfo.client_id == client_id
                            ,WorkFlowRouterInfo.prompts_id == prompts_id).first()
+    logger.info(f"WorkFlowRouterInfo promptsid:{prompts_id} client_id:{client_id} load = {str(db_wkrouter)}")
     if db_wkrouter:
        db_wkrouter.status=status
        db_wkrouter.ori_body = ori_body
@@ -31,6 +32,8 @@ def update_wk_router(db:Session, client_id:str,prompts_id:str,ori_body:str,filen
     else:
         db_wkrouter = WorkFlowRouterInfo(prompts_id=prompts_id,client_id=client_id,ori_body=ori_body,filenames=filenames,comfyui_url=comfyui_url,
                                          status=status,gmt_datetime=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        logger.info(f"Insert into WorkFlowRouterInfo={str(db_wkrouter)}")
+        db.add(db_wkrouter)
         db.commit()
         db.refresh(db_wkrouter)
         logger.debug("restore wkrouter")

@@ -76,7 +76,7 @@ async def extern_prompts(user_token:str, call_from:str, wkflow:dict,context:Cont
         work_flow_crud.create_wk_router(db,wk_info)
         logger.debug(f"begin create ws client-{wkflow['client_id']}")
     
-        await WebsocetClient().start(wkflow["client_id"],ws_url,call_from,db,context)
+        await WebsocetClient().start(user_token,ws_url,call_from,db,context)
         time.sleep(1)
        
         logger.debug(response.content)
