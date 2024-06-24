@@ -5,6 +5,10 @@ from sqlalchemy.orm import Session
 import json
 from loguru import logger
 from comfyai import mixlab_endpoint
+from telegram.ext import ContextTypes
+from telegram import File
+
+
 import time
 
 database = Database()
@@ -21,15 +25,22 @@ class WebsocetClient(object):
         self.ws = None
         self.db = None
         self.sid =None
+        self.callfrom = "default"
+        self.tele_bot_context = None
         
 
     def on_message(self, source,message):
-        if self.if_execute_type(message):
-            if  mixlab_endpoint.detail_recall(self.url,self.sid,message,self.db):
-                self.ws.close()
-
         print("####### on_message #######")
         print("message：%s" % message)
+        if self.if_execute_type(message):
+            engine_recall = database.get_db_connection()
+            flag, filenames = mixlab_endpoint.detail_recall(self.url,self.sid,message,database.get_db_session(engine_recall))
+            if(flag):
+                if(self.callfrom == 'telegram-bot' or self.callfrom =='telegram-miniapp'):
+                   for videofilename in filenames:
+                       video = mixlab_endpoint.fetch_comf_file_raw()
+                       self.do_send_video(self.sid,self.tele_bot_context,)
+                self.ws.close()
 
     def on_error(self,*error):
         print("####### on_error #######")
@@ -60,9 +71,14 @@ class WebsocetClient(object):
             status=detail_json["type"]
         
         return "status" != status
+    
+    #hook function for ws_client
+    #usertoken = user_id % chart_id
+    def do_send_video(usertoken:str,context:ContextTypes.DEFAULT_TYPE, video:File):
+         context.bot.send_video(usertoken.split('%')[1], video, supports_streaming=True)
 
 
-    def start(self,client_id:str,ws_url:str,db:Session):
+    def start(self,client_id:str,ws_url:str,call_from:str,db:Session,context:ContextTypes.DEFAULT_TYPE):
     
         logger.debug("Begin create WebSocketApp:" + ws_url)
         self.ws = websocket.WebSocketApp(ws_url,
@@ -74,6 +90,8 @@ class WebsocetClient(object):
         self.db = database.get_db()
         self.url = ws_url
         self.sid = client_id
+        self.callfrom = call_from
+        self.tele_bot_context = context
         # self.ws.on_open = self.on_open  # 也可以先创建对象再这样指定回调函数。run_forever 之前指定回调函数即可。
         #threading.Thread(target=self.ws.run_forever()) 
         self.ws.run_forever()

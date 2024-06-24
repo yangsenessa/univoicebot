@@ -26,6 +26,7 @@ def update_wk_router(db:Session, client_id:str,prompts_id:str,ori_body:str,filen
            db_wkrouter.filenames = filenames
        db.commit()
        db.refresh(db_wkrouter)
+       
        logger.debug("update success")
     else:
         db_wkrouter = WorkFlowRouterInfo(prompts_id=prompts_id,client_id=client_id,ori_body=ori_body,filenames=filenames,comfyui_url=comfyui_url,

@@ -2,12 +2,17 @@ from loguru import logger
 from telegram import Update
 from telegram import File
 from pydub import AudioSegment
+from telegram.ext import ContextTypes
 import tempfile
 import os
 import base64
 import json
 
-async def parsewav(voice_file:File):
+import sys
+sys.path.append('..')
+from comfyai import telegram_bot_endpoint
+
+async def parsewav(user_token:str, voice_file:File,context:ContextTypes.DEFAULT_TYPE):
    with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_ogg_file:
          await voice_file.download_to_drive(tmp_ogg_file.name)
          tmp_ogg_file.flush()
@@ -23,15 +28,19 @@ async def parsewav(voice_file:File):
  
               # transfer to BASE64
               base64_audio = base64.b64encode(audiowav.export(format="wav").read())
-              with tempfile.NamedTemporaryFile(delete=False,suffix=".txt") as tmp_txt_file:
-                   tmp_txt_file.write(base64_audio)
+              #with tempfile.NamedTemporaryFile(delete=False,suffix=".txt") as tmp_txt_file:
+              #     tmp_txt_file.write(base64_audio)
 
               tmp_ogg_file.close()
               os.remove(tmp_ogg_file.name)
-              tmp_wk_json = await parseAudioBase64IntoWorkflow(base64_audio)
+              tmp_wk_json =  parseAudioBase64IntoWorkflow(base64_audio)
+              return tmp_wk_json
+
+
+
 
 #transfer wkflow content
-async def parseAudioBase64IntoWorkflow(base64date:bytes):
+def parseAudioBase64IntoWorkflow(base64date:bytes):
     wk_filename = "musetalk-comfyui-workflow.json"
     comfyai_path = os.path.abspath(os.path.dirname(__file__))
     wk_path = os.path.join(comfyai_path,"workflows",wk_filename)
@@ -52,10 +61,29 @@ async def parseAudioBase64IntoWorkflow(base64date:bytes):
               with open(tmp_wk_path,"w") as tmp_json_file:
                    json.dump(json_wk_data,tmp_json_file)
                    tmp_json_file.flush()
-                   return json_wk_data
+              return json_wk_data
               
     
     except Exception as e:
          logger.error(f"Some exception happend:  {str(e)}")
          
-    
+#load video default
+def loadVideoDefault():
+     videofile = "sun.mp4"
+     comfyai_path = os.path.abspath(os.path.dirname(__file__))
+     video_path = os.path.join(comfyai_path,"video",videofile)
+     logger.info(f"Video template path :{video_path}")
+     
+     try:
+          file = open(video_path,'r')
+          return file
+     except Exception as e:
+          logger.error(f"Load video file fail: {str(e)}")  
+
+     return None  
+
+
+#hook function for ws_client
+#usertoken = user_id % chart_id
+def do_send_video(usertoken:str,context:ContextTypes.DEFAULT_TYPE, video:File):
+    context.bot.send_video(usertoken.split('-')[1], video, supports_streaming=True)

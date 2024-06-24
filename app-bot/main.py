@@ -8,7 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from comfyai import usermanner_endpoint
 from comfyai import mixlab_endpoint
 from comfyai import wsserver_endpoint
-from comfyai.core.media import parsewav
+from comfyai import telegram_bot_endpoint
+from biz.media import parsewav
 from loguru import logger
 import uvicorn
 
@@ -46,7 +47,18 @@ async def voice(update:Update, context:ContextTypes.DEFAULT_TYPE):
      
      if(update.message.chat.type == "private"):
         voice_file = await update.effective_message.voice.get_file()
-        await parsewav(voice_file)
+        user_token = f"{update.effective_user.id}-{update.effective_message.chat_id}"
+        logger.info(f"Hearing voice :{user_token}")
+       
+        tmp_wk_json = await parsewav(user_token,voice_file,context)
+
+        
+        wk_client_id = f"{update.effective_message.id}-{user_token}"
+        logger.info(f"prompts client_id={wk_client_id}")
+        tmp_wk_json["client_id"] = wk_client_id
+        await telegram_bot_endpoint.extern_prompts(user_token,"telegram-bot",tmp_wk_json,context)
+
+
         await context.bot.send_message(chat_id=update.effective_chat.id,text="AIGC ...")
 
 

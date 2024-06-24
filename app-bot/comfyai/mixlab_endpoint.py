@@ -16,7 +16,6 @@ import json
 from comfyai.wsclient.websocket_client_new import WebsocetClient
 from datetime import datetime
 import time
-import threading
 import os
 
 
@@ -38,6 +37,7 @@ def get_oss_download_url(key:str):
     #todo
     url = ""
     return url
+
 
 
 
@@ -134,11 +134,6 @@ def read_workflow_json_files(folder_path ):
     return sorted_data
 
 
-#prompt for UNIVOICE
-async def prompts_origin(userId:str, voice_base64:str):
-    return 
-
-
 #prompt
 @router.post("/mixlab/prompt")
 async def do_prompts_process(request:Request,db:Session = Depends(get_db)):
@@ -193,7 +188,7 @@ async def do_prompts_process(request:Request,db:Session = Depends(get_db)):
         logger.debug("begin create ws client")
         #t1=threading.Thread(target=WebsocetClient().start,args=(body["client_id"],ws_url,db))
         #t1.start()
-        WebsocetClient().start(body["client_id"],ws_url,db)
+        WebsocetClient().start(body["client_id"],ws_url,"default",db,None)
         time.sleep(1)
        
         logger.debug(response.content)
@@ -298,12 +293,26 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
             filenames = json.dumps(output["images"])
         elif  "text" in output.keys():
             filenames = json.dumps(output["text"])
+#{
+#    "node": "155",
+#   "output": {
+#       "gifs": [
+#           {
+#               "filename": "video_final_00046.mp4",
+#               "subfolder": "",
+#               "type": "output",
+#                "format": "video/mp4"
+#           }
+#       ]
+#   },
+#   "prompt_id": "2f857632-c0be-4275-a15b-8ec0333e848e"
+#}
         elif  "gifts" in output.keys():
             filenames = json.dumps(output["gifts"])
         if not filenames:
             return False
     if filenames:   
-       logger.debug("FILENAME:"+ filenames)
+       logger.debug("FILENAME:"+ str(filenames[0]))
 
     logger.debug("DATA:", json.dumps(data))
     if ("prompt_id" in  data.keys()):
@@ -315,17 +324,18 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
                work_flow_crud.update_wk_router(db,sid,prompt_id,detail,gw_filenames,url,status)
 
             else:
-                work_flow_crud.update_wk_router(db,sid,prompt_id,detail,None,url,status)
+               work_flow_crud.update_wk_router(db,sid,prompt_id,detail,None,url,status)
 
         except Exception as e:
             print(e)
             logger.debug("db exception")
 
     if  status =="executed" and filenames:
-        return True
+        return True,filenames 
     else:
-        return False
+        return False, None
 
+#for FastApi only
 def construct_comf_file_url(url:str,file_names:str):
     file_obj = json.loads(file_names)
     file_item=[]
@@ -359,6 +369,7 @@ def construct_comf_file_url(url:str,file_names:str):
 
     return json.dumps(file_item)
 
+
 def fetch_comf_file(url:str,type:str,filename:str):
     current_path = os.path.abspath(os.path.dirname(__file__))
     app_path=os.path.join(current_path, "tempfiles")
@@ -388,6 +399,33 @@ def fetch_comf_file(url:str,type:str,filename:str):
     except Exception as e:
         print(e)
 
+#feich output from comfyui,use in tel-bot
+def fetch_comf_file_raw(url:str,type:str,filename:str):
+    current_path = os.path.abspath(os.path.dirname(__file__))
+    app_path=os.path.join(current_path, "tempfiles")
+    category_path=os.path.join(app_path,type)
+    if not os.path.exists(category_path):
+        os.mkdir(category_path)
+   
+    if type:
+        comfyui_res_path = category_path
+    else:
+        comfyui_res_path = app_path
+    
+    comfyui_file = os.path.join(comfyui_res_path,filename)
+    
+    logger.debug(comfyui_file)
+
+    res = requests.get(url)
+    try:
+        with open(comfyui_file,"wb") as res_file:
+           res_file.write(res.content)
+           res_file.flush()
+           logger.info("Success feich AI result")
+           return res_file
+    except Exception as e:
+        print(e)
+
 
 #put_file_to_comfyui
 def put_file_to_comfyui(url:str,filename:str, filelocalurl:str):
@@ -402,6 +440,8 @@ def put_file_to_comfyui(url:str,filename:str, filelocalurl:str):
     ]
     response = requests.post(comfyui_file_url, data=data,  files=files)
     logger.debug("uploaded file into comfyui:", str(response.content) )
+
+
 
   
 
