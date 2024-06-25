@@ -38,8 +38,13 @@ class WebsocetClient(object):
             if(flag):
                 if(self.callfrom == 'telegram-bot' or self.callfrom =='telegram-miniapp'):
                    for videofilename in filenames:
-                       video = mixlab_endpoint.fetch_comf_file_raw()
-                       self.do_send_video(self.sid,self.tele_bot_context,)
+                       logger.info(f"Begin fetching result :{videofilename['filename']}")
+                       url = self.url
+                       type = videofilename['type']
+                       filename = videofilename["filename"]
+                       
+                       video = mixlab_endpoint.fetch_comf_file_raw(url,type, filename)
+                       self.do_send_video(self.sid,self.tele_bot_context,video)
                 self.ws.close()
 
     def on_error(self,*error):
