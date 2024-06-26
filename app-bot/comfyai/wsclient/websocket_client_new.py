@@ -8,6 +8,7 @@ from comfyai import mixlab_endpoint
 from telegram.ext import ContextTypes
 from telegram import File
 import asyncio
+import nest_asyncio
 
 
 import time
@@ -86,6 +87,7 @@ class WebsocetClient(object):
     #hook function for ws_client
     #usertoken = user_id % chart_id
     def do_send_video(usertoken:str,chat_id:str,context:ContextTypes.DEFAULT_TYPE, video:File):
+        nest_asyncio.apply()
         loop = asyncio.get_event_loop()
         result = loop.run_until_complete(context.bot.send_video(chat_id, video, supports_streaming=True))
         loop.close()

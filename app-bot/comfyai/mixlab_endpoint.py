@@ -423,7 +423,7 @@ def fetch_comf_file(url:str,type:str,filename:str):
 
     res = requests.get(url)
     try:
-        with open(comfyui_file,"wb") as res_file:
+        with open(comfyui_file,"rwb") as res_file:
            res_file.write(res.content)
         if type :
            oss_key=type+"_"+filename
