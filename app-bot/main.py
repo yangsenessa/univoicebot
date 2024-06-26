@@ -56,7 +56,9 @@ async def voice(update:Update, context:ContextTypes.DEFAULT_TYPE):
         wk_client_id = f"{update.effective_message.id}-{user_token}"
         logger.info(f"prompts client_id={wk_client_id}")
         tmp_wk_json["client_id"] = wk_client_id
-        await telegram_bot_endpoint.extern_prompts(user_token,"telegram-bot",tmp_wk_json,context)
+        chat_id = update.effective_chat.id
+
+        await telegram_bot_endpoint.extern_prompts(user_token,chat_id,context,"telegram-bot",tmp_wk_json)
 
 
         await context.bot.send_message(chat_id=update.effective_chat.id,text="AIGC ...")

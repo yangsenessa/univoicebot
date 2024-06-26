@@ -1,0 +1,31 @@
+{
+    "node": "155",
+    "output": {
+        "gifs": [
+            {
+                "filename": "video_final_00083.mp4",
+                "subfolder": "",
+                "type": "output",
+                "format": "video/mp4"
+            }
+        ]
+    },
+    "prompt_id": "0272b153-4a24-4bae-8049-b5afac99dd78"
+}
+
+
+{
+    "node": "154",
+    "output": {
+        "gifs": [
+            {
+                "filename": "Comfyui_00016_.mp4",
+                "subfolder": "",
+                "type": "temp",
+                "format": "video/h265-mp4"
+            }
+        ]
+    },
+    "prompt_id": "0272b153-4a24-4bae-8049-b5afac99dd78"
+}
+http://127.0.0.1:8188/view?filename=video_final_00083.mp4&type=output&subfolder=&t=1719422346592
