@@ -7,6 +7,7 @@ from loguru import logger
 from comfyai import mixlab_endpoint
 from telegram.ext import ContextTypes
 from telegram import File
+import asyncio
 
 
 import time
@@ -84,8 +85,10 @@ class WebsocetClient(object):
     
     #hook function for ws_client
     #usertoken = user_id % chart_id
-    async def do_send_video(usertoken:str,chat_id:str,context:ContextTypes.DEFAULT_TYPE, video:File):
-        await context.bot.send_video(chat_id, video, supports_streaming=True)
+    def do_send_video(usertoken:str,chat_id:str,context:ContextTypes.DEFAULT_TYPE, video:File):
+        loop = asyncio.get_event_loop()
+        result = loop.run_until_complete(context.bot.send_video(chat_id, video, supports_streaming=True))
+        loop.close()
 
 
     def start(self,client_id:str,chat_id:str,context:ContextTypes.DEFAULT_TYPE,ws_url:str,call_from:str,db:Session):
