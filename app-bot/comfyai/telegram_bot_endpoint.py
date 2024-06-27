@@ -25,7 +25,7 @@ engine = extern_database.get_db_connection()
 
 #prompt for UNIVOICE
 #@call_from:str telegram-miniapp/telegrem-bot/twitter/red-book/default
-async def extern_prompts(user_token:str, call_from:str, wkflow:dict,context:ContextTypes.DEFAULT_TYPE|None=None):
+async def extern_prompts(user_token:str, chat_id:str,context:ContextTypes.DEFAULT_TYPE,call_from:str, wkflow:dict):
     headers = {
         "Content-Type": "application/json"
     }
@@ -76,7 +76,7 @@ async def extern_prompts(user_token:str, call_from:str, wkflow:dict,context:Cont
         work_flow_crud.create_wk_router(db,wk_info)
         logger.debug(f"begin create ws client-{wkflow['client_id']}")
     
-        await WebsocetClient().start(user_token,ws_url,call_from,db,context)
+        await WebsocetClient().start(user_token,chat_id,context,ws_url,call_from,db)
         time.sleep(1)
        
         logger.debug(response.content)

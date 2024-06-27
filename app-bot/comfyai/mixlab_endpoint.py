@@ -327,8 +327,8 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
                work_flow_crud.update_wk_router(db,sid,prompt_id,detail,None,url,status)
 
         except Exception as e:
-            print(e)
-            logger.debug("db exception")
+           
+            logger.debug(f"db exception:{str(e)}")
 
     if  status =="executed" and filenames:
         return True,filenames 
@@ -370,6 +370,41 @@ def construct_comf_file_url(url:str,file_names:str):
     return json.dumps(file_item)
 
 
+#for Bot only
+def construct_comf_file_url_bot(url:str,file_names:str):
+    file_obj = json.loads(file_names)
+    
+    logger.debug("ORI WS URL:" + url)
+
+    url_split = url.split(":")
+    
+    logger.debug("ORI PORT:" + str(url_split))
+    logger.debug("ORI PORT:" + str(url_split[2]))
+    logger.debug("ORI PORT:" + str(url_split[2].split("/")))
+
+
+    port=url_split[2].split("/")[0]
+
+    raw_url = "http:" +url_split[1] +":"+port
+
+    logger.debug("RBUIILD URL:" + raw_url)
+
+    fileurls = list()
+
+    for item in file_obj:
+        logger.debug("ITEM:"+ str(item))
+        logger.debug("filename="+item["filename"])
+        logger.debug("subfolder="+str(item["subfolder"]))
+        logger.debug("type="+item["type"])
+        
+        fileurl = raw_url+"/view?filename="+quote(item["filename"])+"&type="+item["type"]+"&subfolder="+quote(item["subfolder"])+"&t="+ str(int(round(time.time() * 1000)))
+        #fileurl=fileurl.join(quote(item["filename"])).join("&type=").join(item["type"]).join("&subfolder=").join(quote(item["subfolder"])).join("&t=").join(str(int(round(time.time() * 1000))))
+
+        fileurls.append((item["filename"],fileurl))
+
+    return fileurls
+
+
 def fetch_comf_file(url:str,type:str,filename:str):
     current_path = os.path.abspath(os.path.dirname(__file__))
     app_path=os.path.join(current_path, "tempfiles")
@@ -388,7 +423,7 @@ def fetch_comf_file(url:str,type:str,filename:str):
 
     res = requests.get(url)
     try:
-        with open(comfyui_file,"wb") as res_file:
+        with open(comfyui_file,"rwb") as res_file:
            res_file.write(res.content)
         if type :
            oss_key=type+"_"+filename
@@ -400,25 +435,21 @@ def fetch_comf_file(url:str,type:str,filename:str):
         print(e)
 
 #feich output from comfyui,use in tel-bot
-def fetch_comf_file_raw(url:str,type:str,filename:str):
+def fetch_comf_file_raw(url:str,filename:str,type:str):
     current_path = os.path.abspath(os.path.dirname(__file__))
     app_path=os.path.join(current_path, "tempfiles")
     category_path=os.path.join(app_path,type)
     if not os.path.exists(category_path):
         os.mkdir(category_path)
    
-    if type:
-        comfyui_res_path = category_path
-    else:
-        comfyui_res_path = app_path
     
-    comfyui_file = os.path.join(comfyui_res_path,filename)
-    
-    logger.debug(comfyui_file)
+    logger.debug(url)
 
     res = requests.get(url)
+    conf_file=os.path.join(category_path,filename)
+    logger.info(f"Output file localname:{conf_file}")
     try:
-        with open(comfyui_file,"wb") as res_file:
+        with open(conf_file,"wb") as res_file:
            res_file.write(res.content)
            res_file.flush()
            logger.info("Success feich AI result")

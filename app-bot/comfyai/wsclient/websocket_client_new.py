@@ -7,6 +7,8 @@ from loguru import logger
 from comfyai import mixlab_endpoint
 from telegram.ext import ContextTypes
 from telegram import File
+import asyncio
+import nest_asyncio
 
 
 import time
@@ -26,20 +28,26 @@ class WebsocetClient(object):
         self.db = None
         self.sid =None
         self.callfrom = "default"
-        self.tele_bot_context = None
+        self.tele_bot_chatid = None
+        self.bot_context= ContextTypes.DEFAULT_TYPE
         
 
     def on_message(self, source,message):
         print("####### on_message #######")
         print("message：%s" % message)
         if self.if_execute_type(message):
+            if(not self.isfinal_curr_node(message,'155')):
+                return
             engine_recall = database.get_db_connection()
             flag, filenames = mixlab_endpoint.detail_recall(self.url,self.sid,message,database.get_db_session(engine_recall))
+            
             if(flag):
                 if(self.callfrom == 'telegram-bot' or self.callfrom =='telegram-miniapp'):
-                   for videofilename in filenames:
-                       video = mixlab_endpoint.fetch_comf_file_raw()
-                       self.do_send_video(self.sid,self.tele_bot_context,)
+                   fileurllist  = mixlab_endpoint.construct_comf_file_url_bot(self.url,filenames)
+                   for videofileurl in fileurllist:
+                       logger.info(f"Begin fetching result :{videofileurl}")                       
+                       video = mixlab_endpoint.fetch_comf_file_raw(videofileurl[1],videofileurl[0],"output")
+                       self.do_send_video(self.sid,self.bot_context,video)
                 self.ws.close()
 
     def on_error(self,*error):
@@ -72,13 +80,20 @@ class WebsocetClient(object):
         
         return "status" != status
     
+    def isfinal_curr_node(self,message,node_id:str):
+        detail_json = json.loads(message)
+        return detail_json['data']['node'] == node_id
+    
     #hook function for ws_client
     #usertoken = user_id % chart_id
-    def do_send_video(usertoken:str,context:ContextTypes.DEFAULT_TYPE, video:File):
-         context.bot.send_video(usertoken.split('%')[1], video, supports_streaming=True)
+    def do_send_video(usertoken:str,chat_id:str,context:ContextTypes.DEFAULT_TYPE, video:File):
+        nest_asyncio.apply()
+        loop = asyncio.get_event_loop()
+        result = loop.run_until_complete(context.bot.send_video(chat_id, video, supports_streaming=True))
+        loop.close()
 
 
-    def start(self,client_id:str,ws_url:str,call_from:str,db:Session,context:ContextTypes.DEFAULT_TYPE):
+    def start(self,client_id:str,chat_id:str,context:ContextTypes.DEFAULT_TYPE,ws_url:str,call_from:str,db:Session):
     
         logger.debug("Begin create WebSocketApp:" + ws_url)
         self.ws = websocket.WebSocketApp(ws_url,
@@ -91,7 +106,8 @@ class WebsocetClient(object):
         self.url = ws_url
         self.sid = client_id
         self.callfrom = call_from
-        self.tele_bot_context = context
+        self.tele_bot_chatid = chat_id
+        self.bot_context = context
         # self.ws.on_open = self.on_open  # 也可以先创建对象再这样指定回调函数。run_forever 之前指定回调函数即可。
         #threading.Thread(target=self.ws.run_forever()) 
         self.ws.run_forever()

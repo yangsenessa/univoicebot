@@ -19,6 +19,15 @@ def update_wk_router(db:Session, client_id:str,prompts_id:str,ori_body:str,filen
                            ,WorkFlowRouterInfo.prompts_id == prompts_id).first()
     logger.info(f"WorkFlowRouterInfo promptsid:{prompts_id} client_id:{client_id} load = {str(db_wkrouter)}")
     if db_wkrouter:
+       #executing status doesn't need to be updated currently
+       if((status == "executing" or status =="progress") and db_wkrouter.status == status):
+           logger.info("Don't need update")
+           return
+  
+       # The status of exected is the ending ,so return directly
+       if(db_wkrouter.status == 'exeuted'):
+           logger.info("Update status is reach the end!")
+           return db_wkrouter
        db_wkrouter.status=status
        db_wkrouter.ori_body = ori_body
        now = datetime.now()
