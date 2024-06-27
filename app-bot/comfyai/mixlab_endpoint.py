@@ -453,9 +453,9 @@ def fetch_comf_file_raw(url:str,filename:str,type:str):
            res_file.write(res.content)
            res_file.flush()
            logger.info("Success feich AI result")
-           return res_file
+           return conf_file
     except Exception as e:
-        print(e)
+        logger.error(f"resave video file err:{str(e)}")
 
 
 #put_file_to_comfyui
