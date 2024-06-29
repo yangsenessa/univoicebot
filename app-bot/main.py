@@ -1,6 +1,6 @@
 import random
-from telegram import Update,File
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler ,filters, MessageHandler
+from telegram import Update,InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler ,filters, MessageHandler,CallbackQueryHandler
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,13 +10,10 @@ from comfyai import mixlab_endpoint
 from comfyai import wsserver_endpoint
 from comfyai import telegram_bot_endpoint
 from biz.media import parsewav
+from biz.botaction import start,callback_inline
 from loguru import logger
 import uvicorn
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    '''响应start命令'''
-    text = '你好~我是一个bot'
-    await context.bot.send_message(chat_id=update.effective_chat.id,text=text)
 async def set_right(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''设置成员权限和头衔'''
     chat_id = update.effective_chat.id
@@ -75,7 +72,8 @@ filter_voice = filters.VOICE
 voice_handler = MessageHandler(filter_voice,voice)
 
 # 构建 bot
-TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
+#TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
+TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'
 application = ApplicationBuilder().token(TOKEN).build()
 # 注册 handler
 application.add_handler(start_handler)
@@ -83,6 +81,8 @@ application.add_handler(set_right_handler)
 application.add_handler(unknown_handler)
 application.add_handler(ohayo_handler)
 application.add_handler(voice_handler)
+application.add_handler(CallbackQueryHandler(callback_inline))
+
 # run!
 application.run_polling()
 
