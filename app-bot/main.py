@@ -11,6 +11,7 @@ from comfyai import wsserver_endpoint
 from comfyai import telegram_bot_endpoint
 from biz.media import parsewav
 from biz.botaction import start,callback_inline
+from biz.tonwallet.config import TOKEN
 from loguru import logger
 import uvicorn
 
@@ -72,8 +73,7 @@ filter_voice = filters.VOICE
 voice_handler = MessageHandler(filter_voice,voice)
 
 # 构建 bot
-#TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
-TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'
+
 application = ApplicationBuilder().token(TOKEN).build()
 # 注册 handler
 application.add_handler(start_handler)

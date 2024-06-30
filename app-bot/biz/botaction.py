@@ -10,15 +10,29 @@ from telegram.ext import (
     ExtBot,
     TypeHandler,
 )
+from . import tonbuss
+from datetime import datetime
 from collections import defaultdict
 from typing import DefaultDict, Optional, Set
+from .dal import user_buss_crud
+from .dal.user_buss import BotUserInfo, BotUserAcctBase
+from .dal import database
+
 from loguru import logger
+
+extern_database =  database.Database()
+engine = extern_database.get_db_connection()
+db = extern_database.get_db_session(engine)
+
+
+
 
 inlineKeyboardButton_list=list()
 
 inlineKeyboardButton_list.append(InlineKeyboardButton(text="Speaking",callback_data="voice-speaking"))
 inlineKeyboardButton_list.append(InlineKeyboardButton(text="earn",callback_data="opr-earn"))
 inlineKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
+inlineKeyboardButton_list.append(InlineKeyboardButton(text="Ton Wallet",callback_data='opr_tonwallet'))
 inlineKeyboardButton_list.append(InlineKeyboardButton(text="Invite link",callback_data="opr-invite"))
 
 
@@ -78,6 +92,7 @@ async def start(update: Update, context: CustomContext) -> None:
     """Display a message with a button."""
 
     logger.info(f"{update.effective_user.id} call start")
+    deal_user_start(update.effective_user.id)
     await update.message.reply_html(
         "Univoice-bot hearing your voice always..",
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
@@ -88,14 +103,34 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
     logger.info("Button callback...")
     await update.callback_query.answer()
 
-    commandhandermsg = update.callback_query.data
-    logger.info(f"Callback command:{commandhandermsg}")
+    commandhandlemsg = update.callback_query.data
+    logger.info(f"Callback command:{commandhandlemsg}")
 
-    if(commandhandermsg == "voice-speaking"):
+    if(commandhandlemsg == "voice-speaking"):
         await show_speak_reback(update, context)
-
+    elif (commandhandlemsg == "opr_tonwallet"):
+        await tonbuss.start_connect_wallet(update)
+        
 
 async def show_speak_reback(update:Update, context:CustomContext) -> None:
     replaymsg = "You can press mic-phone and leave your pretty voice..."
     await context.bot.send_message(chat_id=update.effective_chat.id,
                                    text=replaymsg)
+
+
+def deal_user_start(user_id:str):
+    gmtdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    userinfo = user_buss_crud.get_user(db=db, user_id=user_id)
+
+    if userinfo:
+        '''Add code for redefine the guider message'''
+        logger.info(f"This user is members!")
+    else:
+       logger.info(f'Init userInfo and acctinfo with userid={user_id}')
+       userinfo = BotUserInfo(tele_user_id=user_id, reg_gmtdate=gmtdate,level='0')
+       userAcctBase = BotUserAcctBase(user_id=user_id, biz_id='0', tokens='0')
+       
+       user_buss_crud.create_user(db,user=userinfo, user_acct=userAcctBase)
+
+
+
