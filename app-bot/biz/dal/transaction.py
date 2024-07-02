@@ -5,7 +5,8 @@ from .database import Base
 
 class User_claim_jnl(Base):
     __tablename__ = "unv_claimjnl"
-    user_id=Column(String, primary_key=True)
+    jnl_no=Column(String,primary_key=True)
+    user_id=Column(String)
     task_id=Column(String)
     task_name=Column(String)
     tokens=Column(String)

@@ -36,6 +36,13 @@ async def parsewav(user_token:str, voice_file:File,context:ContextTypes.DEFAULT_
               tmp_wk_json =  parseAudioBase64IntoWorkflow(base64_audio)
               return tmp_wk_json
 
+async def save_voice( voice_file:File):
+      with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_ogg_file:
+         await voice_file.download_to_drive(tmp_ogg_file.name)
+         tmp_ogg_file.flush()
+         os.fsync(tmp_ogg_file.fileno())    
+         logger.info(f"ogg dir: {tmp_ogg_file.name}")
+         return tmp_ogg_file.name
 
 
 

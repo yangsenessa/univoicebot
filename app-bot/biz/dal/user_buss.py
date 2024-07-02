@@ -8,6 +8,7 @@ class BotUserInfo(Base):
     wallet_id=Column(String)
     reg_gmtdate=Column(DateTime)
     level=Column(String)
+    source=Column(String)
 
 class BotUserAcctBase(Base):
     __tablename__="bot_user_acct_base"
@@ -16,6 +17,24 @@ class BotUserAcctBase(Base):
     biz_id=Column(String)
     tokens=Column(String)
 
+class UserCurrTaskDetail(Base):
+    __tablename__="unv_user_curr_task_detail"
+    user_id=Column(String, primary_key=True)
+    chat_id=Column(String)
+    task_type=Column(String)
+    progress_status=Column(String)
+    gmt_create=Column(DateTime)
+    gmt_modified=Column(DateTime)
+
+class UserTaskProducer(Base):
+    __tablename__="unv_user_task_producer"
+    prd_id=Column(String,primary_key=True)
+    user_id=Column(String)
+    chat_id=Column(String)
+    task_id=Column(String)
+    prd_entity=Column(String)
+    duration=Column(Integer)
+    gmt_create=Column(DateTime)
 
 
     

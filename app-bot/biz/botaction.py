@@ -15,8 +15,12 @@ from datetime import datetime
 from collections import defaultdict
 from typing import DefaultDict, Optional, Set
 from .dal import user_buss_crud
-from .dal.user_buss import BotUserInfo, BotUserAcctBase
+from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
+from .dal.global_config import Unvtaskinfo
 from .dal import database
+from .tonwallet import config
+from . import media
+import json
 
 from loguru import logger
 
@@ -117,13 +121,64 @@ async def show_speak_reback(update:Update, context:CustomContext) -> None:
     await context.bot.send_message(chat_id=update.effective_chat.id,
                                    text=replaymsg)
 
+async def voice_upload(update:Update, context:CustomContext) -> None:
+    voice_file = await update.effective_message.voice.get_file()
+    time_duration = update.effective_message.voice.duration
+    user_id = update.effective_user.id
+    chat_id = update.effective_message.chat_id
+    file_full_name=media.save_voice(voice_file)
+
+    #fetch userinfo
+    user_info:BotUserInfo
+    user_info = fet_user_info(user_id)
+    task_info:Unvtaskinfo
+    task_info = match_user_task(config.TASK_START,user_info.level)
+
+
+
+    #create producer entity
+    entity:dict
+    entity["type"]="filename"
+    entity["value"]=file_full_name
+    entity_str = json.dumps(entity)
+    prd_id = hash(entity_str)
+
+    #create UserCurrTaskDetail
+    user_curr_task_detail = UserCurrTaskDetail(user_id=user_id,
+                                              chat_id=chat_id,
+                                               task_type=task_info.inspire_action,
+                                                 progress_status="begin",
+                                                 gmt_create=config.get_datetime(),
+                                                 gmt_modified=config.get_datetime())
+    
+    
+    user_task_producer = UserTaskProducer(prd_id=prd_id,
+                                          user_id=user_id,
+                                          chat_id=chat_id,
+                                          task_id=task_info.task_id,
+                                          prd_entity=entity_str,
+                                          duration=time_duration,
+                                          gmt_create=config.get_datetime())
+
+    user_buss_crud.create_task_producer(db,user_curr_task_detail,user_task_producer)
+
+    
+def match_user_task(action:str,level:str):
+    return user_buss_crud.match_task(db,action, level)
+
+
+def fet_user_info(user_id:str):
+    return user_buss_crud.get_user(db,user_id)
+
+
+
 
 def deal_user_start(user_id:str):
     gmtdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     userinfo = user_buss_crud.get_user(db=db, user_id=user_id)
 
     if userinfo:
-        '''Add code for redefine the guider message'''
+        '''Add code for re-define the guider message'''
         logger.info(f"This user is members!")
     else:
        logger.info(f'Init userInfo and acctinfo with userid={user_id}')

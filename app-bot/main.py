@@ -10,7 +10,7 @@ from comfyai import mixlab_endpoint
 from comfyai import wsserver_endpoint
 from comfyai import telegram_bot_endpoint
 from biz.media import parsewav
-from biz.botaction import start,callback_inline
+from biz.botaction import start,callback_inline,voice_upload
 from biz.tonwallet.config import TOKEN
 from loguru import logger
 import uvicorn
@@ -70,7 +70,11 @@ filter_ohayo = filters.Regex('早安|早上好|哦哈哟|ohayo')
 ohayo_handler = MessageHandler(filter_ohayo, ohayo)
 
 filter_voice = filters.VOICE
-voice_handler = MessageHandler(filter_voice,voice)
+
+#Scope the voice AI bussiness code
+#voice_handler = MessageHandler(filter_voice,voice)
+voice_handler = MessageHandler(filter_voice, voice_upload)
+
 
 # 构建 bot
 
