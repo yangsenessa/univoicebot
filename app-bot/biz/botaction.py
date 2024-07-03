@@ -96,7 +96,7 @@ async def start(update: Update, context: CustomContext) -> None:
     """Display a message with a button."""
 
     logger.info(f"{update.effective_user.id} call start")
-    deal_user_start(update.effective_user.id)
+    deal_user_start(update.effective_user.id, update.effective_message.chat_id)
     await update.message.reply_html(
         "Univoice-bot hearing your voice always..",
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
@@ -126,32 +126,26 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     time_duration = update.effective_message.voice.duration
     user_id = update.effective_user.id
     chat_id = update.effective_message.chat_id
-    file_full_name=media.save_voice(voice_file)
+    task_flag = False
+    file_full_name=await media.save_voice(voice_file)
 
-    #fetch userinfo
-    user_info:BotUserInfo
-    user_info = fet_user_info(user_id)
-    task_info:Unvtaskinfo
-    task_info = match_user_task(config.TASK_START,user_info.level)
-
-
+    task_details = user_buss_crud.fetch_user_curr_tase_detail_status(db,user_id,config.PROGRESS_INIT)
+    for task_detail in task_details:
+        task_info = user_buss_crud.get_task_info(db,task_id=task_detail.task_id)
+        if task_info.inspire_action == config.TASK_VOICE_UPLOAD :
+            task_flag=user_buss_crud.update_user_curr_task_detail(db,user_id,task_detail.task_id,config.PROGRESS_DEAILING)
+    if not task_flag:
+        logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
+        return
+    logger.info(f"user_id={user_id} process task")
 
     #create producer entity
-    entity:dict
+    entity=dict()
     entity["type"]="filename"
     entity["value"]=file_full_name
     entity_str = json.dumps(entity)
     prd_id = hash(entity_str)
 
-    #create UserCurrTaskDetail
-    user_curr_task_detail = UserCurrTaskDetail(user_id=user_id,
-                                              chat_id=chat_id,
-                                               task_type=task_info.inspire_action,
-                                                 progress_status="begin",
-                                                 gmt_create=config.get_datetime(),
-                                                 gmt_modified=config.get_datetime())
-    
-    
     user_task_producer = UserTaskProducer(prd_id=prd_id,
                                           user_id=user_id,
                                           chat_id=chat_id,
@@ -160,11 +154,11 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
                                           duration=time_duration,
                                           gmt_create=config.get_datetime())
 
-    user_buss_crud.create_task_producer(db,user_curr_task_detail,user_task_producer)
+    user_buss_crud.create_task_producer(db,user_task_producer)
 
     
-def match_user_task(action:str,level:str):
-    return user_buss_crud.match_task(db,action, level)
+def match_user_task(action:str,level:str, chat_id:str):
+    return user_buss_crud.match_task(db,action, level,chat_id)
 
 
 def fet_user_info(user_id:str):
@@ -172,8 +166,8 @@ def fet_user_info(user_id:str):
 
 
 
-
-def deal_user_start(user_id:str):
+#@chat_id for special rewards from other group
+def deal_user_start(user_id:str, chat_id:str):
     gmtdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     userinfo = user_buss_crud.get_user(db=db, user_id=user_id)
 
@@ -182,10 +176,38 @@ def deal_user_start(user_id:str):
         logger.info(f"This user is members!")
     else:
        logger.info(f'Init userInfo and acctinfo with userid={user_id}')
-       userinfo = BotUserInfo(tele_user_id=user_id, reg_gmtdate=gmtdate,level='0')
+       userinfo = BotUserInfo(tele_user_id=user_id, reg_gmtdate=gmtdate,level='1')
        userAcctBase = BotUserAcctBase(user_id=user_id, biz_id='0', tokens='0')
-       
        user_buss_crud.create_user(db,user=userinfo, user_acct=userAcctBase)
+
+    task_status_progress = deploy_user_curr_task(user_id=userinfo.tele_user_id,
+                                              chat_id=chat_id, level=userinfo.level,
+                                              task_action=config.TASK_START)
+       
+
+def deploy_user_curr_task(user_id:str, chat_id:str,level:str, task_action:str):
+       task_info = match_user_task(action=task_action,level=level, chat_id=chat_id)
+       if not task_info:
+           logger.error(f"user_id={user_id} - chat_id={chat_id} can't match any tasks!")
+           return
+        
+       curr_task_detail:UserCurrTaskDetail
+       '''If task has finished ,delete it and rebuild it'''
+       curr_task_detail = user_buss_crud.fetch_user_curr_task_detal(db, user_id,task_info.task_id)
+       if curr_task_detail and curr_task_detail.progress_status == config.PROGRESS_FINISH:
+           user_buss_crud.remove_curr_task_detail(db,curr_task_detail)
+
+       curr_task_detail = UserCurrTaskDetail(user_id=user_id, chat_id=chat_id,task_id=task_info.task_id,
+                                            progress_status= config.PROGRESS_INIT, gmt_create=config.get_datetime(),
+                                            gmt_modified=config.get_datetime())
+       curr_task_detail_deployed_flag = user_buss_crud.create_user_curr_task_detail(db,curr_task_detail)
+
+       if curr_task_detail_deployed_flag:
+           logger.info(f"user_id:{user_id}-chat_id:{chat_id} deployed task success")
+           return config.PROGRESS_INIT
+       else:
+           logger.info(f"user_id:{user_id} - chat_id:{chat_id} has already in task progress")
+           return config.PROGRESS_DEAILING
 
 
 

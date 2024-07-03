@@ -7,6 +7,7 @@ class Unvtaskinfo(Base):
     __tablename__="unv_task_info"
     task_id=Column(String,primary_key=True)
     task_name=Column(String)
+    chat_id=Column(String)
     level=Column(String)
     task_action=Column(String)
     task_rule_desc=Column(String)

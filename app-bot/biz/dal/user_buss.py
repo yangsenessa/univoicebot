@@ -21,7 +21,7 @@ class UserCurrTaskDetail(Base):
     __tablename__="unv_user_curr_task_detail"
     user_id=Column(String, primary_key=True)
     chat_id=Column(String)
-    task_type=Column(String)
+    task_id=Column(String)
     progress_status=Column(String)
     gmt_create=Column(DateTime)
     gmt_modified=Column(DateTime)

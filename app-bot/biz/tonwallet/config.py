@@ -16,8 +16,13 @@ MANIFEST_URL='https://raw.githubusercontent.com/XaBbl4/pytonconnect/main/pytonco
 #MANIFEST_URL = env['MANIFEST_URL']
 
 #USER_TASK
-TASK_START='START'
-TASK_VOICE_UPLOAD='VOICE_UPLOAD'
+TASK_START='VOICE-RECORD'
+TASK_VOICE_UPLOAD='VOICE-UPLOAD'
+
+#PROGRESS
+PROGRESS_INIT = 'INIT'
+PROGRESS_DEAILING = 'DEAILING'
+PROGRESS_FINISH = 'FINISH'
 
 def paramloader(paramstr:str):
     paramobj =json.loads(paramstr)
