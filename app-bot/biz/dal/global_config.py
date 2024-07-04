@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer,DECIMAL,String,DateTime
+from sqlalchemy import Boolean, Column, ForeignKey, BIGINT,DECIMAL,String,DateTime
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -15,6 +15,6 @@ class Unvtaskinfo(Base):
     rewards_type=Column(String)
     reward_cal_params_type=Column(String)
     flater=Column(DECIMAL)
-    base_reward=Column(String)
+    base_reward=Column(BIGINT)
     status=Column(String)
 

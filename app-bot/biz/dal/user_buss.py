@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String,DateTime
+from sqlalchemy import Boolean, Column, BIGINT, Integer, String,DateTime
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -15,13 +15,14 @@ class BotUserAcctBase(Base):
     user_id=Column(String,primary_key=True)
     wallet_id=Column(String)
     biz_id=Column(String)
-    tokens=Column(String)
+    tokens=Column(BIGINT)
 
 class UserCurrTaskDetail(Base):
     __tablename__="unv_user_curr_task_detail"
     user_id=Column(String, primary_key=True)
     chat_id=Column(String)
     task_id=Column(String)
+    token_amount=Column(BIGINT)
     progress_status=Column(String)
     gmt_create=Column(DateTime)
     gmt_modified=Column(DateTime)

@@ -20,6 +20,7 @@ from .dal.global_config import Unvtaskinfo
 from .dal import database
 from .tonwallet import config
 from . import media
+from  .taskqueue import queue
 import json
 
 from loguru import logger
@@ -198,12 +199,14 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, task_action:str):
            user_buss_crud.remove_curr_task_detail(db,curr_task_detail)
 
        curr_task_detail = UserCurrTaskDetail(user_id=user_id, chat_id=chat_id,task_id=task_info.task_id,
+                                            token_amount=task_info.base_reward,
                                             progress_status= config.PROGRESS_INIT, gmt_create=config.get_datetime(),
                                             gmt_modified=config.get_datetime())
        curr_task_detail_deployed_flag = user_buss_crud.create_user_curr_task_detail(db,curr_task_detail)
 
        if curr_task_detail_deployed_flag:
            logger.info(f"user_id:{user_id}-chat_id:{chat_id} deployed task success")
+           queue.push(user_id)
            return config.PROGRESS_INIT
        else:
            logger.info(f"user_id:{user_id} - chat_id:{chat_id} has already in task progress")
