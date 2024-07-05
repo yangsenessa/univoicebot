@@ -52,7 +52,7 @@ async def save_voice( voice_file:File):
       set_environment_variables()
       # 调用编译好的二进制文件
       result = subprocess.run(
-          ['/Users/yangguangyong/Documents/code/titan-storage-sdk/example/example', 'upload', voice_file],
+          ['/Users/yangguangyong/Documents/code/univoicebot/bin/example', 'upload', voice_file],
           stdout=subprocess.PIPE,
           stderr=subprocess.PIPE,
           text=True
