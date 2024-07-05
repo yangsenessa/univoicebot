@@ -7,10 +7,16 @@ import tempfile
 import os
 import base64
 import json
+import subprocess
+import re
 
 import sys
 sys.path.append('..')
 from comfyai import telegram_bot_endpoint
+
+def set_environment_variables():
+    os.environ['API_KEY'] = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJ1c2VyIl0sIklEIjoiZjFwZmw2aXVoZHNoamU0N3FpbHgzeWR0ZDNlNmRlbHg2ajVyaHB4ZXkiLCJOb2RlSUQiOiIiLCJFeHRlbmQiOiJhcGlfa2V5IiwiQWNjZXNzQ29udHJvbExpc3QiOlsicmVhZEZpbGUiLCJjcmVhdGVGaWxlIiwiZGVsZXRlRmlsZSIsInJlYWRGb2xkZXIiLCJjcmVhdGVGb2xkZXIiLCJkZWxldGVGb2xkZXIiXX0.NmE1E5zVvwK5uRk4oogFN-gwx1GPQI1cbTdgNsTr3t0'
+    os.environ['TITAN_URL'] = 'https://cassini-locator.titannet.io:5000/rpc/v0'
 
 async def parsewav(user_token:str, voice_file:File,context:ContextTypes.DEFAULT_TYPE):
    with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_ogg_file:
@@ -37,13 +43,36 @@ async def parsewav(user_token:str, voice_file:File,context:ContextTypes.DEFAULT_
               return tmp_wk_json
 
 async def save_voice( voice_file:File):
-      with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_ogg_file:
-         await voice_file.download_to_drive(tmp_ogg_file.name)
-         tmp_ogg_file.flush()
-         os.fsync(tmp_ogg_file.fileno())    
-         logger.info(f"ogg dir: {tmp_ogg_file.name}")
-         return tmp_ogg_file.name
+      # with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_ogg_file:
+      #    await voice_file.download_to_drive(tmp_ogg_file.name)
+      #    tmp_ogg_file.flush()
+      #    os.fsync(tmp_ogg_file.fileno())
+      #    logger.info(f"ogg dir: {tmp_ogg_file.name}")
+      #    return tmp_ogg_file.name
+      set_environment_variables()
+      # 调用编译好的二进制文件
+      result = subprocess.run(
+          ['/Users/yangguangyong/Documents/code/titan-storage-sdk/example/example', 'upload', voice_file],
+          stdout=subprocess.PIPE,
+          stderr=subprocess.PIPE,
+          text=True
+      )
 
+      if result.returncode == 0:
+          print("Upload successful")
+          print("Output:", result.stdout)
+          match = re.search(r'cid ([a-zA-Z0-9]+)', result.stderr)
+          if match:
+              cid = match.group(1)
+              print("Extracted CID:", cid)
+              return cid
+          else:
+              print("CID not found in the output.")
+              return ""
+      else:
+          print("Upload failed")
+          print("Error:", result.stderr)
+          return ""
 
 
 #transfer wkflow content

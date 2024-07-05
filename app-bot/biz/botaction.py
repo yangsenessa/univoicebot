@@ -128,7 +128,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     user_id = update.effective_user.id
     chat_id = update.effective_message.chat_id
     task_flag = False
-    file_full_name=await media.save_voice(voice_file)
+    cid = await media.save_voice(voice_file)
 
     task_details = user_buss_crud.fetch_user_curr_tase_detail_status(db,user_id,config.PROGRESS_INIT)
     for task_detail in task_details:
@@ -143,7 +143,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     #create producer entity
     entity=dict()
     entity["type"]="filename"
-    entity["value"]=file_full_name
+    entity["value"]=cid
     entity_str = json.dumps(entity)
     prd_id = hash(entity_str)
 
