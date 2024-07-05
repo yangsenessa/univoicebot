@@ -8,4 +8,3 @@ def get_user_claim_list(db:Session, user_id:str):
 def insert_user_claim_jnl(db:Session, user_claim_jnl:User_claim_jnl):
     db.add(user_claim_jnl)
     db.commit()
-    db.refresh()

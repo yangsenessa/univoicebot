@@ -128,12 +128,13 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     user_id = update.effective_user.id
     chat_id = update.effective_message.chat_id
     task_flag = False
-    cid = await media.save_voice(voice_file)
+    cid:str
 
     task_details = user_buss_crud.fetch_user_curr_tase_detail_status(db,user_id,config.PROGRESS_INIT)
     for task_detail in task_details:
         task_info = user_buss_crud.get_task_info(db,task_id=task_detail.task_id)
         if task_info.inspire_action == config.TASK_VOICE_UPLOAD :
+            cid = await media.save_voice(voice_file)
             task_flag=user_buss_crud.update_user_curr_task_detail(db,user_id,task_detail.task_id,config.PROGRESS_DEAILING)
     if not task_flag:
         logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
@@ -156,6 +157,8 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
                                           gmt_create=config.get_datetime())
 
     user_buss_crud.create_task_producer(db,user_task_producer)
+    queue.push(user_id)
+
 
     
 def match_user_task(action:str,level:str, chat_id:str):
@@ -192,10 +195,16 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, task_action:str):
            logger.error(f"user_id={user_id} - chat_id={chat_id} can't match any tasks!")
            return
         
-       curr_task_detail:UserCurrTaskDetail
        '''If task has finished ,delete it and rebuild it'''
-       curr_task_detail = user_buss_crud.fetch_user_curr_task_detal(db, user_id,task_info.task_id)
-       if curr_task_detail and curr_task_detail.progress_status == config.PROGRESS_FINISH:
+       if db.transaction != None :
+           db.commit()
+       db.begin()
+       curr_task_detail:UserCurrTaskDetail
+
+       curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db, user_id,task_info.task_id)
+       logger.info(f"Load curr task detail {curr_task_detail.task_id}-{curr_task_detail.progress_status}")
+       if curr_task_detail != None  and  curr_task_detail.progress_status == config.PROGRESS_FINISH:
+           logger.info(f"Entering delete curr-detail")
            user_buss_crud.remove_curr_task_detail(db,curr_task_detail)
 
        curr_task_detail = UserCurrTaskDetail(user_id=user_id, chat_id=chat_id,task_id=task_info.task_id,
@@ -206,7 +215,6 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, task_action:str):
 
        if curr_task_detail_deployed_flag:
            logger.info(f"user_id:{user_id}-chat_id:{chat_id} deployed task success")
-           queue.push(user_id)
            return config.PROGRESS_INIT
        else:
            logger.info(f"user_id:{user_id} - chat_id:{chat_id} has already in task progress")

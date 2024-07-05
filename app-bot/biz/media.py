@@ -43,36 +43,40 @@ async def parsewav(user_token:str, voice_file:File,context:ContextTypes.DEFAULT_
               return tmp_wk_json
 
 async def save_voice( voice_file:File):
-      # with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_ogg_file:
-      #    await voice_file.download_to_drive(tmp_ogg_file.name)
-      #    tmp_ogg_file.flush()
-      #    os.fsync(tmp_ogg_file.fileno())
-      #    logger.info(f"ogg dir: {tmp_ogg_file.name}")
-      #    return tmp_ogg_file.name
-      set_environment_variables()
-      # 调用编译好的二进制文件
-      result = subprocess.run(
-          ['/Users/yangguangyong/Documents/code/univoicebot/bin/example', 'upload', voice_file],
-          stdout=subprocess.PIPE,
-          stderr=subprocess.PIPE,
-          text=True
-      )
+     with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_ogg_file:
+          await voice_file.download_to_drive(tmp_ogg_file.name)
+          tmp_ogg_file.flush()
+          os.fsync(tmp_ogg_file.fileno())
+          logger.info(f"ogg dir: {tmp_ogg_file.name}")
+       #   return tmp_ogg_file.name
+     set_environment_variables()
+     # 调用编译好的二进制文件
+     logger.info(f'Upload file={tmp_ogg_file.name}')
+     result = subprocess.run(
+     #['/Users/yangguangyong/Documents/code/univoicebot/bin/example', 'upload', voice_file],
+         ['D:\\project\\titan-storage-sdk\\example\\example', 'upload', tmp_ogg_file.name],
+         stdout=subprocess.PIPE,
+         stderr=subprocess.PIPE,
+        text=True
+     )
 
-      if result.returncode == 0:
-          print("Upload successful")
-          print("Output:", result.stdout)
-          match = re.search(r'cid ([a-zA-Z0-9]+)', result.stderr)
-          if match:
-              cid = match.group(1)
-              print("Extracted CID:", cid)
-              return cid
-          else:
-              print("CID not found in the output.")
-              return ""
-      else:
-          print("Upload failed")
-          print("Error:", result.stderr)
-          return ""
+     if result.returncode == 0:
+         logger.info("Upload successful")
+         logger.info(f"Output stdout:{result.stdout}")
+         logger.info(f"Output stderr:{result.stderr}")
+
+         match = re.search(r'cid ([a-zA-Z0-9]+)', result.stderr)
+         if match:
+             cid = match.group(1)
+             print("Extracted CID:", cid)
+             return cid
+         else:
+             print("CID not found in the output.")
+             return ""
+     else:
+         print("Upload failed")
+         print("Error:", result.stderr)
+         return ""
 
 
 #transfer wkflow content

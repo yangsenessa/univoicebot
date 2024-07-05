@@ -13,8 +13,15 @@ from telegram.ext import (
 from .tonwallet import connector
 from collections import defaultdict
 from pytonconnect import TonConnect
+from .dal import user_buss_crud
 from typing import DefaultDict, Optional, Set
+from .dal import database
 from loguru import logger
+
+
+extern_database =  database.Database()
+engine = extern_database.get_db_connection()
+db = extern_database.get_db_session(engine)
 
 async def start_connect_wallet(update:Update):
     chatid = update.effective_message.chat_id
@@ -44,4 +51,7 @@ async def start_connect_wallet(update:Update):
         )
 
 
+def deal_task_claim(user_id:str):
+     logger.info(f"user_id = {user_id} is claiming...")
+     return user_buss_crud.deal_task_claim(db,user_id)
 
