@@ -34,11 +34,17 @@ db = extern_database.get_db_session(engine)
 
 inlineKeyboardButton_list=list()
 
-inlineKeyboardButton_list.append(InlineKeyboardButton(text="Speaking",callback_data="voice-speaking"))
+claimedKeyboardButton_list=list()
+
+inlineKeyboardButton_list.append(InlineKeyboardButton(text="Invite link",callback_data="opr-invite"))
 inlineKeyboardButton_list.append(InlineKeyboardButton(text="earn",callback_data="opr-earn"))
 inlineKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
 inlineKeyboardButton_list.append(InlineKeyboardButton(text="Ton Wallet",callback_data='opr_tonwallet'))
-inlineKeyboardButton_list.append(InlineKeyboardButton(text="Invite link",callback_data="opr-invite"))
+inlineKeyboardButton_list.append(InlineKeyboardButton(text="play",callback_data="opr-play",pay=True))
+
+claimedKeyboardButton_list.append(InlineKeyboardButton(text="earn",callback_data="opr-earn"))
+
+
 
 
 class ChatData:
@@ -97,11 +103,27 @@ async def start(update: Update, context: CustomContext) -> None:
     """Display a message with a button."""
 
     logger.info(f"{update.effective_user.id} call start")
-    deal_user_start(update.effective_user.id, update.effective_message.chat_id)
-    await update.message.reply_html(
-        "Univoice-bot hearing your voice always..",
+    args = context.args
+    if args and len(args) > 0:
+        inviter_id = args[0]
+        # 在这里记录邀请信息，例如更新数据库
+        logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
+    
+    progress_status =  deal_user_start(update.effective_user.id, update.effective_message.chat_id)
+    await context.bot.send_message( chat_id = update.effective_chat.id,
+        text="Univoice-bot hearing your voice always..",
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
     )
+
+    if progress_status == config.PROGRESS_INIT or progress_status == config.PROGRESS_FINISH:
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="You can press the mic-phone button and send out your voice...")
+    elif progress_status == config.PROGRESS_DEAILING:
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="You have a task processing,please wait you rewards...")
+    elif progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="Congratulation! You have some gift need claim,you can press 'claim' button which on the plane")
 
 
 async def callback_inline(update:Update, context:CustomContext) -> None:
@@ -114,8 +136,35 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
     if(commandhandlemsg == "voice-speaking"):
         await show_speak_reback(update, context)
     elif (commandhandlemsg == "opr_tonwallet"):
-        await tonbuss.start_connect_wallet(update)
-        
+        await tonbuss.start_connect_wallet(update,context)
+    elif (commandhandlemsg == "opr-claim"):
+        await cust_claim_replay(update, context)
+    elif (commandhandlemsg == "opr-play"):
+        await start(update,context)
+    elif (commandhandlemsg == "opr-invite"):
+        await sharelink_task(update, context)
+    elif (commandhandlemsg =="opr-earn"):
+        await show_cus_earn(update,context)
+
+async def show_cus_earn(update:Update, context:CustomContext) -> None:
+    user_acct_base = user_buss_crud.get_user_acct(db,update.effective_user.id)
+    replay_msg=f"Your voice has earned :{user_acct_base.tokens} 💰 "
+    await context.bot.send_message(chat_id=user_acct_base.user_id, text=replay_msg)
+
+
+async def sharelink_task(update:Update, context:CustomContext) -> None:
+    chat_id = update.effective_chat.id
+    replay_msg = f"https://t.me/univoice2bot?start=1111"
+    await context.bot.send_message(chat_id=chat_id, text=replay_msg)
+
+async def cust_claim_replay (update:Update, context:CustomContext) -> None:
+
+    chat_id = update.effective_chat.id
+    trx_fee, amount = user_buss_crud.deal_custom_claim(db,update.effective_user.id)
+
+    msg_tmpl = f"<strong>Claim Success</strong>\n\n<i>You just claimed {trx_fee}</i>\n<i>The total tokens :{amount}</i>"
+    await context.bot.send_message(chat_id=chat_id,text=msg_tmpl,parse_mode=ParseMode.HTML)
+
 
 async def show_speak_reback(update:Update, context:CustomContext) -> None:
     replaymsg = "You can press mic-phone and leave your pretty voice..."
@@ -138,6 +187,8 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
             task_flag=user_buss_crud.update_user_curr_task_detail(db,user_id,task_detail.task_id,config.PROGRESS_DEAILING)
     if not task_flag:
         logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text="You have done current task,please waiting for your rewards...")
         return
     logger.info(f"user_id={user_id} process task")
 
@@ -172,6 +223,8 @@ def fet_user_info(user_id:str):
 
 #@chat_id for special rewards from other group
 def deal_user_start(user_id:str, chat_id:str):
+
+
     gmtdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     userinfo = user_buss_crud.get_user(db=db, user_id=user_id)
 
@@ -180,13 +233,15 @@ def deal_user_start(user_id:str, chat_id:str):
         logger.info(f"This user is members!")
     else:
        logger.info(f'Init userInfo and acctinfo with userid={user_id}')
-       userinfo = BotUserInfo(tele_user_id=user_id, reg_gmtdate=gmtdate,level='1')
+       userinfo = BotUserInfo(tele_user_id=user_id,tele_chat_id=chat_id, reg_gmtdate=gmtdate,level='1')
        userAcctBase = BotUserAcctBase(user_id=user_id, biz_id='0', tokens='0')
        user_buss_crud.create_user(db,user=userinfo, user_acct=userAcctBase)
 
     task_status_progress = deploy_user_curr_task(user_id=userinfo.tele_user_id,
                                               chat_id=chat_id, level=userinfo.level,
                                               task_action=config.TASK_START)
+    return task_status_progress
+
        
 
 def deploy_user_curr_task(user_id:str, chat_id:str,level:str, task_action:str):
@@ -203,6 +258,7 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, task_action:str):
 
        curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db, user_id,task_info.task_id)
        logger.info(f"Load curr task detail {curr_task_detail.task_id}-{curr_task_detail.progress_status}")
+       progress_status = curr_task_detail.progress_status
        if curr_task_detail != None  and  curr_task_detail.progress_status == config.PROGRESS_FINISH:
            logger.info(f"Entering delete curr-detail")
            user_buss_crud.remove_curr_task_detail(db,curr_task_detail)
@@ -215,10 +271,8 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, task_action:str):
 
        if curr_task_detail_deployed_flag:
            logger.info(f"user_id:{user_id}-chat_id:{chat_id} deployed task success")
-           return config.PROGRESS_INIT
        else:
            logger.info(f"user_id:{user_id} - chat_id:{chat_id} has already in task progress")
-           return config.PROGRESS_DEAILING
-
+       return progress_status
 
 

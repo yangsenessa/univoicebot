@@ -10,6 +10,7 @@ from telegram.ext import (
     ExtBot,
     TypeHandler,
 )
+
 from .tonwallet import connector
 from collections import defaultdict
 from pytonconnect import TonConnect
@@ -23,7 +24,7 @@ extern_database =  database.Database()
 engine = extern_database.get_db_connection()
 db = extern_database.get_db_session(engine)
 
-async def start_connect_wallet(update:Update):
+async def start_connect_wallet(update:Update,context:ContextTypes.DEFAULT_TYPE):
     chatid = update.effective_message.chat_id
     conn_instance = connector.get_connector(chatid)
     connected = await conn_instance.restore_connection()
@@ -35,7 +36,9 @@ async def start_connect_wallet(update:Update):
         for wallet in wallets_list:
             button = InlineKeyboardButton(text=wallet['name'],callback_data=f'connect:{wallet["name"]}')
             inlineKeyboardButton_list.append(button)
-        await update.message.reply_html(
+
+        await context.bot.send_message(
+            chat_id=chatid,
             text="Choose wallte to connect",
             reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list)
         )
@@ -45,13 +48,14 @@ async def start_connect_wallet(update:Update):
         inlineKeyboardButton_list.append(btn_send_tr)
         inlineKeyboardButton_list.append(bit_disconn)
 
-        await update.message.reply_html(
+        await context.bot.send_message(
+            chat_id=chatid,
             text="You are already connected!",
             reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list)
         )
 
 
-def deal_task_claim(user_id:str):
+def deal_task_claim( user_id:str):
      logger.info(f"user_id = {user_id} is claiming...")
      return user_buss_crud.deal_task_claim(db,user_id)
 

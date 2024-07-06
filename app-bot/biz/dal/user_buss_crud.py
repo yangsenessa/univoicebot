@@ -15,7 +15,6 @@ def get_user_acct(db:Session, user_id:str):
 
 
 def create_user(db:Session, user:BotUserInfo, user_acct:BotUserAcctBase):
-    db.begin()
     db.add(user)
     db.add(user_acct)
     db.commit()
@@ -48,7 +47,10 @@ def create_user_curr_task_detail(db:Session, user_curr_task_detail:UserCurrTaskD
         db.flush(user_curr_task_detail)
         return True
     else:
-        return False
+        if task_detail.progress_status == config.PROGRESS_INIT:
+            return True
+        else:
+            return False
 
 
 def fetch_user_curr_task_detail(db:Session, user_id:str, task_id:str):
@@ -86,7 +88,6 @@ def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,progress_sta
          return False
 
 def deal_task_claim(db:Session,user_id:str):
-     db.begin()
      task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
                                                       UserCurrTaskDetail.progress_status == config.PROGRESS_DEAILING).first()
      if task_detail == None :
@@ -94,7 +95,7 @@ def deal_task_claim(db:Session,user_id:str):
          return True
      
      try:
-         task_detail.progress_status = config.PROGRESS_FINISH
+         task_detail.progress_status = config.PROGRESS_WAIT_CUS_CLAIM
 
          task_info = get_task_info(db,task_detail.task_id)
      
@@ -105,16 +106,12 @@ def deal_task_claim(db:Session,user_id:str):
                                      tokens=task_info.base_reward * task_info.flater,
                                      gmt_biz_create = config.get_datetime(),
                                      gmt_biz_finish =  config.get_datetime(),
-                                     status = config.PROGRESS_FINISH)
+                                     status = config.PROGRESS_WAIT_CUS_CLAIM)
          db.add(user_claim_jnl)
 
-         user_acct_base = get_user_acct(db, user_id=user_id)
-         amount_val =  user_acct_base.tokens
-         trx_val = user_claim_jnl.tokens
-         user_acct_base.tokens = amount_val + trx_val
+         
          db.commit()
-         db.flush(task_detail)
-         db.flush(user_acct_base)
+         db.refresh(task_detail)
          
          logger.info(f"user:{user_id} have finish claim")
      except Exception as e:
@@ -124,7 +121,36 @@ def deal_task_claim(db:Session,user_id:str):
      
      return True
 
+def deal_custom_claim(db:Session, user_id:str):
+     task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
+                                                      UserCurrTaskDetail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM).first()
+     if task_detail == None :
+         logger.error(f"Claim is timing, but can't find the task detail!" )
+         return True
+     claim_jnl = db.query(User_claim_jnl).filter(User_claim_jnl.user_id==user_id,
+                                                      User_claim_jnl.status == config.PROGRESS_WAIT_CUS_CLAIM).first()
+     if claim_jnl == None :
+         logger.error(f"Claim is timing, but can't find the task detail!" )
+         return None
 
+     try:
+        user_acct_base = get_user_acct(db, user_id=user_id)
+        amount_val =  user_acct_base.tokens
+        trx_val = claim_jnl.tokens
+        user_acct_base.tokens = amount_val + trx_val
+        task_detail.progress_status = config.PROGRESS_FINISH
+        claim_jnl.status = config.PROGRESS_FINISH
+        db.commit()
+        db.refresh(claim_jnl)
+        db.refresh(task_detail)
+        db.refresh(user_acct_base)
+        return (trx_val, user_acct_base.tokens)
+     except Exception as e:
+         logger.error(f"Deal claim err userid={user_id} e={str(e)}")
+         db.rollback()
+         return None
+    
+    
 
      
 

@@ -23,6 +23,7 @@ TASK_VOICE_UPLOAD='VOICE-UPLOAD'
 PROGRESS_INIT = 'INIT'
 PROGRESS_DEAILING = 'DEAILING'
 PROGRESS_FINISH = 'FINISH'
+PROGRESS_WAIT_CUS_CLAIM = 'WAIT_CUS_CLAIM'
 
 def paramloader(paramstr:str):
     paramobj =json.loads(paramstr)
