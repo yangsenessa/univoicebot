@@ -54,8 +54,8 @@ async def save_voice( voice_file:File):
      # 调用编译好的二进制文件
      logger.info(f'Upload file={tmp_ogg_file.name}')
      result = subprocess.run(
-     #['/Users/yangguangyong/Documents/code/univoicebot/bin/example', 'upload', voice_file],
-         ['D:\\project\\titan-storage-sdk\\example\\example', 'upload', tmp_ogg_file.name],
+     ['/home/ubuntu/app/bin/example', 'upload', voice_file],
+         #['D:\\project\\titan-storage-sdk\\example\\example', 'upload', tmp_ogg_file.name],
          stdout=subprocess.PIPE,
          stderr=subprocess.PIPE,
         text=True
