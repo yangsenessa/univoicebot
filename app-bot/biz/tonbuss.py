@@ -57,5 +57,8 @@ async def start_connect_wallet(update:Update,context:ContextTypes.DEFAULT_TYPE):
 
 def deal_task_claim( user_id:str):
      logger.info(f"user_id = {user_id} is claiming...")
-     return user_buss_crud.deal_task_claim(db,user_id)
+    
+     flag = user_buss_crud.deal_task_claim(db,user_id)
+    
+     return flag
 

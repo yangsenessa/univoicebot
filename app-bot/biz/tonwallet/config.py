@@ -41,3 +41,6 @@ def params_rex(context:dict, parmrex:tuple):
 
 def get_datetime() -> str:
      return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def load_datetime(timestamp)->datetime:
+    return datetime.strptime(timestamp,"%Y-%m-%d %H:%M:%S")

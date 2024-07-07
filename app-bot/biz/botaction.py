@@ -160,9 +160,11 @@ async def sharelink_task(update:Update, context:CustomContext) -> None:
 async def cust_claim_replay (update:Update, context:CustomContext) -> None:
 
     chat_id = update.effective_chat.id
-    trx_fee, amount = user_buss_crud.deal_custom_claim(db,update.effective_user.id)
-
-    msg_tmpl = f"<strong>Claim Success</strong>\n\n<i>You just claimed {trx_fee}</i>\n<i>The total tokens :{amount}</i>"
+    flag,trx_fee, amount = user_buss_crud.deal_custom_claim(db,update.effective_user.id)
+    if flag:
+        msg_tmpl = f"<strong>Claim Success</strong>\n\n<i>You just claimed {trx_fee}</i>\n<i>The total tokens :{amount}</i>"
+    else:
+        msg_tmpl="Please waiting some minutes then retry."
     await context.bot.send_message(chat_id=chat_id,text=msg_tmpl,parse_mode=ParseMode.HTML)
 
 
@@ -251,15 +253,25 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, task_action:str):
            return
         
        '''If task has finished ,delete it and rebuild it'''
-       if db.transaction != None :
-           db.commit()
-       db.begin()
        curr_task_detail:UserCurrTaskDetail
+       progress_status = config.PROGRESS_INIT
 
        curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db, user_id,task_info.task_id)
-       logger.info(f"Load curr task detail {curr_task_detail.task_id}-{curr_task_detail.progress_status}")
-       progress_status = curr_task_detail.progress_status
+       if curr_task_detail != None:
+           logger.info(f"Load curr task detail {curr_task_detail.task_id}-{curr_task_detail.progress_status}")
+           if curr_task_detail.progress_status == config.PROGRESS_DEAILING:
+               #timebegin = config.load_datetime(curr_task_detail.gmt_modified) 
+               timebegin = curr_task_detail.gmt_modified
+               timeend = datetime.now()
+               if (timeend-timebegin).seconds >10:
+                   user_buss_crud.deal_task_claim(db,user_id)
+               
+           progress_status = curr_task_detail.progress_status
+       else:
+           logger.info(f"{user_id} -task detail is null ,redeploy")
+           progress_status = config.PROGRESS_INIT
        if curr_task_detail != None  and  curr_task_detail.progress_status == config.PROGRESS_FINISH:
+           progress_status = curr_task_detail.progress_status
            logger.info(f"Entering delete curr-detail")
            user_buss_crud.remove_curr_task_detail(db,curr_task_detail)
 
