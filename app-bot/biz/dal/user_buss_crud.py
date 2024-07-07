@@ -15,11 +15,17 @@ def get_user_acct(db:Session, user_id:str):
 
 
 def create_user(db:Session, user:BotUserInfo, user_acct:BotUserAcctBase):
-    db.add(user)
-    db.add(user_acct)
-    db.commit()
-    db.refresh(user)
-    db.refresh(user_acct)
+    try:
+        db.add(user)
+        db.add(user_acct)
+        db.commit()
+        db.refresh(user)
+        db.refresh(user_acct)
+    except Exception as e:
+        db.rollback()
+    finally:
+        db.close()
+
 
 def match_task(db:Session,action:str, level:str,chat_id:str):
     logger.info(f"load task by action={action} level = {level}")
@@ -41,19 +47,26 @@ def get_task_info(db:Session,task_id:str):
 def create_user_curr_task_detail(db:Session, user_curr_task_detail:UserCurrTaskDetail):
 
     task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_curr_task_detail.user_id,
-                                                      UserCurrTaskDetail.task_id==user_curr_task_detail.task_id).first()
-    if  task_detail == None:
-        db.add(user_curr_task_detail)
-        db.commit()
-        db.refresh(user_curr_task_detail)
-        return True
-    else:
-        if task_detail.progress_status == config.PROGRESS_INIT:
-           db.add(task_detail)
-           db.commit()
-           return True
+                                                        UserCurrTaskDetail.task_id==user_curr_task_detail.task_id).first()
+    
+    try:                                                  
+        if  task_detail == None:
+            db.add(user_curr_task_detail)
+            db.commit()
+            db.refresh(user_curr_task_detail)
+            return True
         else:
-           return False
+            if task_detail.progress_status == config.PROGRESS_INIT:
+                db.add(task_detail)
+                db.commit()
+                return True
+            else:
+                return False
+    except Exception as e:
+        db.rollback()
+    finally:
+        db.close()
+
 
 
 def fetch_user_curr_task_detail(db:Session, user_id:str, task_id:str):
@@ -62,9 +75,14 @@ def fetch_user_curr_task_detail(db:Session, user_id:str, task_id:str):
 
 def remove_curr_task_detail(db:Session,user_curr_task_detail:UserCurrTaskDetail):
      logger.info(f"Delete the detail which already claimed")
-     if user_curr_task_detail:
-         db.delete(user_curr_task_detail)
-         db.commit()
+     try:
+        if user_curr_task_detail:
+            db.delete(user_curr_task_detail)
+            db.commit()
+     except Exception as e:
+        db.rollback()
+     finally:
+         db.close()
 
 def fetch_user_curr_tase_detail_status(db:Session,user_id:str,progress_status:str):
     return db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
@@ -73,23 +91,33 @@ def fetch_user_curr_tase_detail_status(db:Session,user_id:str,progress_status:st
 
 
 def create_task_producer(db:Session,user_task_producer:UserTaskProducer):
-    db.add(user_task_producer)
-    db.commit()
-    db.refresh(user_task_producer)
+    try:
+        db.add(user_task_producer)
+        db.commit()
+        db.refresh(user_task_producer)
+    except Exception as e:
+        db.rollback()
+    finally:
+        db.close()
 
 def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,progress_status:str) :
-     task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
+     try:
+        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
                                                       UserCurrTaskDetail.task_id==task_id).first()
-     if task_detail:
-         task_detail.progress_status = progress_status
-         task_detail.gmt_modified = config.get_datetime()
-         db.add(task_detail)
-         db.commit()
-         db.refresh(task_detail)
-         return True
-     else:
-         db.commit()
-         return False
+        if task_detail:
+            task_detail.progress_status = progress_status
+            task_detail.gmt_modified = config.get_datetime()
+            db.add(task_detail)
+            db.commit()
+            db.refresh(task_detail)
+            return True
+        else:
+            db.commit()
+            return False
+     except Exception as e:
+        db.rollback()
+     finally:
+         db.close()
 
 def deal_task_claim(db:Session,user_id:str):
      task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
@@ -101,6 +129,8 @@ def deal_task_claim(db:Session,user_id:str):
      
      try:
          task_detail.progress_status = config.PROGRESS_WAIT_CUS_CLAIM
+         db.add(task_detail)
+         db.commit()
 
          task_info = get_task_info(db,task_detail.task_id)
      
@@ -113,7 +143,6 @@ def deal_task_claim(db:Session,user_id:str):
                                      gmt_biz_finish =  config.get_datetime(),
                                      status = config.PROGRESS_WAIT_CUS_CLAIM)
          db.add(user_claim_jnl)
-         db.add(task_detail)
          db.commit()
          db.refresh(task_detail)
          
@@ -122,6 +151,8 @@ def deal_task_claim(db:Session,user_id:str):
          logger.error(f"Deal claim err userid={user_id} e={str(e)}")
          db.rollback()
          return False
+     finally:
+         db.close()
      
      return True
 
@@ -158,6 +189,8 @@ def deal_custom_claim(db:Session, user_id:str):
          logger.error(f"Deal claim err userid={user_id} e={str(e)}")
          db.rollback()
          return (False, '0','0')
+     finally:
+         db.close()
     
     
 
