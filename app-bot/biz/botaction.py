@@ -104,6 +104,8 @@ async def start(update: Update, context: CustomContext) -> None:
 
     logger.info(f"{update.effective_user.id} call start")
     args = context.args
+    prm_begin=f"<b>Hello</b> {update.effective_user.name} ,"
+
     if args and len(args) > 0:
         inviter_id = args[0]
         # 在这里记录邀请信息，例如更新数据库
@@ -111,19 +113,20 @@ async def start(update: Update, context: CustomContext) -> None:
     
     progress_status =  deal_user_start(update.effective_user.id, update.effective_message.chat_id)
     await context.bot.send_message( chat_id = update.effective_chat.id,
-        text="Univoice-bot hearing your voice always..",
+        text=prm_begin + config.PROMPT_START,
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
+        parse_mode=ParseMode.HTML
     )
 
     if progress_status == config.PROGRESS_INIT or progress_status == config.PROGRESS_FINISH:
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="You can press the mic-phone button and send out your voice...")
+                                       text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
     elif progress_status == config.PROGRESS_DEAILING:
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="You have a task processing,please wait you rewards...")
+                                       text="You have a task processing,please wait you rewards...",parse_mode=ParseMode.HTML)
     elif progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="Congratulation! You have some gift need claim,you can press 'claim' button which on the plane")
+                                       text="Congratulation! You have some gift need claim,you can press 'claim' button which on the plane",parse_mode=ParseMode.HTML)
 
 
 async def callback_inline(update:Update, context:CustomContext) -> None:
@@ -154,7 +157,7 @@ async def show_cus_earn(update:Update, context:CustomContext) -> None:
 
 async def sharelink_task(update:Update, context:CustomContext) -> None:
     chat_id = update.effective_chat.id
-    replay_msg = f"https://t.me/univoice2bot?start=1111"
+    replay_msg = f"https://t.me/univoice2bot?start={update.effective_user.id}"
     await context.bot.send_message(chat_id=chat_id, text=replay_msg)
 
 async def cust_claim_replay (update:Update, context:CustomContext) -> None:
@@ -169,9 +172,9 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
 
 
 async def show_speak_reback(update:Update, context:CustomContext) -> None:
-    replaymsg = "You can press mic-phone and leave your pretty voice..."
+    replaymsg = config.PROGRESS_FINISH
     await context.bot.send_message(chat_id=update.effective_chat.id,
-                                   text=replaymsg)
+                                   text=replaymsg,parse_mode=ParseMode.HTML)
 
 async def voice_upload(update:Update, context:CustomContext) -> None:
     voice_file = await update.effective_message.voice.get_file()
@@ -214,6 +217,9 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
 
     user_buss_crud.create_task_producer(db,user_task_producer)
     queue.push(user_id)
+    replaymsg = config.PROMPT_RECORD_FINISH
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text=replaymsg,parse_mode=ParseMode.HTML)
 
 
     

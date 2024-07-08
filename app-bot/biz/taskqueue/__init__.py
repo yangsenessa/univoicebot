@@ -5,7 +5,9 @@ from threading import Thread
 from loguru import logger
 
 from telegram import Update,InlineKeyboardButton, InlineKeyboardMarkup,Bot
-from biz.tonwallet.config import TOKEN
+from telegram.constants import ParseMode
+
+from biz.tonwallet.config import TOKEN,PROMPT_WAIT_CALIMED
 
 import asyncio
 import nest_asyncio
@@ -31,7 +33,8 @@ def do_pop():
               nest_asyncio.apply()
               loop = asyncio.get_event_loop()
               loop.run_until_complete( bot.send_message(chat_id=user_id,
-                                                        text="You have tokens waitting for claim, press '/start' to get the details"))
+                                                        text=PROMPT_WAIT_CALIMED,
+                                                        parse_mode=ParseMode.HTML))
               #loop.close()
 
 
