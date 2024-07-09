@@ -8,10 +8,20 @@ import uuid
 
 
 def get_user(db:Session, user_id:str):
-    return db.query(BotUserInfo).filter(BotUserInfo.tele_user_id==user_id).first()
+    try:
+       return db.query(BotUserInfo).filter(BotUserInfo.tele_user_id==user_id).first()
+    except Exception as e:
+       logger.error(f"query user info err:{str(e)}")
+    finally:
+        db.close()
 
 def get_user_acct(db:Session, user_id:str):
-    return db.query(BotUserAcctBase).filter(BotUserAcctBase.user_id==user_id).first()
+    try:
+        return db.query(BotUserAcctBase).filter(BotUserAcctBase.user_id==user_id).first()
+    except Exception as e:
+       logger.error(f"query user_acct base info err:{str(e)}")
+    finally:
+        db.close()
 
 
 def create_user(db:Session, user:BotUserInfo, user_acct:BotUserAcctBase):
@@ -29,27 +39,33 @@ def create_user(db:Session, user:BotUserInfo, user_acct:BotUserAcctBase):
 
 def match_task(db:Session,action:str, level:str,chat_id:str):
     logger.info(f"load task by action={action} level = {level}")
-    taskinfos = db.query(Unvtaskinfo).filter(Unvtaskinfo.task_action==action,
-                                         Unvtaskinfo.level == level,
-                                         Unvtaskinfo.status =="NORMAL").all()
-    if taskinfos:
-        for taskinfo in taskinfos:
-            if(taskinfo.chat_id == chat_id):
-                return taskinfo
-    else:
-        return None
-    return taskinfos[0]
+    
+    try:
+        taskinfos = db.query(Unvtaskinfo).filter(Unvtaskinfo.task_action==action,
+                                                  Unvtaskinfo.level == level,
+                                                  Unvtaskinfo.status =="NORMAL").all()
+        if taskinfos:
+            for taskinfo in taskinfos:
+                if(taskinfo.chat_id == chat_id):
+                    return taskinfo
+        else:
+            return None
+        return taskinfos[0]
+    except Exception as e:
+        logger.error(f"load and match task base info err: {str(e)}")
+    finally:
+        db.close()
+
+    
 
 def get_task_info(db:Session,task_id:str):
     return db.query(Unvtaskinfo).filter(Unvtaskinfo.task_id == task_id).first()
 
 
-def create_user_curr_task_detail(db:Session, user_curr_task_detail:UserCurrTaskDetail):
-
-    task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_curr_task_detail.user_id,
-                                                        UserCurrTaskDetail.task_id==user_curr_task_detail.task_id).first()
-    
-    try:                                                  
+def create_user_curr_task_detail(db:Session, user_curr_task_detail:UserCurrTaskDetail):  
+    try: 
+        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_curr_task_detail.user_id,
+                                                        UserCurrTaskDetail.task_id==user_curr_task_detail.task_id).first()                                                 
         if  task_detail == None:
             db.add(user_curr_task_detail)
             db.commit()
@@ -70,8 +86,13 @@ def create_user_curr_task_detail(db:Session, user_curr_task_detail:UserCurrTaskD
 
 
 def fetch_user_curr_task_detail(db:Session, user_id:str, task_id:str):
-    return  db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
+    try:
+        return  db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
                                                       UserCurrTaskDetail.task_id==task_id).first()
+    except Exception as e:
+        logger.error(f"query user curr task detail err:{str(e)}")
+    finally:
+        db.close()
 
 def remove_curr_task_detail(db:Session,user_curr_task_detail:UserCurrTaskDetail):
      logger.info(f"Delete the detail which already claimed")
@@ -85,8 +106,13 @@ def remove_curr_task_detail(db:Session,user_curr_task_detail:UserCurrTaskDetail)
          db.close()
 
 def fetch_user_curr_tase_detail_status(db:Session,user_id:str,progress_status:str):
-    return db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
-                                               UserCurrTaskDetail.progress_status==progress_status).all()
+    try:
+        return db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
+                                                     UserCurrTaskDetail.progress_status==progress_status).all()
+    except Exception as e:
+        logger.error(f"query user curr task detail with status err:{str(e)}")
+    finally:
+        db.close()
     
 
 
@@ -120,21 +146,21 @@ def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,progress_sta
          db.close()
 
 def deal_task_claim(db:Session,user_id:str):
-     task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
+    try:
+        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
                                                       UserCurrTaskDetail.progress_status == config.PROGRESS_DEAILING).first()
-     if task_detail == None :
-         logger.error(f"Claim is timing, but can't find the task detail!" )
-         db.commit()
-         return False
-     
-     try:
-         task_detail.progress_status = config.PROGRESS_WAIT_CUS_CLAIM
-         db.add(task_detail)
-         db.commit()
+        if task_detail == None :
+            logger.error(f"Claim is timing, but can't find the task detail!" )
+            db.commit()
+            return False
+         
+        task_detail.progress_status = config.PROGRESS_WAIT_CUS_CLAIM
+        db.add(task_detail)
+        db.commit()
 
-         task_info = get_task_info(db,task_detail.task_id)
+        task_info = get_task_info(db,task_detail.task_id)
      
-         user_claim_jnl = User_claim_jnl(jnl_no = str(uuid.uuid4()),
+        user_claim_jnl = User_claim_jnl(jnl_no = str(uuid.uuid4()),
                                      user_id =  user_id,
                                      task_id = task_info.task_id,
                                      task_name = task_info.task_name,
@@ -142,35 +168,39 @@ def deal_task_claim(db:Session,user_id:str):
                                      gmt_biz_create = config.get_datetime(),
                                      gmt_biz_finish =  config.get_datetime(),
                                      status = config.PROGRESS_WAIT_CUS_CLAIM)
-         db.add(user_claim_jnl)
-         db.commit()
-         db.refresh(task_detail)
-         
-         logger.info(f"user:{user_id} have finish claim")
-     except Exception as e:
+        db.add(user_claim_jnl)
+        db.commit()
+        db.refresh(task_detail)
+        
+        logger.info(f"user:{user_id} have finish claim")
+    except Exception as e:
          logger.error(f"Deal claim err userid={user_id} e={str(e)}")
          db.rollback()
          return False
-     finally:
+    finally:
          db.close()
      
-     return True
+    return True
 
 def deal_custom_claim(db:Session, user_id:str):
-     task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
-                                                      UserCurrTaskDetail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM).first()
-     if task_detail == None :
-         logger.error(f"{user_id} is claiming, but can't find the task detail!" )
-         db.commit()
-         return (False, '0','0')
-     claim_jnl = db.query(User_claim_jnl).filter(User_claim_jnl.user_id==user_id,
-                                                      User_claim_jnl.status == config.PROGRESS_WAIT_CUS_CLAIM).first()
-     if claim_jnl == None :
-         logger.error(f"{user_id} is claiming, but can't find the User_claim_jnl!" )
-         db.commit()
-         return (False, '0','0')
-
      try:
+        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
+                                                         UserCurrTaskDetail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM).first()
+        if task_detail == None:
+            task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id).first()
+            if task_detail:
+                return (True,None,None)
+            else:
+                logger.error(f"{user_id} is claiming, but can't find the task detail!" )
+                return (False, '0','0')
+        claim_jnl = db.query(User_claim_jnl).filter(User_claim_jnl.user_id==user_id,
+                                                      User_claim_jnl.status == config.PROGRESS_WAIT_CUS_CLAIM).first()
+        if claim_jnl == None :
+            logger.error(f"{user_id} is claiming, but can't find the User_claim_jnl!" )
+            db.commit()
+            return (False, '0','0')
+
+     
         user_acct_base = get_user_acct(db, user_id=user_id)
         amount_val =  user_acct_base.tokens
         trx_val = claim_jnl.tokens

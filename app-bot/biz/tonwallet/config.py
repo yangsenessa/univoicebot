@@ -2,7 +2,10 @@ import json
 from datetime import datetime
 
 #.env
+#bot1
 #TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
+
+#bot2
 TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'  
 MANIFEST_URL='https://raw.githubusercontent.com/XaBbl4/pytonconnect/main/pytonconnect-manifest.json'
 
@@ -26,8 +29,8 @@ PROGRESS_FINISH = 'FINISH'
 PROGRESS_WAIT_CUS_CLAIM = 'WAIT_CUS_CLAIM'
 
 
-
-PROMPT_START="welcome to Univoice's fifth-dimensional world. Here, you can store your voice and have your unique AI steward, which helps transform your voice into your exclusive fifth-dimensional space."+\
+PANEL_IMG="<img src='./resource/univouce/univoice.png'/>"
+PROMPT_START="\nwelcome to Univoice's fifth-dimensional world. Here, you can store your voice and have your unique AI steward, which helps transform your voice into your exclusive fifth-dimensional space."+\
 "\n\nRecord your voice to earn points and rewards. Upgrade to get more recording opportunities and higher points."+\
 "\n\nDon't forget to invite your friends to join you so you can earn points faster."+\
 "\n\nWe look forward to you having a delightful journey in the world of voice!"

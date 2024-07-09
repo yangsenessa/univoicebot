@@ -22,6 +22,7 @@ from .tonwallet import config
 from . import media
 from  .taskqueue import queue
 import json
+import os
 
 from loguru import logger
 
@@ -112,11 +113,22 @@ async def start(update: Update, context: CustomContext) -> None:
         logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
     
     progress_status =  deal_user_start(update.effective_user.id, update.effective_message.chat_id)
-    await context.bot.send_message( chat_id = update.effective_chat.id,
-        text=prm_begin + config.PROMPT_START,
+    '''await context.bot.send_message( chat_id = update.effective_chat.id,
+        text=config.PANEL_IMG+prm_begin + config.PROMPT_START,
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
         parse_mode=ParseMode.HTML
-    )
+    )'''
+    path = os.path.abspath(os.path.dirname(__file__))
+    logger.info(f"Curr path is:{path}")
+    img_path="resource"
+    img_name="unvoice.png"
+
+    with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
+        await context.bot.send_photo(chat_id=update.effective_chat.id, 
+                                     photo=imgfile,
+                                     caption=prm_begin + config.PROMPT_START,
+                                     reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
+                                     parse_mode=ParseMode.HTML)
 
     if progress_status == config.PROGRESS_INIT or progress_status == config.PROGRESS_FINISH:
         await context.bot.send_message(chat_id=update.effective_chat.id,
@@ -164,8 +176,10 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
 
     chat_id = update.effective_chat.id
     flag,trx_fee, amount = user_buss_crud.deal_custom_claim(db,update.effective_user.id)
-    if flag:
+    if flag and trx_fee != None and amount != None:
         msg_tmpl = f"<strong>Claim Success</strong>\n\n<i>You just claimed {trx_fee}</i>\n<i>The total tokens :{amount}</i>"
+    elif flag:
+        msg_tmpl = f"<strong>You have claimed Success</strong>\n\n<i>You can press 'earn' and see your account details </i>"
     else:
         msg_tmpl="Please waiting some minutes then retry."
     await context.bot.send_message(chat_id=chat_id,text=msg_tmpl,parse_mode=ParseMode.HTML)

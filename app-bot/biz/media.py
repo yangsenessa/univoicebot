@@ -51,7 +51,7 @@ async def save_voice( voice_file:File):
      logger.info(f'Upload file={tmp_ogg_file.name}')
      result = subprocess.run(
      ['/home/ubuntu/app/bin/example', 'upload',tmp_ogg_file.name],
-      #   ['D:\\project\\titan-storage-sdk\\example\\example', 'upload', tmp_ogg_file.name],
+         # ['D:\\project\\titan-storage-sdk\\example\\example', 'upload', tmp_ogg_file.name],
          stdout=subprocess.PIPE,
          stderr=subprocess.PIPE,
         text=True
@@ -61,7 +61,7 @@ async def save_voice( voice_file:File):
          logger.info("Upload successful")
          logger.info(f"Output stdout:{result.stdout}")
          logger.info(f"Output stderr:{result.stderr}")
-
+         os.remove(tmp_ogg_file.name)
          match = re.search(r'cid ([a-zA-Z0-9]+)', result.stderr)
          if match:
              cid = match.group(1)
