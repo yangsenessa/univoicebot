@@ -19,6 +19,11 @@ redis_conf = {'host': '8.141.81.75', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 queue = DelayQueue(redis_conf)
 bot = Bot(token=TOKEN)
 
+claimedKeyboardButton_list=list()
+claimedKeyboardButton_list.append(InlineKeyboardButton(text="earn",callback_data="opr-earn"))
+claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
+
+
 
 def do_pop():
     while True:
@@ -34,6 +39,7 @@ def do_pop():
               loop = asyncio.get_event_loop()
               loop.run_until_complete( bot.send_message(chat_id=user_id,
                                                         text=PROMPT_WAIT_CALIMED,
+                                                        reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
                                                         parse_mode=ParseMode.HTML))
               #loop.close()
 

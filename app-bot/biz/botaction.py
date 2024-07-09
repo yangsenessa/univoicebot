@@ -44,6 +44,7 @@ inlineKeyboardButton_list.append(InlineKeyboardButton(text="Ton Wallet",callback
 inlineKeyboardButton_list.append(InlineKeyboardButton(text="play",callback_data="opr-play",pay=True))
 
 claimedKeyboardButton_list.append(InlineKeyboardButton(text="earn",callback_data="opr-earn"))
+claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
 
 
 
