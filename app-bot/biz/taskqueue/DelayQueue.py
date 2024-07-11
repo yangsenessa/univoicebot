@@ -21,7 +21,7 @@ class DelayQueue(object):
         host, port, db, passwd = conf['host'], conf['port'], conf['db'], conf['passwd']
         self.client = redis.Redis(host=host, port=port, db=db,password=passwd)
 
-    def push(self, data):
+    def push(self, data,task_sec):
         """push
 
         :param data: data
@@ -32,9 +32,9 @@ class DelayQueue(object):
         # save string
         self.client.set(data_key, data)
         # add zset(queue_key=>data_key,ts)
-        self.client.zadd(self.QUEUE_KEY, data_key, int(time.time()))
+        self.client.zadd(self.QUEUE_KEY, data_key, int(task_sec))
         
-    def pop(self, num=1, previous=3):
+    def pop(self, num=500, previous=3):
         """pop多条数据
 
         :param num: pop多少个

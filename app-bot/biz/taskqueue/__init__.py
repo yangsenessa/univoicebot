@@ -20,8 +20,8 @@ queue = DelayQueue(redis_conf)
 bot = Bot(token=TOKEN)
 
 claimedKeyboardButton_list=list()
-claimedKeyboardButton_list.append(InlineKeyboardButton(text="earn",callback_data="opr-earn"))
-claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
+claimedKeyboardButton_list.append(InlineKeyboardButton(text="🤑 earn",callback_data="opr-earn"))
+claimedKeyboardButton_list.append(InlineKeyboardButton(text="🎉 claim",callback_data="opr-claim"))
 
 
 
@@ -33,7 +33,7 @@ def do_pop():
        for user_id in userids :
           if False == tonbuss.deal_task_claim(user_id):
               logger.warning(f"User = {user_id} claim err,re-queue")
-              queue.push(user_id)
+              queue.push(user_id,int(time.time())+20)
           else:
               nest_asyncio.apply()
               loop = asyncio.get_event_loop()

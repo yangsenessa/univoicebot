@@ -13,7 +13,7 @@ def get_user(db:Session, user_id:str):
     except Exception as e:
        logger.error(f"query user info err:{str(e)}")
     finally:
-        db.close()
+       db.close()
 
 def get_user_acct(db:Session, user_id:str):
     try:
@@ -22,6 +22,35 @@ def get_user_acct(db:Session, user_id:str):
        logger.error(f"query user_acct base info err:{str(e)}")
     finally:
         db.close()
+
+def update_user_info(db:Session, user_info:BotUserInfo):
+    try:
+        db.add(user_info)
+        db.commit()
+        db.refresh(user_info)
+    except Exception as e:
+        db.rollback()
+        logger.error(f"update user base info err:{str(e)}")
+    finally:
+        db.close()
+
+def invoke_acct_token(db:Session, user_id:str, tokens:str,user_claim_jnl:User_claim_jnl):
+    try:
+        user_acct_info = get_user_acct(db,user_id)
+        user_acct_info.tokens = str(int(user_acct_info.tokens)+int(tokens))
+
+        db.add(user_acct_info)
+        db.add(user_claim_jnl)
+        db.commit()
+        db.refresh(user_acct_info)
+        db.refresh(user_claim_jnl)
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"update user acct info err:{str(e)}")
+    finally:
+        db.close()
+
 
 
 def create_user(db:Session, user:BotUserInfo, user_acct:BotUserAcctBase):
@@ -81,9 +110,26 @@ def create_user_curr_task_detail(db:Session, user_curr_task_detail:UserCurrTaskD
     except Exception as e:
         db.rollback()
     finally:
+        db.close() 
+
+
+def fetch_user_curr_task_detail_can_be_claimed(db:Session, user_id:str):
+    try:
+        return  db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
+                                                    UserCurrTaskDetail.progress_status==config.PROGRESS_WAIT_CUS_CLAIM).first()
+    except Exception as e:
+        logger.error(f"query user curr task detail err:{str(e)}")
+    finally:
+        db.close() 
+
+def fetch_user_curr_task_detail_not_finish(db:Session, user_id:str):
+    try:
+        return  db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
+                                                    UserCurrTaskDetail.progress_status==config.PROGRESS_DEAILING).first()
+    except Exception as e:
+        logger.error(f"query user curr task detail err:{str(e)}")
+    finally:
         db.close()
-
-
 
 def fetch_user_curr_task_detail(db:Session, user_id:str, task_id:str):
     try:
@@ -145,26 +191,23 @@ def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,progress_sta
      finally:
          db.close()
 
+
 def deal_task_claim(db:Session,user_id:str):
     try:
-        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
-                                                      UserCurrTaskDetail.progress_status == config.PROGRESS_DEAILING).first()
-        if task_detail == None :
+        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id).first()
+        if task_detail == None or task_detail.progress_status != config.PROGRESS_DEAILING :
             logger.error(f"Claim is timing, but can't find the task detail!" )
-            db.commit()
-            return False
+            # Dirty data ,ignore
+            return True
          
         task_detail.progress_status = config.PROGRESS_WAIT_CUS_CLAIM
         db.add(task_detail)
-        db.commit()
 
-        task_info = get_task_info(db,task_detail.task_id)
-     
         user_claim_jnl = User_claim_jnl(jnl_no = str(uuid.uuid4()),
                                      user_id =  user_id,
-                                     task_id = task_info.task_id,
-                                     task_name = task_info.task_name,
-                                     tokens=task_info.base_reward * task_info.flater,
+                                     task_id = task_detail.task_id,
+                                     task_name = task_detail.task_id,
+                                     tokens=task_detail.token_amount,
                                      gmt_biz_create = config.get_datetime(),
                                      gmt_biz_finish =  config.get_datetime(),
                                      status = config.PROGRESS_WAIT_CUS_CLAIM)

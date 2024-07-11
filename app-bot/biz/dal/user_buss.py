@@ -9,6 +9,7 @@ class BotUserInfo(Base):
     wallet_id=Column(String)
     reg_gmtdate=Column(DateTime)
     level=Column(String)
+    gpu_level=Column(String)
     source=Column(String)
 
 class BotUserAcctBase(Base):
@@ -21,6 +22,8 @@ class BotUserAcctBase(Base):
 class UserCurrTaskDetail(Base):
     __tablename__="unv_user_curr_task_detail"
     user_id=Column(String, primary_key=True)
+    user_level=Column(String)
+    gpu_level=Column(String)
     chat_id=Column(String)
     task_id=Column(String)
     token_amount=Column(BIGINT)

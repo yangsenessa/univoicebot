@@ -18,6 +18,7 @@ from .dal import user_buss_crud
 from typing import DefaultDict, Optional, Set
 from .dal import database
 from loguru import logger
+from .tonwallet import config
 
 
 extern_database =  database.Database()
@@ -57,6 +58,7 @@ async def start_connect_wallet(update:Update,context:ContextTypes.DEFAULT_TYPE):
 
 def deal_task_claim( user_id:str):
      logger.info(f"user_id = {user_id} is claiming...")
+     task_info = config.TASK_INFO
     
      flag = user_buss_crud.deal_task_claim(db,user_id)
     
