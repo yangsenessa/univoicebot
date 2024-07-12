@@ -10,7 +10,7 @@ from comfyai import mixlab_endpoint
 from comfyai import wsserver_endpoint
 from comfyai import telegram_bot_endpoint
 from biz.media import parsewav
-from biz.botaction import start,callback_inline,voice_upload
+from biz.botaction import start,callback_inline,voice_upload,show_cus_earn
 from biz.tonwallet.config import TOKEN
 from loguru import logger
 import uvicorn
@@ -33,7 +33,7 @@ async def set_right(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="我不会这个哦~")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="I can't understand,but, if you want to start, you can type '/start")
 
 
 async def ohayo(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -64,6 +64,8 @@ async def voice(update:Update, context:ContextTypes.DEFAULT_TYPE):
 
 
 start_handler = CommandHandler('start', start)
+earn_handler = CommandHandler('earn', show_cus_earn)
+
 set_right_handler = CommandHandler('p', set_right)
 unknown_handler = MessageHandler(filters.COMMAND, unknown)
 filter_ohayo = filters.Regex('早安|早上好|哦哈哟|ohayo')
@@ -81,6 +83,7 @@ voice_handler = MessageHandler(filter_voice, voice_upload)
 application = ApplicationBuilder().token(TOKEN).build()
 # 注册 handler
 application.add_handler(start_handler)
+application.add_handler(earn_handler)
 application.add_handler(set_right_handler)
 application.add_handler(unknown_handler)
 application.add_handler(ohayo_handler)
