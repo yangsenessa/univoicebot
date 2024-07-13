@@ -1,0 +1,32 @@
+{
+    "1":{
+        "wait_h":24,
+        "flatter":1,
+        "consume":0
+    },
+    "2":{
+        "wait_h":12,
+        "flatter":1,
+        "consume":5000
+    },
+    "3":{
+        "wait_h":8,
+        "flatter":1.5,
+        "consume":10000
+    },
+    "4":{
+        "wait_h":6,
+        "flatter":2,
+        "consume":50000
+    },
+    "5":{
+        "wait_h":4,
+        "flatter":2.5,
+        "consume":100000
+    },
+    "6":{
+        "wait_h":2,
+        "flatter":3,
+        "consume":500000
+    }
+}

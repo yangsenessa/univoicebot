@@ -22,7 +22,7 @@ from .dal import database
 from .tonwallet import config
 from biz.tonwallet.config import TASK_INFO
 from . import media
-from  .taskqueue import queue
+from  .taskqueue import queue, complex_template
 import json
 import os
 import time
@@ -46,12 +46,19 @@ claimedKeyboardButton_list=list()
 #inlineKeyboardButton_list.append(InlineKeyboardButton(text="Ton Wallet",callback_data='opr_tonwallet'))
 #inlineKeyboardButton_list.append(InlineKeyboardButton(text="play",callback_data="opr-play",pay=True))
 
-panel_btn = [[InlineKeyboardButton(text="🤑 earn",callback_data="opr-earn"),InlineKeyboardButton(text="claim",callback_data="opr-claim")],
-             [InlineKeyboardButton(text="🤑 Invite link",callback_data="opr-invite")],
-             [InlineKeyboardButton(text="🐶 play",callback_data="opr-play")]]
+panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
+             [InlineKeyboardButton(text="👝 balance",callback_data="opr-balance"),InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")],
+             [InlineKeyboardButton(text="🌟 earn",callback_data="opr-earn"),InlineKeyboardButton(text="💸claim",callback_data="opr-claim")],
+             [InlineKeyboardButton(text="✨ Join Community",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
+             ]
 
-claimedKeyboardButton_list.append(InlineKeyboardButton(text="earn",callback_data="opr-earn"))
 claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
+
+upgradekeyboardButton_list=list()
+upgradekeyboardButton_list.append(InlineKeyboardButton(text="level-upgrade",callback_data="opr-level-upgrade"))
+upgradekeyboardButton_list.append(InlineKeyboardButton(text="gpu-upgrade",callback_data="opr-gpu-upgrade"))
+
+
 
 
 
@@ -115,7 +122,7 @@ async def start(update: Update, context: CustomContext) -> None:
     # WelCome Card
     logger.info("Show welcome card")
     args = context.args
-    prm_begin=f"<b>Hello</b> {update.effective_user.name} ,"
+    prm_begin=f"<b>Hi </b> {update.effective_user.name},welcome"
     path = os.path.abspath(os.path.dirname(__file__))
     logger.info(f"Curr path is:{path}")
     img_path="resource"
@@ -134,7 +141,7 @@ async def start(update: Update, context: CustomContext) -> None:
         # 在这里记录邀请信息，例如更新数据库
         logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
     
-    progress_status =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,context)
+    progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,context)
     '''await context.bot.send_message( chat_id = update.effective_chat.id,
         text=config.PANEL_IMG+prm_begin + config.PROMPT_START,
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
@@ -142,28 +149,30 @@ async def start(update: Update, context: CustomContext) -> None:
     )'''
     
 
-    if progress_status == config.PROGRESS_INIT or progress_status == config.PROGRESS_FINISH:
+   # if progress_status == config.PROGRESS_INIT or progress_status == config.PROGRESS_FINISH:
+        #await context.bot.send_message(chat_id=update.effective_chat.id,
+        #                               text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
+    if progress_status == config.PROGRESS_DEAILING:
+        rsp_msg=f"There's  ⏰ {time_remain} seconds left until your next claim."
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
-    elif progress_status == config.PROGRESS_DEAILING:
-        await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="You have a task processing,please wait you rewards...",parse_mode=ParseMode.HTML)
+                                       text=rsp_msg,parse_mode=ParseMode.HTML)
     elif progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
-        await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="Congratulation! You have some gift need claim,you can press 'claim' button which on the plane",parse_mode=ParseMode.HTML)
+        path = os.path.abspath(os.path.dirname(__file__))
+        logger.info(f"Curr path is:{path}")
+        img_path="resource"
+        img_name=config.PROMPT_NOTIFY_CLAIM_IMG
+        rsp_img_path = os.path.join(path,img_path,img_name)
+        abs_path = os.path.join(path,img_path)
+        imgfile =  complex_template.marked_claim_notify(update.effective_user.id,[config.PROMPT_WAIT_CALIMED],rsp_img_path,abs_path)
+  
+        await context.bot.send_photo(chat_id=update.effective_user.id,
+                                photo=imgfile,                                            
+                                reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
+                                parse_mode=ParseMode.HTML)
+        os.remove(imgfile)   
     elif progress_status == config.PROGRESS_LEVEL_IDT:
-        logger.info("Send new member rewards")
-        user_claim_jnl = User_claim_jnl(jnl_no = str(uuid.uuid4()),
-                                     user_id =  update.effective_user.id,
-                                     task_id = config.TASK_NEW_MEMBER,
-                                     task_name = config.TASK_NEW_MEMBER,
-                                     tokens="5000",
-                                     gmt_biz_create = config.get_datetime(),
-                                     gmt_biz_finish =  config.get_datetime(),
-                                     status = config.PROGRESS_FINISH)
-        user_buss_crud.invoke_acct_token(db, update.effective_user.id,"5000",user_claim_jnl)
-        await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="Congratulation! You have got the newer rewards",parse_mode=ParseMode.HTML)
+        logger.info("New member need test voice")
+       
 
 
 async def callback_inline(update:Update, context:CustomContext) -> None:
@@ -183,13 +192,169 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
         await start(update,context)
     elif (commandhandlemsg == "opr-invite"):
         await sharelink_task(update, context)
-    elif (commandhandlemsg =="opr-earn"):
-        await show_cus_earn(update,context)
+    elif (commandhandlemsg =="opr-balance"):
+        await show_cus_balance(update,context)
+    elif (commandhandlemsg == "opr-join"):
+        await join_chat_group(update,context)
+    elif (commandhandlemsg == "opr-upgrade"):
+        await show_cus_upgrade(update, context)
+    elif (commandhandlemsg == "opr-level-upgrade"):
+        await do_user_level_up(update, context)
+    elif (commandhandlemsg == "opr-gpu-upgrade"):
+        await do_gpu_level_up(update, context)
 
-async def show_cus_earn(update:Update, context:CustomContext) -> None:
+async def do_user_level_up(update:Update,context:CustomContext):
+    user_info = fet_user_info(update.effective_message.chat_id)
+    user_acct = user_buss_crud.get_user_acct(db,update.effective_message.chat_id)
+    balance_amount = int(user_acct.tokens) 
+    user_level = int(user_info.level)
+    task_info = config.TASK_INFO["VOICE-UPLOAD"]
+
+    if user_level >= 12:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="You are on the top level.") 
+        return
+    else:
+        user_level_next = str(user_level+1)
+        if(balance_amount < task_info[user_level_next]["consume"]):
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, you haven't enough tokens.") 
+            return
+
+        user_info.level = user_level_next
+
+        trx_fee = str(-task_info[user_level_next]["consume"]) 
+
+        user_claim_jnl = User_claim_jnl(
+            jnl_no = str(uuid.uuid4()) ,
+            user_id = user_info.tele_user_id,
+            task_id="USER_LEVEL_UP",
+            task_name="USER_LEVEL_UP",
+            tokens=trx_fee,
+            gmt_biz_create=config.get_datetime(),
+            gmt_biz_finish=config.get_datetime(),
+            status="FINISH"
+        )
+        user_buss_crud.acct_update_deal(db,user_info.tele_user_id,
+                                         trx_fee,user_claim_jnl, user_info)
+        rsp_msg=f"Upgrade successful! \
+            \n Your VSD is now at {user_level_next} level .  \
+            \n Enhance the value of your voice."
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=rsp_msg) 
+    return
+
+async def do_gpu_level_up(update:Update,context:CustomContext):
+    user_info = fet_user_info(update.effective_message.chat_id)
+    user_acct = user_buss_crud.get_user_acct(db,update.effective_message.chat_id)
+    balance_amount = int(user_acct.tokens) 
+    gpu_level = int(user_info.gpu_level)
+    gpu_info = config.GPU_LEVEL_INFO
+
+    if gpu_level >=6:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="You have owned the top gpu.") 
+        return
+    else:
+        gpu_level_next = str(gpu_level+1)
+        if(balance_amount < gpu_info[gpu_level_next]["consume"]):
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, you haven't enough tokens.") 
+            return
+       
+        user_info.gpu_level = gpu_level_next
+        trx_fee = str(-gpu_info[gpu_level_next]["consume"])
+        user_claim_jnl = User_claim_jnl(
+            jnl_no = str(uuid.uuid4()) ,
+            user_id = user_info.tele_user_id,
+            task_id="GPU_LEVEL_UP",
+            task_name="GPU_LEVEL_UP",
+            tokens=trx_fee,
+            gmt_biz_create=config.get_datetime(),
+            gmt_biz_finish=config.get_datetime(),
+            status="FINISH"
+        )
+        user_buss_crud.acct_update_deal(db,user_info.tele_user_id,
+                                         trx_fee,user_claim_jnl, user_info)
+        rsp_msg=f"Upgrade successful! \
+            \n Your GPU is at {gpu_level_next} level now .  \
+            \n Enhance the value of your voice."
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=rsp_msg) 
+    return
+
+
+
+
+
+
+#https://t.me/+i7Idmn6MhVNiNmE1
+async def join_chat_group(update:Update, context:CustomContext):
+    replay_msg="https://t.me/+i7Idmn6MhVNiNmE1"
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=replay_msg) 
+    
+    
+
+async def show_cus_balance(update:Update, context:CustomContext) -> None:
     user_acct_base = user_buss_crud.get_user_acct(db,update.effective_user.id)
-    replay_msg=f"Your voice has earned :{user_acct_base.tokens} 💰 "
+    user_info = fet_user_info(update.effective_user.id)
+    user_level = user_info.level
+    gpu_level = user_info.gpu_level
+    replay_msg=f"Your voice storage duration are currently at **{user_level} level**. \
+     \n                                  GPU efficiency **{gpu_level} level**\
+    \n                                  Your balanc is :{user_acct_base.tokens} 💰 "
     await context.bot.send_message(chat_id=user_acct_base.user_id, text=replay_msg)
+
+
+async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
+    user_info = fet_user_info(update.effective_user.id)
+    user_level = user_info.level
+    gpu_level = user_info.gpu_level
+
+    task_info = config.TASK_INFO['VOICE-UPLOAD']
+
+    tp_1="The current VSD is at {user_level} level."
+
+
+    next_user_level = int(user_level) +1
+    next_gpu_level = int(gpu_level) +1
+
+    if next_user_level >12:
+        tp_2 = "You have the top level"
+        tp_3=" "
+    else:
+        tokens= task_info[user_level]["consume"]
+        futurn_rewards = task_info[user_level]["token"]
+        tp_2 = f"Use $VOICE {tokens} to upgrade to {next_user_level} level."
+        tp_3=f"You can claim $VOICE {futurn_rewards} each time."
+    
+    if next_gpu_level > 6 :
+        tp_4="Your gpu is the most efficent now. "
+        tp_5=" "
+        tp_6=" "
+    else:
+        tp_4="GPU efficiency (GPU)"
+        tokens = config.GPU_LEVEL_INFO[gpu_level]["consume"]
+        flatter = config.GPU_LEVEL_INFO[gpu_level]["flatter"]
+        wait_h = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
+        tp_5=f"Use $VOICE {tokens} to upgrade to {next_gpu_level} level."
+        tp_6=f"Wait {wait_h} hours to claim and $VOICE * {flatter} each time"
+    rsp_msg = [tp_1,tp_2,tp_3,tp_4,tp_5,tp_6]
+
+     # prepare img to rsp:
+    path = os.path.abspath(os.path.dirname(__file__))
+    logger.info(f"Curr path is:{path}")
+    img_path="resource"
+    img_name=config.PROMPT_UPGRADE_SUCCESS
+    rsp_img_path = os.path.join(path,img_path,img_name)
+    abs_path = os.path.join(path,img_path)
+    imgfile =  complex_template.marked_record_update(update.effective_chat.id,rsp_msg,rsp_img_path,abs_path)
+
+    await context.bot.send_photo(chat_id=update.effective_chat.id, 
+                                     photo=imgfile,
+                                     caption="choose to upgrade",
+                                     reply_markup=InlineKeyboardMarkup.from_row(upgradekeyboardButton_list),
+                                     parse_mode=ParseMode.HTML)
+    os.remove(imgfile)
+
+
+
+    
+
 
 
 async def sharelink_task(update:Update, context:CustomContext) -> None:
@@ -205,15 +370,19 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
         await context.bot.send_message(chat_id=chat_id,text="Please waiting some minutes then retry.",parse_mode=ParseMode.HTML)
         return
 
-
-    flag,trx_fee, amount = user_buss_crud.deal_custom_claim(db,update.effective_user.id)
-    if flag and trx_fee != None and amount != None:
-        msg_tmpl = f"<strong>Claim Success</strong>\n\n<i>You just claimed {trx_fee}</i>\n<i>The total tokens :{amount}</i>"
-    elif flag:
-        msg_tmpl = f"<strong>You have claimed Success</strong>\n\n<i>You can press 'earn' and see your account details </i>"
-    else:
-        msg_tmpl="Please waiting some minutes then retry."
-    await context.bot.send_message(chat_id=chat_id,text=msg_tmpl,parse_mode=ParseMode.HTML)
+    user_buss_crud.deal_custom_claim(db,update.effective_user.id)
+    path = os.path.abspath(os.path.dirname(__file__))
+    logger.info(f"Curr path is:{path}")
+    img_path="resource"
+    img_name=config.PROMPT_NOTIFY_CLAIMED_IMG
+    rsp_img_path = os.path.join(path,img_path,img_name)
+    abs_path = os.path.join(path,img_path)
+    rsp_marked=[config.PROMPT_HAS_CALIMED_1, config.PROMPT_HAS_CALIMED_2]
+    img_file = complex_template.marked_claimed(chat_id,rsp_marked,rsp_img_path,abs_path)
+    await context.bot.send_photo(chat_id=chat_id,
+                                 photo=img_file,                                            
+                                 reply_markup=InlineKeyboardMarkup(panel_btn),
+                                 parse_mode=ParseMode.HTML)
 
 
 async def show_speak_reback(update:Update, context:CustomContext) -> None:
@@ -236,13 +405,16 @@ async def voice_judge(update:Update,context:CustomContext):
         user_info.gpu_level = config.get_rd_gpu_level()
         user_buss_crud.update_user_info(db,user_info)
         logger.info("Update user level success!")
-        rsp_msg = f"Congratulation ! Our AI identified your level is {user_info.level}, \
-            and he privade your gpu level is {user_info.gpu_level}\
-        \n\n Then you can press /start and begin your travel"
+        rsp_msg = f"Congratulation ! \n Your voice storage duration are currently at {user_info.level} level, GPU efficiency {user_info.gpu_level} level\
+        \n$VOICE has been credited to your account. CHECK it in your 'balance' \
+        \n Click 'play' to start your journey. \
+        \n Click 'earn' to upgrades \
+        \n Click 'Invite frens to earn more."
 
 
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                   text=rsp_msg,parse_mode=ParseMode.HTML)
+                                       reply_markup=InlineKeyboardMarkup(panel_btn),
+                                       text=rsp_msg,parse_mode=ParseMode.HTML)
         return True
     return False
 
@@ -297,9 +469,24 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
 
     user_buss_crud.create_task_producer(db,user_task_producer)
     queue.push(user_id,task_sec= int(time.time())+config.cal_task_claim_time(gpu_level,task_id))
-    replaymsg = config.PROMPT_RECORD_FINISH
-    await context.bot.send_message(chat_id=update.effective_chat.id,
-                                   text=replaymsg,parse_mode=ParseMode.HTML)
+    
+    hours = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
+    replaymsg = f"Please wait {hours} hours before \"clain \"."
+
+    # prepare img to rsp:
+    path = os.path.abspath(os.path.dirname(__file__))
+    logger.info(f"Curr path is:{path}")
+    img_path="resource"
+    img_name=config.PROMPT_RECORD_FINISH_IMG
+    rsp_img_path = os.path.join(path,img_path,img_name)
+    abs_path = os.path.join(path,img_path)
+    imgfile =  complex_template.marked_record_suc(user_id,replaymsg,rsp_img_path,abs_path)
+
+    await context.bot.send_photo(chat_id=update.effective_chat.id, 
+                                     photo=imgfile,
+                                     caption="👏👏👏",
+                                     parse_mode=ParseMode.HTML)
+    os.remove(imgfile)
 
 
     
@@ -339,6 +526,8 @@ async def deal_user_start(user_id:str, chat_id:str, context:CustomContext):
     if userinfo:
         '''Add code for re-define the guider message'''
         logger.info(f"This user is members!")
+        if await deal_new_user(user_id,context):
+          return config.PROGRESS_LEVEL_IDT,0
     else:
        logger.info(f'Init userInfo and acctinfo with userid={user_id}')
        userinfo = BotUserInfo(tele_user_id=user_id,tele_chat_id=chat_id, reg_gmtdate=gmtdate,
@@ -348,14 +537,14 @@ async def deal_user_start(user_id:str, chat_id:str, context:CustomContext):
        user_buss_crud.create_user(db,user=userinfo, user_acct=userAcctBase)
     
        if await deal_new_user(user_id,context):
-          return config.PROGRESS_LEVEL_IDT
+          return config.PROGRESS_LEVEL_IDT,0
 
 
-    task_status_progress = deploy_user_curr_task(user_id=userinfo.tele_user_id,
+    task_status_progress,time_remain = deploy_user_curr_task(user_id=userinfo.tele_user_id,
                                               chat_id=chat_id, level=userinfo.level, gpu_level=userinfo.gpu_level,
                                               task_action=config.TASK_VOICE_UPLOAD)
     
-    return task_status_progress
+    return task_status_progress, time_remain
 
        
 
@@ -374,18 +563,19 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, gpu_level:str,task
        curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db, user_id,task_id)
        if curr_task_detail != None and  curr_task_detail.progress_status == config.PROGRESS_DEAILING:
            logger.info(f"Load curr task detail {curr_task_detail.task_id}-{curr_task_detail.progress_status}")
-         
-           #timebegin = config.load_datetime(curr_task_detail.gmt_modified) 
+           
            timebegin = curr_task_detail.gmt_modified
            timeend = datetime.now()
-           if (timeend-timebegin).seconds >config.cal_task_claim_time(level,task_id):
+           if (timeend-timebegin).seconds >config.cal_task_claim_time(gpu_level,task_id):
                user_buss_crud.deal_task_claim(db,user_id)
                progress_status = config.PROGRESS_WAIT_CUS_CLAIM
+               time_remain = 0
            else:
+               time_remain = config.cal_task_claim_time(gpu_level,task_id) - (timeend-timebegin).seconds
                progress_status = config.PROGRESS_DEAILING
-           return progress_status
+           return progress_status, time_remain
        if curr_task_detail != None and  curr_task_detail.progress_status ==config.PROGRESS_WAIT_CUS_CLAIM:
-           return config.PROGRESS_WAIT_CUS_CLAIM
+           return config.PROGRESS_WAIT_CUS_CLAIM, 0
        
        if curr_task_detail != None  and  curr_task_detail.progress_status == config.PROGRESS_FINISH:
            progress_status = curr_task_detail.progress_status
@@ -399,9 +589,10 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, gpu_level:str,task
        curr_task_detail_deployed_flag = user_buss_crud.create_user_curr_task_detail(db,curr_task_detail_new)
 
        if curr_task_detail_deployed_flag:
+           time_remain = config.cal_task_claim_time(gpu_level,task_id)
            logger.info(f"user_id:{user_id}-chat_id:{chat_id} deployed task success")
        else:
            logger.info(f"user_id:{user_id} - chat_id:{chat_id} has already in task progress")
-       return progress_status
+       return progress_status,time_remain
 
 

@@ -51,6 +51,27 @@ def invoke_acct_token(db:Session, user_id:str, tokens:str,user_claim_jnl:User_cl
     finally:
         db.close()
 
+def acct_update_deal(db:Session, user_id:str,tokens:str,user_claim_jnl:User_claim_jnl, user_info:BotUserInfo):
+    try:
+        user_acct_info = get_user_acct(db,user_id)
+        user_acct_info.tokens = str(int(user_acct_info.tokens)+int(tokens))
+
+        db.add(user_acct_info)
+        db.add(user_claim_jnl)
+        db.add(user_info)
+
+        db.commit()
+        db.refresh(user_acct_info)
+        db.refresh(user_claim_jnl)
+        db.refresh(user_info)
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"update user level info err:{str(e)}")
+    finally:
+        db.close()
+
+
 
 
 def create_user(db:Session, user:BotUserInfo, user_acct:BotUserAcctBase):

@@ -10,7 +10,7 @@ from comfyai import mixlab_endpoint
 from comfyai import wsserver_endpoint
 from comfyai import telegram_bot_endpoint
 from biz.media import parsewav
-from biz.botaction import start,callback_inline,voice_upload,show_cus_earn
+from biz.botaction import start,callback_inline,voice_upload,show_cus_upgrade
 from biz.tonwallet.config import TOKEN
 from loguru import logger
 import uvicorn
@@ -64,7 +64,7 @@ async def voice(update:Update, context:ContextTypes.DEFAULT_TYPE):
 
 
 start_handler = CommandHandler('start', start)
-earn_handler = CommandHandler('earn', show_cus_earn)
+earn_handler = CommandHandler('earn', show_cus_upgrade)
 
 set_right_handler = CommandHandler('p', set_right)
 unknown_handler = MessageHandler(filters.COMMAND, unknown)

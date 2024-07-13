@@ -34,31 +34,43 @@ PROGRESS_LEVEL_IDT = 'IDT'
 
 
 PANEL_IMG="<img src='./resource/univouce/univoice.png'/>"
-PROMPT_START="\nwelcome to Univoice's fifth-dimensional world. Here, you can store your voice and have your unique AI steward, which helps transform your voice into your exclusive fifth-dimensional space."+\
-"\n\nRecord your voice to earn points and rewards. Upgrade to get more recording opportunities and higher points."+\
-"\n\nDon't forget to invite your friends to join you so you can earn points faster."+\
-"\n\nWe look forward to you having a delightful journey in the world of voice!"
+PROMPT_START="\nDon't overlook your voice and the voices you hear. Let every voice generate value. Univoice is your Web3 bank of voice. Deposit your voice into your account and unlock unlimited creativity. Co-create voice value with friends , community and AI."+\
+"\n\n💎Farm $voice daily"+\
+"\n\n🎁Enjoy NFTs"+\
+"\n\n🚀Upgrade your voice storage duration and GPU efficiency to earn more"+\
+"\n\n🗣Let’s star VOICE-TO-EARN            ⬇️⬇️⬇️"
 
 
 PROMPT_GUIDE="Please say \"Hello\" to the world in any language  to start your journey." +\
 "\n\n<i>How to: Press the mic-phone button to capture and send your voice.</i>"
 
-PROMPT_USER_FIRST="Let's say some this to the AI,\nthen let it judge your level and privade the type of gpu your need "
+PROMPT_USER_FIRST="Thank you for embarking on this voice exploration journey. \
+            \nlet's conduct a voiceprint test to obtain your initial equipment and $VOICE \
+            \nClick the 🎤 in right corner  \
+            \nSpeak anything to the bot at least 3 seconds."
 
 
 PROMPT_RECORD_FINISH="Recording successful! Your fifth-dimensional space now has more voices asset preserved for you!"+\
-"\n\nPlease wait 6 hours to receive your points."
+"\n\nPlease wait {hours} hours to receive your points."
 
 
-PROMPT_WAIT_CALIMED="Dear, your voice energy is fully charged.!Please come and claim your points."+\
-"\n\nYour current voice duration level is 1st, with a maximum recording length of 5 seconds per entry."+\
-"\n\nYou have 3 remaining recording opportunities within the next 24 hours."
+PROMPT_WAIT_CALIMED="$VOICE in the account is available to claim now."
+PROMPT_HAS_CALIMED_1="$VOICE in the account has available to claim now. "
+PROMPT_HAS_CALIMED_2="You can continue depositing new voices."
 
+
+PROMPT_RECORD_FINISH_IMG = "record-complete.jpg"
+PROMPT_UPGRADE_SUCCESS="upgrade-success.jpg"
+PROMPT_NOTIFY_CLAIM_IMG="notify-claim.jpg"
+PROMPT_NOTIFY_CLAIMED_IMG="cliam-success.jpg"
 
 
 #########################################TASK########################################
 path = os.path.join(os.path.dirname(__file__),"conf","plan.json")
 TASK_INFO=json.load(open(path))
+
+path = os.path.join(os.path.dirname(__file__),"conf","gpu_level.json")
+GPU_LEVEL_INFO=json.load(open(path))
 
 def paramloader(paramstr:str):
     paramobj =json.loads(paramstr)
@@ -89,33 +101,25 @@ def get_rd_gpu_level() -> str:
     return str(random.randint(1,6))
 #Return Second
 def cal_task_claim_time(gpu_level:str, task_id:str):
-    #for test
-    return 10
 
-    if task_id == TASK_VOICE_UPLOAD and int(gpu_level)<5 :
-        return   (24/int(gpu_level))*3600
-    elif task_id == TASK_VOICE_UPLOAD and int(gpu_level)== 5:
-        return 4*3600
-    elif task_id == TASK_VOICE_UPLOAD and int(gpu_level) ==6:
-        return 2*3600
+    gpu_level_cfg:dict
+    gpu_level_cfg = GPU_LEVEL_INFO[gpu_level]
+
+    if task_id == TASK_VOICE_UPLOAD:
+       #return gpu_level_cfg["wait_h"] * 3600
+       #todo:only for test
+       return 120
     else:
-        return 10
+       return 10
 
 
-def cal_tokens(user_level:str, gpu_level:str,token_base:str):
-    i_token_base = int(token_base)
-    i_user_level = int(user_level)
-    i_gpu_level = int(gpu_level)
-    
-    if i_gpu_level <3 :
-        return str(i_token_base*user_level*5000*1)
-    elif i_gpu_level ==3:
-        return str(i_token_base*user_level*5000*1.5)
-    elif i_gpu_level == 4:
-        return str(i_token_base*i_user_level*5000*2)
-    elif i_gpu_level == 5:
-        return str(i_token_base*i_user_level*5000*2.5)
-    elif i_gpu_level == 6:
-        return str(i_token_base*i_user_level*5000*3)
-    else:
-        return '0'
+def cal_tokens(user_level:str, gpu_level:str,task_action:str):
+    task_plan:dict
+    task_plan = TASK_INFO[task_action][user_level]
+    i_token_base = int(task_plan["token"])
+
+    gpu_level_cfg:dict
+    gpu_level_cfg = GPU_LEVEL_INFO[gpu_level]
+
+    flatter = gpu_level_cfg["flatter"]
+    return str(i_token_base*flatter)
