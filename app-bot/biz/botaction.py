@@ -129,7 +129,7 @@ async def start(update: Update, context: CustomContext) -> None:
     img_name="TGbanner.jpg"
 
     with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
-        await context.bot.send_photo(chat_id=update.effective_user.id, 
+        await context.bot.send_photo(chat_id=update.effective_chat.id, 
                                      photo=imgfile,
                                      caption=prm_begin + config.PROMPT_START,
                                      reply_markup=InlineKeyboardMarkup(panel_btn),
