@@ -18,7 +18,7 @@ import os
 
 
 
-redis_conf = {'host': '54.144.89.247', 'port': 6379, 'db': 0,'passwd':'mixlab'}
+redis_conf = {'host': '54.209.157.83', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 queue = DelayQueue(redis_conf)
 bot = Bot(token=TOKEN)
 
