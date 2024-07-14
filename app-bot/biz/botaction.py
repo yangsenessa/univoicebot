@@ -154,7 +154,7 @@ async def start(update: Update, context: CustomContext) -> None:
         #                               text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
     if progress_status == config.PROGRESS_DEAILING:
         rsp_msg=f"There's  ⏰ {time_remain} seconds left until your next claim."
-        await context.bot.send_message(chat_id=update.effective_chat.id,
+        await context.bot.send_message(chat_id=update.effective_user.id,
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
     elif progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
         path = os.path.abspath(os.path.dirname(__file__))
@@ -204,19 +204,19 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
         await do_gpu_level_up(update, context)
 
 async def do_user_level_up(update:Update,context:CustomContext):
-    user_info = fet_user_info(update.effective_message.chat_id)
-    user_acct = user_buss_crud.get_user_acct(db,update.effective_message.chat_id)
+    user_info = fet_user_info(update.effective_user.id)
+    user_acct = user_buss_crud.get_user_acct(db,update.effective_user.id)
     balance_amount = int(user_acct.tokens) 
     user_level = int(user_info.level)
     task_info = config.TASK_INFO["VOICE-UPLOAD"]
 
     if user_level >= 12:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="You are on the top level.") 
+        await context.bot.send_message(chat_id=update.effective_user.id, text="You are on the top level.") 
         return
     else:
         user_level_next = str(user_level+1)
         if(balance_amount < task_info[user_level_next]["consume"]):
-            await context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, you haven't enough tokens.") 
+            await context.bot.send_message(chat_id=update.effective_user.id, text="Sorry, you haven't enough tokens.") 
             return
 
         user_info.level = user_level_next
@@ -243,18 +243,18 @@ async def do_user_level_up(update:Update,context:CustomContext):
 
 async def do_gpu_level_up(update:Update,context:CustomContext):
     user_info = fet_user_info(update.effective_message.chat_id)
-    user_acct = user_buss_crud.get_user_acct(db,update.effective_message.chat_id)
+    user_acct = user_buss_crud.get_user_acct(db,update.effective_user.id)
     balance_amount = int(user_acct.tokens) 
     gpu_level = int(user_info.gpu_level)
     gpu_info = config.GPU_LEVEL_INFO
 
     if gpu_level >=6:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="You have owned the top gpu.") 
+        await context.bot.send_message(chat_id=update.effective_user.id, text="You have owned the top gpu.") 
         return
     else:
         gpu_level_next = str(gpu_level+1)
         if(balance_amount < gpu_info[gpu_level_next]["consume"]):
-            await context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, you haven't enough tokens.") 
+            await context.bot.send_message(chat_id=update.effective_user.id, text="Sorry, you haven't enough tokens.") 
             return
        
         user_info.gpu_level = gpu_level_next
@@ -274,7 +274,7 @@ async def do_gpu_level_up(update:Update,context:CustomContext):
         rsp_msg=f"Upgrade successful! \
             \n Your GPU is at {gpu_level_next} level now .  \
             \n Enhance the value of your voice."
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=rsp_msg) 
+        await context.bot.send_message(chat_id=update.effective_user.id, text=rsp_msg) 
     return
 
 
@@ -285,7 +285,7 @@ async def do_gpu_level_up(update:Update,context:CustomContext):
 #https://t.me/+i7Idmn6MhVNiNmE1
 async def join_chat_group(update:Update, context:CustomContext):
     replay_msg="https://t.me/+i7Idmn6MhVNiNmE1"
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=replay_msg) 
+    await context.bot.send_message(chat_id=update.effective_user.id, text=replay_msg) 
     
     
 
@@ -344,7 +344,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
     abs_path = os.path.join(path,img_path)
     imgfile =  complex_template.marked_record_update(update.effective_chat.id,rsp_msg,rsp_img_path,abs_path)
 
-    await context.bot.send_photo(chat_id=update.effective_chat.id, 
+    await context.bot.send_photo(chat_id=update.effective_user.id, 
                                      photo=imgfile,
                                      caption="choose to upgrade",
                                      reply_markup=InlineKeyboardMarkup.from_row(upgradekeyboardButton_list),
@@ -358,13 +358,13 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
 
 
 async def sharelink_task(update:Update, context:CustomContext) -> None:
-    chat_id = update.effective_chat.id
+    chat_id = update.effective_user.id
     replay_msg = f"https://t.me/univoice2bot?start={update.effective_user.id}"
     await context.bot.send_message(chat_id=chat_id, text=replay_msg)
 
 async def cust_claim_replay (update:Update, context:CustomContext) -> None:
 
-    chat_id = update.effective_chat.id
+    chat_id = update.effective_user.id
     user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail_can_be_claimed(db,update.effective_user.id)
     if user_curr_task_detail == None:
         await context.bot.send_message(chat_id=chat_id,text="Please waiting some minutes then retry.",parse_mode=ParseMode.HTML)
@@ -387,7 +387,7 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
 
 async def show_speak_reback(update:Update, context:CustomContext) -> None:
     replaymsg = config.PROGRESS_FINISH
-    await context.bot.send_message(chat_id=update.effective_chat.id,
+    await context.bot.send_message(chat_id=update.effective_user.id,
                                    text=replaymsg,parse_mode=ParseMode.HTML)
 
 async def voice_judge(update:Update,context:CustomContext):
@@ -398,7 +398,7 @@ async def voice_judge(update:Update,context:CustomContext):
         voice_file = await update.effective_message.voice.get_file()
         time_duration = update.effective_message.voice.duration
         if voice_file == None or time_duration <3:
-            await context.bot.send_message(chat_id=update.effective_chat.id,
+            await context.bot.send_message(chat_id=update.effective_user.id,
                                    text="Please let us hear you ,at least 3 sec.",parse_mode=ParseMode.HTML)
             return
         user_info.level = config.get_rd_user_level()
@@ -412,7 +412,7 @@ async def voice_judge(update:Update,context:CustomContext):
         \n Click 'Invite frens to earn more."
 
 
-        await context.bot.send_message(chat_id=update.effective_chat.id,
+        await context.bot.send_message(chat_id=update.effective_user.id,
                                        reply_markup=InlineKeyboardMarkup(panel_btn),
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
         return True
@@ -447,7 +447,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
 
     if not task_flag:
         logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
-        await context.bot.send_message(chat_id=update.effective_chat.id,
+        await context.bot.send_message(chat_id=update.effective_user.id,
                                    text="Univoice is busing now,please wait some times and retry!")
         return
     logger.info(f"user_id={user_id} process task")
@@ -482,7 +482,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     abs_path = os.path.join(path,img_path)
     imgfile =  complex_template.marked_record_suc(user_id,replaymsg,rsp_img_path,abs_path)
 
-    await context.bot.send_photo(chat_id=update.effective_chat.id, 
+    await context.bot.send_photo(chat_id=update.effective_user.id, 
                                      photo=imgfile,
                                      caption="👏👏👏",
                                      parse_mode=ParseMode.HTML)
@@ -490,7 +490,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
 
 
     
-def match_user_task(action:str,level:str, chat_id:str):
+def match_user_task(action:str,level:str):
     task_rule:dict
     task_rule = TASK_INFO[action]
     if level in task_rule.keys():
