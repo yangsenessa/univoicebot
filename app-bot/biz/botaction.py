@@ -49,7 +49,7 @@ claimedKeyboardButton_list=list()
 panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
              [InlineKeyboardButton(text="👝 balance",callback_data="opr-balance"),InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")],
              [InlineKeyboardButton(text="🌟 earn",callback_data="opr-earn"),InlineKeyboardButton(text="💸claim",callback_data="opr-claim")],
-             [InlineKeyboardButton(text="✨ Join Community",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
+             [InlineKeyboardButton(text="✨ Join Group",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
              ]
 
 claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
@@ -209,6 +209,8 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
         await do_user_level_up(update, context)
     elif (commandhandlemsg == "opr-gpu-upgrade"):
         await do_gpu_level_up(update, context)
+    elif (commandhandlemsg == "opr-earn"):
+        await gener_earn_rule(update, context)
 
 async def do_user_level_up(update:Update,context:CustomContext):
     user_info = fet_user_info(update.effective_user.id)
@@ -303,7 +305,7 @@ async def show_cus_balance(update:Update, context:CustomContext) -> None:
     gpu_level = user_info.gpu_level
     replay_msg=f"Your voice storage duration are currently at **{user_level} level**. \
      \n                                  GPU efficiency **{gpu_level} level**\
-    \n                                  Your balanc is :{user_acct_base.tokens} 💰 "
+    \n                                  Your balance is :{user_acct_base.tokens} 💰 "
     await context.bot.send_message(chat_id=user_acct_base.user_id, text=replay_msg)
 
 
@@ -362,8 +364,8 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
 async def route_privacy(update:Update, context:CustomContext):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
-    replay_msg=f"Your travel would be privacy,use this link to your own bot:\n   \
-    https://t.me/univoice2bot"
+    replay_msg=f"Your journey would be privacy,use this link to your own bot:\n   \
+    https://t.me/univoice2bot?start"
 
     await context.bot.sendMessage(chat_id=chat_id,text=replay_msg,parse_mode=ParseMode.HTML)
 
@@ -380,17 +382,22 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
     chat_id = update.effective_user.id
     user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail_can_be_claimed(db,update.effective_user.id)
     if user_curr_task_detail == None:
-        await context.bot.send_message(chat_id=chat_id,text="Please waiting some minutes then retry.",parse_mode=ParseMode.HTML)
+        await context.bot.send_message(chat_id=chat_id,text="Please wait a few minutes then retry.",parse_mode=ParseMode.HTML)
         return
 
-    user_buss_crud.deal_custom_claim(db,update.effective_user.id)
+    flag, trx_val, balance_amt= user_buss_crud.deal_custom_claim(db,update.effective_user.id)
+    if flag == False:
+        await context.bot.send_message(chat_id=chat_id,text="Please retry after a few minutes...",
+                                       parse_mode=ParseMode.HTML)
+        return
     path = os.path.abspath(os.path.dirname(__file__))
     logger.info(f"Curr path is:{path}")
     img_path="resource"
     img_name=config.PROMPT_NOTIFY_CLAIMED_IMG
     rsp_img_path = os.path.join(path,img_path,img_name)
     abs_path = os.path.join(path,img_path)
-    rsp_marked=[config.PROMPT_HAS_CALIMED_1, config.PROMPT_HAS_CALIMED_2]
+    res_p1=f"${trx_val} " +config.PROMPT_HAS_CALIMED_1
+    rsp_marked=[res_p1, config.PROMPT_HAS_CALIMED_2]
     img_file = complex_template.marked_claimed(chat_id,rsp_marked,rsp_img_path,abs_path)
     await context.bot.send_photo(chat_id=chat_id,
                                  photo=img_file,                                            
@@ -413,16 +420,34 @@ async def voice_judge(update:Update,context:CustomContext):
         if voice_file == None or time_duration <3:
             await context.bot.send_message(chat_id=update.effective_user.id,
                                    text="Please let us hear you ,at least 3 sec.",parse_mode=ParseMode.HTML)
-            return
+            return False
         user_info.level = config.get_rd_user_level()
         user_info.gpu_level = config.get_rd_gpu_level()
-        user_buss_crud.update_user_info(db,user_info)
-        logger.info("Update user level success!")
+
+        #send base tokens
+        token_base = config.TASK_INFO['VOICE-UPLOAD'][user_info.level]['token']
+        flatter = config.GPU_LEVEL_INFO[user_info.gpu_level]['flatter']
+        token_fee = int(float(token_base) * float(flatter))
+        user_claim_jnl = User_claim_jnl(
+            jnl_no = str (uuid.uuid4()),
+            user_id = update.effective_user.id,
+            task_id = "NEWER",
+            task_name = "NEWER",
+            tokens = token_fee,
+            gmt_biz_create=config.get_datetime(),
+            gmt_biz_finish = config.get_datetime(),
+            status = "FINISH"
+        )
         rsp_msg = f"Congratulation ! \n Your voice storage duration are currently at {user_info.level} level, GPU efficiency {user_info.gpu_level} level\
-        \n$VOICE has been credited to your account. CHECK it in your 'balance' \
-        \n Click 'play' to start your journey. \
-        \n Click 'earn' to upgrades \
-        \n Click 'Invite frens to earn more."
+        \n${str(token_fee)} has been credited to your account. CHECK it in your '👝 balance' \
+        \n Click '🗣 play' to start your journey. \
+        \n Click '🚀upgrade' to upgrades \
+        \n Click '👏 Invite Fren'  to earn more."
+        user_buss_crud.acct_update_deal(db, user_info.tele_user_id,
+                                        str(token_fee),user_claim_jnl,user_info)
+        logger.info("Update user level success!")
+
+        
 
 
         await context.bot.send_message(chat_id=update.effective_user.id,
@@ -437,6 +462,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
    
     if await voice_judge(update, context):
         logger.info(f"{update.effective_user.id} get levels...")   
+        
         return
 
     user_id = update.effective_user.id
@@ -461,7 +487,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     if not task_flag:
         logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
         await context.bot.send_message(chat_id=update.effective_user.id,
-                                   text="Univoice is busing now,please wait some times and retry!")
+                                   text="Univoice is busing now,please wait a few minutes and retry!")
         return
     logger.info(f"user_id={user_id} process task")
 
@@ -607,5 +633,41 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, gpu_level:str,task
        else:
            logger.info(f"user_id:{user_id} - chat_id:{chat_id} has already in task progress")
        return progress_status,time_remain
+
+async def gener_earn_rule(update:Update, context:CustomContext):
+    task_info:dict
+    task_info = config.TASK_INFO['VOICE-UPLOAD']
+    gpu_info:dict
+    gpu_info = config.GPU_LEVEL_INFO
+    
+    content_topic1 ="At differ levels,you can \n"
+
+    for key in task_info.keys():
+        duration = task_info[key]["duration"]
+        tokens = task_info[key]["duration"]
+        consume = task_info[key]["consume"]
+        item=f"Level {key}:voice-lenth:{duration} can earn ${tokens} each time \n  \
+            you can pay ${consume} to reach it \n"
+        content_topic1 = content_topic1 + item 
+    
+    content_topic2 = "\n\n"+"With doffer gpu,you can \n"
+
+    for key in gpu_info.keys():
+        times = 24/gpu_info[key]['wait_h']
+        mutiples = gpu_info[key]['flatter']
+        consume = gpu_info[key]['consume']
+        item=f"gpu-level {key}: you can play {times} one day. \n   \
+            Specially, you earned $VOICES will be mutipled by {mutiples} \n   \
+            you can pay ${consume} for own it \n"
+        
+        content_topic2=content_topic2+item
+ 
+    await context.bot.send_message(chat_id=update.effective_user.id,
+                                   reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")]]),     
+                                   text=content_topic1+content_topic2,parse_mode=ParseMode.HTML)
+
+
+
+
 
 

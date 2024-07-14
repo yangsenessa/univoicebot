@@ -46,7 +46,7 @@ PROMPT_GUIDE="Please say \"Hello\" to the world in any language  to start your j
 
 PROMPT_USER_FIRST="Thank you for embarking on this voice exploration journey. \
             \nlet's conduct a voiceprint test to obtain your initial equipment and $VOICE \
-            \nClick the 🎤 in right corner  \
+            \nClick the button of 'mic' in right corner to upload your voice  \
             \nSpeak anything to the bot at least 3 seconds."
 
 
@@ -55,7 +55,7 @@ PROMPT_RECORD_FINISH="Recording successful! Your fifth-dimensional space now has
 
 
 PROMPT_WAIT_CALIMED="$VOICE in the account is available to claim now."
-PROMPT_HAS_CALIMED_1="$VOICE in the account has available to claim now. "
+PROMPT_HAS_CALIMED_1=" in the account has available to claim now. "
 PROMPT_HAS_CALIMED_2="You can continue depositing new voices."
 
 

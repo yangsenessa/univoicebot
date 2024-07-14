@@ -43,6 +43,7 @@ def do_pop():
               img_name=PROMPT_NOTIFY_CLAIM_IMG
               rsp_img_path = os.path.join(path,img_path,img_name)
               abs_path = os.path.join(path,img_path)
+              
             
               
               imgfile =  complex_template.marked_claim_notify(user_id,[PROMPT_WAIT_CALIMED],rsp_img_path,abs_path)
