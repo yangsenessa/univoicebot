@@ -187,6 +187,7 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
     if chat_id != user_id:
         logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
         await route_privacy(update, context)
+        return
 
     if(commandhandlemsg == "voice-speaking"):
         await show_speak_reback(update, context)
