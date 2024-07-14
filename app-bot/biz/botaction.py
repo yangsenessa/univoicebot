@@ -181,6 +181,12 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
 
     commandhandlemsg = update.callback_query.data
     logger.info(f"Callback command:{commandhandlemsg}")
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    if chat_id != user_id:
+        logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
+        await route_privacy(update, context)
 
     if(commandhandlemsg == "voice-speaking"):
         await show_speak_reback(update, context)
@@ -352,8 +358,14 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
     os.remove(imgfile)
 
 
+async def route_privacy(update:Update, context:CustomContext):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    replay_msg=f"Your travel would be privacy,use this link to your own bot:\n   \
+    https://t.me/univoice2bot"
 
-    
+    await context.bot.sendMessage(chat_id=chat_id,user_id=user_id,text=replay_msg,parse_mode=ParseMode.HTML)
+
 
 
 
