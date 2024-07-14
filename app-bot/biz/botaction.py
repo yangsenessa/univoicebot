@@ -129,7 +129,7 @@ async def start(update: Update, context: CustomContext) -> None:
     img_name="TGbanner.jpg"
 
     with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
-        await context.bot.send_photo(chat_id=update.effective_user.id, 
+        await context.bot.send_photo(chat_id=update.effective_chat.id, 
                                      photo=imgfile,
                                      caption=prm_begin + config.PROMPT_START,
                                      reply_markup=InlineKeyboardMarkup(panel_btn),
@@ -364,7 +364,7 @@ async def route_privacy(update:Update, context:CustomContext):
     replay_msg=f"Your travel would be privacy,use this link to your own bot:\n   \
     https://t.me/univoice2bot"
 
-    await context.bot.sendMessage(chat_id=chat_id,user_id=user_id,text=replay_msg,parse_mode=ParseMode.HTML)
+    await context.bot.sendMessage(chat_id=chat_id,text=replay_msg,parse_mode=ParseMode.HTML)
 
 
 
