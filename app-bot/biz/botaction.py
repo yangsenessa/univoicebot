@@ -396,7 +396,7 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
     img_name=config.PROMPT_NOTIFY_CLAIMED_IMG
     rsp_img_path = os.path.join(path,img_path,img_name)
     abs_path = os.path.join(path,img_path)
-    res_p1=f"${trx_val} " +config.PROMPT_HAS_CALIMED_1
+    res_p1=f"${trx_val}" +config.PROMPT_HAS_CALIMED_1
     rsp_marked=[res_p1, config.PROMPT_HAS_CALIMED_2]
     img_file = complex_template.marked_claimed(chat_id,rsp_marked,rsp_img_path,abs_path)
     await context.bot.send_photo(chat_id=chat_id,
