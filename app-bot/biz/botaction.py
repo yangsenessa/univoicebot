@@ -129,7 +129,7 @@ async def start(update: Update, context: CustomContext) -> None:
     img_name="TGbanner.jpg"
 
     with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
-        await context.bot.send_photo(chat_id=update.effective_chat.id, 
+        await context.bot.send_photo(chat_id=update.effective_user.id, 
                                      photo=imgfile,
                                      caption=prm_begin + config.PROMPT_START,
                                      reply_markup=InlineKeyboardMarkup(panel_btn),
@@ -238,7 +238,7 @@ async def do_user_level_up(update:Update,context:CustomContext):
         rsp_msg=f"Upgrade successful! \
             \n Your VSD is now at {user_level_next} level .  \
             \n Enhance the value of your voice."
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=rsp_msg) 
+        await context.bot.send_message(chat_id=update.effective_user.id, text=rsp_msg) 
     return
 
 async def do_gpu_level_up(update:Update,context:CustomContext):
@@ -342,7 +342,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
     img_name=config.PROMPT_UPGRADE_SUCCESS
     rsp_img_path = os.path.join(path,img_path,img_name)
     abs_path = os.path.join(path,img_path)
-    imgfile =  complex_template.marked_record_update(update.effective_chat.id,rsp_msg,rsp_img_path,abs_path)
+    imgfile =  complex_template.marked_record_update(update.effective_user.id,rsp_msg,rsp_img_path,abs_path)
 
     await context.bot.send_photo(chat_id=update.effective_user.id, 
                                      photo=imgfile,
@@ -358,7 +358,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
 
 
 async def sharelink_task(update:Update, context:CustomContext) -> None:
-    chat_id = update.effective_user.id
+    chat_id = update.effective_chat.id
     replay_msg = f"https://t.me/univoice2bot?start={update.effective_user.id}"
     await context.bot.send_message(chat_id=chat_id, text=replay_msg)
 
@@ -423,7 +423,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     time_duration = update.effective_message.voice.duration
    
     if await voice_judge(update, context):
-        logger.info(f"{update.effective_chat.id} get levels...")   
+        logger.info(f"{update.effective_user.id} get levels...")   
         return
 
     user_id = update.effective_user.id
