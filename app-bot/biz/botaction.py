@@ -551,7 +551,7 @@ async def deal_user_start(user_id:str, chat_id:str, context:CustomContext):
 def deploy_user_curr_task(user_id:str, chat_id:str,level:str, gpu_level:str,task_action:str):
        
        logger.info(f"Now deploy the task of :{task_action}")
-       task_info = match_user_task(action=task_action,level=level, chat_id=chat_id)
+       task_info = match_user_task(action=task_action,level=level)
        if not task_info:
            logger.error(f"user_id={user_id} - chat_id={chat_id} can't match any tasks!")
            return
