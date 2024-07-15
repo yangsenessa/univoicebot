@@ -644,7 +644,7 @@ async def gener_earn_rule(update:Update, context:CustomContext):
 
     for key in task_info.keys():
         duration = task_info[key]["duration"]
-        tokens = task_info[key]["duration"]
+        tokens = task_info[key]["token"]
         consume = task_info[key]["consume"]
         item=f"Level {key}:voice-lenth:{duration} can earn ${tokens} each time \n  \
             you can pay ${consume} to reach it \n"
