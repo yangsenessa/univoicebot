@@ -41,8 +41,8 @@ PROMPT_START="\nDon't overlook your voice and the voices you hear. Let every voi
 "\n\n🗣Let’s star VOICE-TO-EARN            ⬇️⬇️⬇️"
 
 
-PROMPT_GUIDE="Please say \"Hello\" to the world in any language  to start your journey." +\
-"\n\n<i>How to: Press the mic-phone button to capture and send your voice.</i>"
+PROMPT_GUIDE="Please upload your voice: 🗣" +\
+"\n\n<i>How to:\bn Press the mic-phone button 🎙 to capture and send your voice.</i>"
 
 PROMPT_USER_FIRST="Thank you for embarking on this voice exploration journey. \
             \nlet's conduct a voiceprint test to obtain your initial equipment and $VOICE \

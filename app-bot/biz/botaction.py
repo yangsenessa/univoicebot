@@ -170,8 +170,12 @@ async def start(update: Update, context: CustomContext) -> None:
                                 reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
                                 parse_mode=ParseMode.HTML)
         os.remove(imgfile)   
-    elif progress_status == config.PROGRESS_LEVEL_IDT:
+    elif progress_status == config.PROGRESS_LEVEL_IDT \
+           or progress_status == config.PROGRESS_INIT  \
+           or progress_status == config.PROGRESS_FINISH:
         logger.info("New member need test voice")
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
        
 
 
@@ -303,9 +307,9 @@ async def show_cus_balance(update:Update, context:CustomContext) -> None:
     user_info = fet_user_info(update.effective_user.id)
     user_level = user_info.level
     gpu_level = user_info.gpu_level
-    replay_msg=f"Your voice storage duration are currently at **{user_level} level**. \
-     \n                                  GPU efficiency **{gpu_level} level**\
-    \n                                  Your balance is :{user_acct_base.tokens} 💰 "
+    replay_msg=f"Your voice storage duration are currently at **{user_level} level**.\
+    \n\nGPU efficiency **{gpu_level} level**\
+    \n\nYour balance is :{user_acct_base.tokens} 💰 "
     await context.bot.send_message(chat_id=user_acct_base.user_id, text=replay_msg)
 
 
@@ -421,8 +425,19 @@ async def voice_judge(update:Update,context:CustomContext):
             await context.bot.send_message(chat_id=update.effective_user.id,
                                    text="Please let us hear you ,at least 3 sec.",parse_mode=ParseMode.HTML)
             return False
-        user_info.level = config.get_rd_user_level()
-        user_info.gpu_level = config.get_rd_gpu_level()
+        
+        radom_level =int(config.get_rd_user_level()) 
+        radom_gpu =  int(config.get_rd_gpu_level())
+
+        if radom_level <=2 :
+            radom_level += 2
+        
+        if radom_gpu <=2 :
+            radom_gpu += 2
+
+
+        user_info.level = str(radom_level) 
+        user_info.gpu_level = str(radom_gpu) 
 
         #send base tokens
         token_base = config.TASK_INFO['VOICE-UPLOAD'][user_info.level]['token']
@@ -510,7 +525,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     queue.push(user_id,task_sec= int(time.time())+config.cal_task_claim_time(gpu_level,task_id))
     
     hours = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
-    replaymsg = f"Please wait {hours} hours before \"clain \"."
+    replaymsg = f"Please wait {hours} hours before \"claim\"."
 
     # prepare img to rsp:
     path = os.path.abspath(os.path.dirname(__file__))
@@ -538,6 +553,11 @@ def match_user_task(action:str,level:str):
     if "ALL" in task_rule.keys():
         return task_rule["ALL"]
     return None
+
+def match_gpu_info(level:str):
+    gpu_info:dict
+    gpu_info = config.GPU_LEVEL_INFO[level]
+    return gpu_info
 
 
 
@@ -591,11 +611,15 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, gpu_level:str,task
        
        logger.info(f"Now deploy the task of :{task_action}")
        task_info = match_user_task(action=task_action,level=level)
-       if not task_info:
+       gpu_info = match_gpu_info(gpu_level)
+       if not task_info or not gpu_info:
            logger.error(f"user_id={user_id} - chat_id={chat_id} can't match any tasks!")
            return
        task_id = task_action
-       base_reward = task_info["token"]
+       base_reward = float(task_info["token"])
+       flatter = float(gpu_info["flatter"])
+
+       reward_amt = str(int(base_reward * flatter)) 
        '''If task has finished ,delete it and rebuild it'''
        curr_task_detail:UserCurrTaskDetail
        progress_status = config.PROGRESS_INIT
@@ -622,7 +646,7 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, gpu_level:str,task
            user_buss_crud.remove_curr_task_detail(db,curr_task_detail)
 
        curr_task_detail_new = UserCurrTaskDetail(user_id=user_id, chat_id=chat_id,task_id=task_id,
-                                            token_amount=base_reward,user_level=level,gpu_level=gpu_level,
+                                            token_amount=reward_amt,user_level=level,gpu_level=gpu_level,
                                             progress_status= config.PROGRESS_INIT, gmt_create=config.get_datetime(),
                                             gmt_modified=config.get_datetime())
        curr_task_detail_deployed_flag = user_buss_crud.create_user_curr_task_detail(db,curr_task_detail_new)
@@ -640,29 +664,28 @@ async def gener_earn_rule(update:Update, context:CustomContext):
     gpu_info:dict
     gpu_info = config.GPU_LEVEL_INFO
     
-    content_topic1 ="At differ levels,you can \n"
+    content_topic1 ="VOICE STORE DURATION UPDATE \nLevel     VSD    $VOICE \n"
 
     for key in task_info.keys():
         duration = task_info[key]["duration"]
         tokens = task_info[key]["token"]
         consume = task_info[key]["consume"]
-        item=f"Level {key}:voice-lenth:{duration} can earn ${tokens} each time \n  "
+        item=f" {key}             {duration}         {tokens} \n"
         content_topic1 = content_topic1 + item 
     
-    content_topic2 = "\n\n"+"With doffer gpu,you can \n"
+    content_split ="-----------------------------------------------\n"
+    content_topic2 = "\n\n"+"GPU \nLevel（GPU）	     Wait Time	      FLATTER \n"
 
     for key in gpu_info.keys():
         times = int(24/gpu_info[key]['wait_h'])
-        mutiples = gpu_info[key]['flatter']
-        consume = gpu_info[key]['consume']
-        item=f"gpu-level {key}: you can play {times} one day. \n   \
-            Specially, you earned $VOICES will be mutipled by {mutiples} \n   "
+        flatter = gpu_info[key]['flatter']
+        item=f"  {key}                               {times}                       {flatter}\n"
         
         content_topic2=content_topic2+item
  
     await context.bot.send_message(chat_id=update.effective_user.id,
                                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")]]),     
-                                   text=content_topic1+content_topic2,parse_mode=ParseMode.HTML)
+                                   text=content_topic1+content_split+content_topic2,parse_mode=ParseMode.HTML)
 
 
 
