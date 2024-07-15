@@ -646,19 +646,17 @@ async def gener_earn_rule(update:Update, context:CustomContext):
         duration = task_info[key]["duration"]
         tokens = task_info[key]["token"]
         consume = task_info[key]["consume"]
-        item=f"Level {key}:voice-lenth:{duration} can earn ${tokens} each time \n  \
-            you can pay ${consume} to reach it \n"
+        item=f"Level {key}:voice-lenth:{duration} can earn ${tokens} each time \n  "
         content_topic1 = content_topic1 + item 
     
     content_topic2 = "\n\n"+"With doffer gpu,you can \n"
 
     for key in gpu_info.keys():
-        times = 24/gpu_info[key]['wait_h']
+        times = int(24/gpu_info[key]['wait_h'])
         mutiples = gpu_info[key]['flatter']
         consume = gpu_info[key]['consume']
         item=f"gpu-level {key}: you can play {times} one day. \n   \
-            Specially, you earned $VOICES will be mutipled by {mutiples} \n   \
-            you can pay ${consume} for own it \n"
+            Specially, you earned $VOICES will be mutipled by {mutiples} \n   "
         
         content_topic2=content_topic2+item
  
