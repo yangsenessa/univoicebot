@@ -38,7 +38,7 @@ PROMPT_START="\nDon't overlook your voice and the voices you hear. Let every voi
 "\n\n💎Farm $voice daily"+\
 "\n\n🎁Enjoy NFTs"+\
 "\n\n🚀Upgrade your voice storage duration and GPU efficiency to earn more"+\
-"\n\n🗣Let’s star VOICE-TO-EARN            ⬇️⬇️⬇️"
+"\n\n🗣Let’s start VOICE-TO-EARN        ⬇️⬇️⬇️"
 
 
 PROMPT_GUIDE="Please upload your voice: 🗣" +\

@@ -299,8 +299,7 @@ async def do_gpu_level_up(update:Update,context:CustomContext):
 async def join_chat_group(update:Update, context:CustomContext):
     replay_msg="https://t.me/+i7Idmn6MhVNiNmE1"
     await context.bot.send_message(chat_id=update.effective_user.id, text=replay_msg) 
-    
-    
+       
 
 async def show_cus_balance(update:Update, context:CustomContext) -> None:
     user_acct_base = user_buss_crud.get_user_acct(db,update.effective_user.id)
