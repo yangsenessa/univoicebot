@@ -52,12 +52,12 @@
         },
         "11":{
             "duration":55,
-            "token":60000,
+            "token":55000,
             "consume":1200000
         },
         "12":{
-            "duration":0,
-            "token":65000,
+            "duration":60,
+            "token":60000,
             "consume":1500000
         }
     },

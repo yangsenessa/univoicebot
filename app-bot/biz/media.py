@@ -61,7 +61,7 @@ async def save_voice( voice_file:File):
          logger.info("Upload successful")
          logger.info(f"Output stdout:{result.stdout}")
          logger.info(f"Output stderr:{result.stderr}")
-         os.remove(tmp_ogg_file.name)
+         #os.remove(tmp_ogg_file.name)
          match = re.search(r'cid ([a-zA-Z0-9]+)', result.stderr)
          if match:
              cid = match.group(1)

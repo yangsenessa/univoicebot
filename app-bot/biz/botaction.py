@@ -676,7 +676,7 @@ async def gener_earn_rule(update:Update, context:CustomContext):
     content_topic2 = "\n\n"+"GPU \nLevel（GPU）	     Wait Time	      FLATTER \n"
 
     for key in gpu_info.keys():
-        times = int(24/gpu_info[key]['wait_h'])
+        times = gpu_info[key]['wait_h']
         flatter = gpu_info[key]['flatter']
         item=f"  {key}                               {times}                       {flatter}\n"
         
