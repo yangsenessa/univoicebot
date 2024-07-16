@@ -175,7 +175,6 @@ async def start(update: Update, context: CustomContext) -> None:
     elif progress_status == config.PROGRESS_LEVEL_IDT \
            or progress_status == config.PROGRESS_INIT  \
            or progress_status == config.PROGRESS_FINISH:
-        logger.info("New member need test voice")
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
        
