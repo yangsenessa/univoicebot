@@ -589,7 +589,7 @@ async def deal_user_start(user_id:str, chat_id:str, context:CustomContext):
     else:
        logger.info(f'Init userInfo and acctinfo with userid={user_id}')
        userinfo = BotUserInfo(tele_user_id=user_id,tele_chat_id=chat_id, reg_gmtdate=gmtdate,
-                              level=0,gpu_level=0,
+                              level='0',gpu_level='0',
                               source="O")
        userAcctBase = BotUserAcctBase(user_id=user_id, biz_id='0', tokens='0')
        user_buss_crud.create_user(db,user=userinfo, user_acct=userAcctBase)
@@ -655,6 +655,9 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, gpu_level:str,task
            logger.info(f"user_id:{user_id}-chat_id:{chat_id} deployed task success")
        else:
            logger.info(f"user_id:{user_id} - chat_id:{chat_id} has already in task progress")
+
+       if not time_remain:
+           time_remain = 0
        return progress_status,time_remain
 
 async def gener_earn_rule(update:Update, context:CustomContext):
