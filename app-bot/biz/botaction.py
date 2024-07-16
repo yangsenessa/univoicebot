@@ -52,6 +52,8 @@ panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
              [InlineKeyboardButton(text="✨ Join Group",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
              ]
 
+cliamed_btn=[[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")]]
+
 claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
 
 upgradekeyboardButton_list=list()
@@ -299,7 +301,7 @@ async def do_gpu_level_up(update:Update,context:CustomContext):
 async def join_chat_group(update:Update, context:CustomContext):
     replay_msg="https://t.me/+i7Idmn6MhVNiNmE1"
     await context.bot.send_message(chat_id=update.effective_user.id, text=replay_msg) 
-       
+
 
 async def show_cus_balance(update:Update, context:CustomContext) -> None:
     user_acct_base = user_buss_crud.get_user_acct(db,update.effective_user.id)
@@ -319,7 +321,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
 
     task_info = config.TASK_INFO['VOICE-UPLOAD']
 
-    tp_1="The current VSD is at {user_level} level."
+    tp_1=f"The current VSD is at {user_level} level."
 
 
     next_user_level = int(user_level) +1
@@ -343,9 +345,10 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
         tokens = config.GPU_LEVEL_INFO[gpu_level]["consume"]
         flatter = config.GPU_LEVEL_INFO[gpu_level]["flatter"]
         wait_h = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
-        tp_5=f"Use $VOICE {tokens} to upgrade to {next_gpu_level} level."
-        tp_6=f"Wait {wait_h} hours to claim and $VOICE * {flatter} each time"
-    rsp_msg = [tp_1,tp_2,tp_3,tp_4,tp_5,tp_6]
+        tp_5=f"Use $ to upgrade to {next_gpu_level} level."
+        tp_6=f"Wait {wait_h} hours to claim"
+        tp_7 =f"and ${tokens}*{flatter} each time"
+    rsp_msg = [tp_1,tp_2,tp_3,tp_4,tp_5,tp_6,tp_7]
 
      # prepare img to rsp:
     path = os.path.abspath(os.path.dirname(__file__))
@@ -400,11 +403,11 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
     rsp_img_path = os.path.join(path,img_path,img_name)
     abs_path = os.path.join(path,img_path)
     res_p1=f"${trx_val}" +config.PROMPT_HAS_CALIMED_1
-    rsp_marked=[res_p1, config.PROMPT_HAS_CALIMED_2]
+    rsp_marked=[res_p1, config.PROMPT_HAS_CALIMED_2,config.PROMPT_HAS_CAILMED_3]
     img_file = complex_template.marked_claimed(chat_id,rsp_marked,rsp_img_path,abs_path)
     await context.bot.send_photo(chat_id=chat_id,
                                  photo=img_file,                                            
-                                 reply_markup=InlineKeyboardMarkup(panel_btn),
+                                 reply_markup=InlineKeyboardMarkup(cliamed_btn),
                                  parse_mode=ParseMode.HTML)
 
 
@@ -414,10 +417,11 @@ async def show_speak_reback(update:Update, context:CustomContext) -> None:
                                    text=replaymsg,parse_mode=ParseMode.HTML)
 
 async def voice_judge(update:Update,context:CustomContext):
-    logger.info("Assgin user level and gpu level")
    
     user_info = user_buss_crud.get_user(db,update.effective_user.id)
     if user_info is not None and user_info.level == '0' and user_info.gpu_level =='0':
+        logger.info("Assgin user level and gpu level")
+
         voice_file = await update.effective_message.voice.get_file()
         time_duration = update.effective_message.voice.duration
         if voice_file == None or time_duration <3:
@@ -489,7 +493,6 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
 
     task_details = user_buss_crud.fetch_user_curr_tase_detail_status(db,user_id,config.PROGRESS_INIT)
     for task_detail in task_details:
-        
 
         if task_detail.task_id == config.TASK_VOICE_UPLOAD :
             cid = await media.save_voice(voice_file)
@@ -501,7 +504,8 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     if not task_flag:
         logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
         await context.bot.send_message(chat_id=update.effective_user.id,
-                                   text="Univoice is busing now,please wait a few minutes and retry!")
+                                   text="Please press the play button first ⬇️⬇️⬇️",
+                                   reply_markup=InlineKeyboardMarkup(cliamed_btn))
         return
     logger.info(f"user_id={user_id} process task")
 

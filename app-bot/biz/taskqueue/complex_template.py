@@ -36,7 +36,7 @@ def marked_record_update(user_id:str, texts:list,img_path:str,abs_path:str )  :
     x_loc = 105
     for text in texts :
        cv2.putText(bk_img,text, (420,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
-                    0.7,(0,0,0), 1, 25)
+                    0.9,(0,0,0), 1, 25)
        x_loc += 45
     imageout= os.path.join(abs_path,f"{user_id}.jpg")
     cv2.imwrite(imageout,bk_img)

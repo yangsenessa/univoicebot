@@ -5,10 +5,10 @@ import random
 
 #.env
 #bot1
-#TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
+TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
 
 #bot2
-TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'  
+#TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'  
 MANIFEST_URL='https://raw.githubusercontent.com/XaBbl4/pytonconnect/main/pytonconnect-manifest.json'
 
 
@@ -57,6 +57,7 @@ PROMPT_RECORD_FINISH="Recording successful! Your fifth-dimensional space now has
 PROMPT_WAIT_CALIMED="$VOICE in the account is available to claim now."
 PROMPT_HAS_CALIMED_1=" in the account has available to claim now. "
 PROMPT_HAS_CALIMED_2="You can continue depositing new voices."
+PROMPT_HAS_CAILMED_3="Press the button on the bottom to earn more"
 
 
 PROMPT_RECORD_FINISH_IMG = "record-complete.jpg"
