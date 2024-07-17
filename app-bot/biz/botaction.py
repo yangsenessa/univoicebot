@@ -408,6 +408,8 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
                                  photo=img_file,                                            
                                  reply_markup=InlineKeyboardMarkup(cliamed_btn),
                                  parse_mode=ParseMode.HTML)
+    await context.bot.send_message(chat_id=chat_id, text="Successfully claim, please participate in the next event.",
+                                   parse_mode=ParseMode.HTML)
 
 
 async def show_speak_reback(update:Update, context:CustomContext) -> None:
