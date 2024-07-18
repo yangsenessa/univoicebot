@@ -401,7 +401,7 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
     chat_id = update.effective_user.id
     user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail_can_be_claimed(db,update.effective_user.id)
     if user_curr_task_detail == None:
-        await context.bot.send_message(chat_id=chat_id,text="Please wait a few minutes then retry.",parse_mode=ParseMode.HTML)
+        await context.bot.send_message(chat_id=chat_id,text="You have no $VOICE waited to be cliamed, if you finish upload? You can catch the claim time just press the play button again.",parse_mode=ParseMode.HTML)
         return
 
     flag, trx_val, balance_amt= user_buss_crud.deal_custom_claim(db,update.effective_user.id)
