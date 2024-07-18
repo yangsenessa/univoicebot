@@ -131,7 +131,7 @@ async def start(update: Update, context: CustomContext) -> None:
     img_name="TGbanner.jpg"
 
     
-    chat_id = chat_id=update._effective_chat.id
+    chat_id = chat_id=update.effective_chat.id
     if update.channel_post and update.channel_post.id:
         logger.info("from channle ....")
         chat_id = update.channel_post.id
