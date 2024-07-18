@@ -130,9 +130,10 @@ async def start(update: Update, context: CustomContext) -> None:
     img_path="resource"
     img_name="TGbanner.jpg"
 
-    chat_id = update.channel_post.id
-    if not chat_id:
-        chat_id = chat_id=update.effective_chat.id
+    
+    chat_id = chat_id=update.effective_chat.id
+    if update.channel_post and update.channel_post.id:
+        chat_id = update.channel_post.id
 
     with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
         await context.bot.send_photo(chat_id=chat_id, 
