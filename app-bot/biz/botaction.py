@@ -132,6 +132,7 @@ async def start(update: Update, context: CustomContext) -> None:
 
     
     chat_id = chat_id=update.effective_chat.id
+    thread_id = update.effective_message.message_thread_id
     if update.channel_post and update.channel_post.id:
         logger.info("from channle ....")
         chat_id = update.channel_post.id
@@ -141,6 +142,7 @@ async def start(update: Update, context: CustomContext) -> None:
                                      photo=imgfile,
                                      caption=prm_begin + config.PROMPT_START,
                                      reply_markup=InlineKeyboardMarkup(panel_btn),
+                                     message_thread_id=thread_id,
                                      parse_mode=ParseMode.HTML)
       
 
@@ -375,10 +377,12 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
 async def route_privacy(update:Update, context:CustomContext):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
+    thread_id = update.effective_message.message_thread_id
     replay_msg=f"Your journey would be privacy,use this link to your own bot:\n   \
     https://t.me/univoice2bot?start"
 
-    await context.bot.sendMessage(chat_id=chat_id,text=replay_msg,parse_mode=ParseMode.HTML)
+    await context.bot.sendMessage(chat_id=chat_id,text=replay_msg,
+                                  message_thread_id=thread_id,parse_mode=ParseMode.HTML)
 
 
 
