@@ -130,7 +130,7 @@ async def start(update: Update, context: CustomContext) -> None:
     img_path="resource"
     img_name="TGbanner.jpg"
 
-    
+    user_id=update.effective_user.id
     chat_id = chat_id=update.effective_chat.id
     thread_id = update.effective_message.message_thread_id
     if update.channel_post and update.channel_post.id:
@@ -150,6 +150,10 @@ async def start(update: Update, context: CustomContext) -> None:
         inviter_id = args[0]
         # 在这里记录邀请信息，例如更新数据库
         logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
+    if chat_id != user_id:
+        logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
+        await route_privacy(update, context)
+        return
     
     progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,context)
     '''await context.bot.send_message( chat_id = update.effective_chat.id,
@@ -176,7 +180,7 @@ async def start(update: Update, context: CustomContext) -> None:
         imgfile =  complex_template.marked_claim_notify(update.effective_user.id,[config.PROMPT_WAIT_CALIMED],rsp_img_path,abs_path)
   
         await context.bot.send_photo(chat_id=update.effective_user.id,
-                                photo=imgfile,                                            
+                                photo=imgfile,                                           
                                 reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
                                 parse_mode=ParseMode.HTML)
         os.remove(imgfile)   
