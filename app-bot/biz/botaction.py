@@ -120,7 +120,7 @@ class CustomContext(CallbackContext[ExtBot, dict, ChatData, dict]):
 async def start(update: Update, context: CustomContext) -> None:
     """Display a message with a button."""
 
-    logger.info(f"{update.effective_user.id} call start")
+    logger.info(f"{update.effective_user.id}--{update.effective_chat.id} call start")
     # WelCome Card
     logger.info("Show welcome card")
     args = context.args
