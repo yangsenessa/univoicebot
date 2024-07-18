@@ -130,13 +130,17 @@ async def start(update: Update, context: CustomContext) -> None:
     img_path="resource"
     img_name="TGbanner.jpg"
 
+    chat_id = update.channel_post.id
+    if not chat_id:
+        chat_id = chat_id=update.effective_chat.id
+
     with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
         await context.bot.send_photo(chat_id=update.effective_chat.id, 
                                      photo=imgfile,
                                      caption=prm_begin + config.PROMPT_START,
                                      reply_markup=InlineKeyboardMarkup(panel_btn),
                                      parse_mode=ParseMode.HTML)
-   
+      
 
     if args and len(args) > 0:
         inviter_id = args[0]

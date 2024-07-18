@@ -64,6 +64,7 @@ async def voice(update:Update, context:ContextTypes.DEFAULT_TYPE):
 
 
 start_handler = CommandHandler('start', start)
+
 invite_handler = CommandHandler('invite', sharelink_task)
 
 set_right_handler = CommandHandler('p', set_right)
