@@ -5,10 +5,10 @@ import random
 
 #.env
 #bot1
-TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
+#TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
 
 #bot2
-#TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'  
+TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'  
 MANIFEST_URL='https://raw.githubusercontent.com/XaBbl4/pytonconnect/main/pytonconnect-manifest.json'
 
 
@@ -109,8 +109,6 @@ def cal_task_claim_time(gpu_level:str, task_id:str):
 
     gpu_level_cfg:dict
     gpu_level_cfg = GPU_LEVEL_INFO[gpu_level]
-
-    return 5
 
     if task_id == TASK_VOICE_UPLOAD:
        return gpu_level_cfg["wait_h"] * 3600
