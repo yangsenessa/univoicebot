@@ -5,10 +5,10 @@ import random
 
 #.env
 #bot1
-#TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
+TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
 
 #bot2
-TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'  
+#TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'  
 MANIFEST_URL='https://raw.githubusercontent.com/XaBbl4/pytonconnect/main/pytonconnect-manifest.json'
 
 
@@ -54,10 +54,14 @@ PROMPT_RECORD_FINISH="Recording successful! Your fifth-dimensional space now has
 "\n\nPlease wait {hours} hours to receive your points."
 
 
-PROMPT_WAIT_CALIMED="$VOICE in the account is available to claim now."
-PROMPT_HAS_CALIMED_1=" in the account has available to claim now. "
-PROMPT_HAS_CALIMED_2="You can continue depositing new voices."
-PROMPT_HAS_CAILMED_3="Press the button on the bottom to earn more"
+PROMPT_WAIT_CALIMED_1="$VOICE is available"
+PROMPT_WAIT_CALIMED_2=" "
+PROMPT_WAIT_CALIMED_3="Claim now !!!"
+PROMPT_HAS_CALIMED_1="in the account "
+PROMPT_HAS_CALIMED_2="has availabled to claim now. "
+PROMPT_HAS_CAILMED_3="You can continue..."
+PROMPT_HAS_CAILMED_4="Press 'play' to earn more."
+PROMPT_HAS_CAILMED_5="Let's go"
 
 
 PROMPT_RECORD_FINISH_IMG = "record-complete.jpg"
@@ -105,6 +109,8 @@ def cal_task_claim_time(gpu_level:str, task_id:str):
 
     gpu_level_cfg:dict
     gpu_level_cfg = GPU_LEVEL_INFO[gpu_level]
+
+    return 5
 
     if task_id == TASK_VOICE_UPLOAD:
        return gpu_level_cfg["wait_h"] * 3600

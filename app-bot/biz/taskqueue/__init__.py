@@ -9,7 +9,7 @@ from loguru import logger
 from telegram import Update,InlineKeyboardButton, InlineKeyboardMarkup,Bot
 from telegram.constants import ParseMode
 
-from biz.tonwallet.config import TOKEN,PROMPT_WAIT_CALIMED,PROMPT_NOTIFY_CLAIM_IMG,PROMPT_WAIT_CALIMED
+from biz.tonwallet.config import TOKEN,PROMPT_WAIT_CALIMED_1,PROMPT_WAIT_CALIMED_2,PROMPT_WAIT_CALIMED_3,PROMPT_NOTIFY_CLAIM_IMG
 
 import asyncio
 import nest_asyncio
@@ -46,7 +46,9 @@ def do_pop():
               
             
               
-              imgfile =  complex_template.marked_claim_notify(user_id,[PROMPT_WAIT_CALIMED],rsp_img_path,abs_path)
+              imgfile =  complex_template.marked_claim_notify(user_id,
+                                                              [PROMPT_WAIT_CALIMED_1,PROMPT_WAIT_CALIMED_2,PROMPT_WAIT_CALIMED_3],
+                                                              rsp_img_path,abs_path)
               
               nest_asyncio.apply()
               loop = asyncio.get_event_loop()

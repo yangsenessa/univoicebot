@@ -177,7 +177,9 @@ async def start(update: Update, context: CustomContext) -> None:
         img_name=config.PROMPT_NOTIFY_CLAIM_IMG
         rsp_img_path = os.path.join(path,img_path,img_name)
         abs_path = os.path.join(path,img_path)
-        imgfile =  complex_template.marked_claim_notify(update.effective_user.id,[config.PROMPT_WAIT_CALIMED],rsp_img_path,abs_path)
+        imgfile =  complex_template.marked_claim_notify(update.effective_user.id,
+                                                        [config.PROMPT_WAIT_CALIMED_1,config.PROMPT_WAIT_CALIMED_2, config.PROMPT_WAIT_CALIMED_3]
+                                                        ,rsp_img_path,abs_path)
   
         await context.bot.send_photo(chat_id=update.effective_user.id,
                                 photo=imgfile,                                           
@@ -344,22 +346,23 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
     else:
         tokens= task_info[user_level]["consume"]
         futurn_rewards = task_info[user_level]["token"]
-        tp_2 = f"Use $VOICE {tokens} to upgrade to {next_user_level} level."
-        tp_3=f"You can claim $VOICE {futurn_rewards} each time."
+        tp_2 = f"Use ${tokens} up to {next_user_level} level."
+        tp_3=f"${futurn_rewards} can be claimed once."
+        tp_3_1="------------------------------------------"
     
     if next_gpu_level > 6 :
         tp_4="Your gpu is the most efficent now. "
         tp_5=" "
         tp_6=" "
     else:
-        tp_4="GPU efficiency (GPU)"
+        tp_4=f"GPU efficiency {gpu_level}"
         tokens = config.GPU_LEVEL_INFO[gpu_level]["consume"]
         flatter = config.GPU_LEVEL_INFO[gpu_level]["flatter"]
         wait_h = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
-        tp_5=f"Use $ to upgrade to {next_gpu_level} level."
-        tp_6=f"Wait {wait_h} hours to claim"
-        tp_7 =f"and ${tokens}*{flatter} each time"
-    rsp_msg = [tp_1,tp_2,tp_3,tp_4,tp_5,tp_6,tp_7]
+        tp_5=f"Use ${tokens} up tp {next_gpu_level} level."
+        tp_6=f"Waiting {wait_h} hours to claim"
+        tp_7 =f"Claiming ${tokens}*{flatter} each time"
+    rsp_msg = [tp_1,tp_2,tp_3,tp_3_1,tp_4,tp_5,tp_6,tp_7]
 
      # prepare img to rsp:
     path = os.path.abspath(os.path.dirname(__file__))
@@ -415,8 +418,9 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
     img_name=config.PROMPT_NOTIFY_CLAIMED_IMG
     rsp_img_path = os.path.join(path,img_path,img_name)
     abs_path = os.path.join(path,img_path)
-    res_p1=f"${trx_val}" +config.PROMPT_HAS_CALIMED_1
-    rsp_marked=[res_p1, config.PROMPT_HAS_CALIMED_2,config.PROMPT_HAS_CAILMED_3]
+    res_p1=f"${trx_val} " +config.PROMPT_HAS_CALIMED_1
+    rsp_marked=[res_p1, config.PROMPT_HAS_CALIMED_2,config.PROMPT_HAS_CAILMED_3,
+                config.PROMPT_HAS_CAILMED_4,config.PROMPT_HAS_CAILMED_5]
     img_file = complex_template.marked_claimed(chat_id,rsp_marked,rsp_img_path,abs_path)
     await context.bot.send_photo(chat_id=chat_id,
                                  photo=img_file,                                            
@@ -472,10 +476,8 @@ async def voice_judge(update:Update,context:CustomContext):
             status = "FINISH"
         )
         rsp_msg = f"Congratulation ! \n Your voice storage duration are currently at {user_info.level} level, GPU efficiency {user_info.gpu_level} level\
-        \n${str(token_fee)} has been credited to your account. CHECK it in your '👝 balance' \
-        \n Click '🗣 play' to start your journey. \
-        \n Click '🚀upgrade' to upgrades \
-        \n Click '👏 Invite Fren'  to earn more."
+        \n${str(token_fee)} has been credited to your account. \nCHECK it in your '👝 balance' \
+        \n Click '🗣 play' to continue ⬇️⬇️⬇️ ."
         user_buss_crud.acct_update_deal(db, user_info.tele_user_id,
                                         str(token_fee),user_claim_jnl,user_info)
         logger.info("Update user level success!")
@@ -484,7 +486,7 @@ async def voice_judge(update:Update,context:CustomContext):
 
 
         await context.bot.send_message(chat_id=update.effective_user.id,
-                                       reply_markup=InlineKeyboardMarkup(panel_btn),
+                                       reply_markup=InlineKeyboardMarkup(cliamed_btn),
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
         return True
     return False
@@ -543,7 +545,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     queue.push(user_id,task_sec= int(time.time())+config.cal_task_claim_time(gpu_level,task_id))
     
     hours = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
-    replaymsg = f"Please wait {hours} hours before \"claim\"."
+    replaymsg = f"{hours} hours later"
 
     # prepare img to rsp:
     path = os.path.abspath(os.path.dirname(__file__))

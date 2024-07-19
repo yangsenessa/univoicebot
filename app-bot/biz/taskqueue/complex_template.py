@@ -21,10 +21,13 @@ def marked_record_suc(user_id:str,text:str, img_path:str,abs_path:str):
     
     imageout:str
     bk_img = cv2.imread(img_path)
-    cv2.putText(bk_img,"Upload successful!", (431,180), cv2.FONT_HERSHEY_SIMPLEX, 
-1.6,(0,0,0), 1, 25)
-    cv2.putText(bk_img,text, (431,255), cv2.FONT_HERSHEY_SIMPLEX, 
-0.9,(0,0,0), 1, 25)
+    cv2.putText(bk_img,"Upload successful!", (431,80), cv2.FONT_HERSHEY_SIMPLEX, 
+1.6,(0,0,0), 5, cv2.LINE_8)
+    cv2.putText(bk_img,text, (431,185), cv2.FONT_HERSHEY_SIMPLEX, 
+1.6,(0,0,0), 5, cv2.LINE_8)
+    cv2.putText(bk_img,"You can claim them", (431,295), cv2.FONT_HERSHEY_SIMPLEX, 
+1.2,(0,0,0), 5, cv2.LINE_8)
+   
         #cv2.imshow(f"{user_id}",bk_img)
     imageout= os.path.join(abs_path,f"{user_id}.jpg")
     cv2.imwrite(imageout,bk_img)
@@ -33,10 +36,10 @@ def marked_record_suc(user_id:str,text:str, img_path:str,abs_path:str):
 def marked_record_update(user_id:str, texts:list,img_path:str,abs_path:str )  :
     imageout:str
     bk_img = cv2.imread(img_path)
-    x_loc = 105
+    x_loc = 65
     for text in texts :
        cv2.putText(bk_img,text, (420,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
-                    0.9,(0,0,0), 1, 25)
+                    1.2,(0,0,0), 3, cv2.LINE_8)
        x_loc += 45
     imageout= os.path.join(abs_path,f"{user_id}.jpg")
     cv2.imwrite(imageout,bk_img)
@@ -45,11 +48,17 @@ def marked_record_update(user_id:str, texts:list,img_path:str,abs_path:str )  :
 def marked_claim_notify(user_id:str, texts:list,img_path:str,abs_path:str )  :
     imageout:str
     bk_img = cv2.imread(img_path)
-    x_loc = 235
+    x_loc = 135
+    i = 0
     for text in texts :
-       cv2.putText(bk_img,text, (485,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
-                    1,(0,0,0), 1, 25)
-       x_loc += 65
+       if i==0:
+          cv2.putText(bk_img,text, (485,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
+                    2,(0,14,112), 5, cv2.LINE_8) 
+       else:
+          cv2.putText(bk_img,text, (485,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
+                        2,(0,0,0), 5, cv2.LINE_8)
+       x_loc += 85
+       i+=1
     imageout= os.path.join(abs_path,f"{user_id}.jpg")
     cv2.imwrite(imageout,bk_img)
     return imageout
@@ -57,11 +66,11 @@ def marked_claim_notify(user_id:str, texts:list,img_path:str,abs_path:str )  :
 def marked_claimed(user_id:str, texts:list,img_path:str,abs_path:str )  :
     imageout:str
     bk_img = cv2.imread(img_path)
-    x_loc = 235
+    x_loc = 85
     for text in texts :
        cv2.putText(bk_img,text, (580,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
-                    0.9,(0,0,0), 1, 25)
-       x_loc += 65
+                    1.5,(0,0,0), 3, cv2.LINE_8)
+       x_loc += 95
     imageout= os.path.join(abs_path,f"{user_id}.jpg")
     cv2.imwrite(imageout,bk_img)
     return imageout
