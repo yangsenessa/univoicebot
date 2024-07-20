@@ -417,7 +417,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
         tp_5=" "
         tp_6=" "
     else:
-        tp_4=f"GPU efficiency {str(next_gpu_level)}"
+        tp_4=f"GPU efficiency {gpu_level}"
         tokens = config.GPU_LEVEL_INFO[str(next_gpu_level)]["consume"]
         flatter = config.GPU_LEVEL_INFO[str(next_gpu_level)]["flatter"]
         wait_h = config.GPU_LEVEL_INFO[str(next_gpu_level)]["wait_h"]
