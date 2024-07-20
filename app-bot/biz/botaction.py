@@ -466,7 +466,7 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
     chat_id = update.effective_user.id
     user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail_can_be_claimed(db,update.effective_user.id)
     if user_curr_task_detail == None:
-        user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db, chat_id)
+        user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db, chat_id,config.TASK_VOICE_UPLOAD)
         if user_curr_task_detail and user_curr_task_detail.progress_status == config.PROGRESS_DEAILING:
             time_begin = user_curr_task_detail.gmt_modified
             time_end = config.get_datetime()
