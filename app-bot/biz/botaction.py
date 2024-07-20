@@ -798,12 +798,19 @@ async def gener_earn_rule(update:Update, context:CustomContext):
 async def deal_invite_user_login(update:Update,context:CustomContext, ori_user_id:str):
 
     #user has been log,return
-    if fet_user_info(update.effective_user.id):
+    user_info = fet_user_info(update.effective_user.id)
+    if user_info:
         logger.info("Invite a member, return")
         return
+    is_premium= update.effective_user.is_premium
+    rewards_type:str
 
+    if is_premium:
+       rewards_type = "PRO"
+    else:
+       rewards_type = "ALL"
     task_info= config.TASK_INFO["INVITE"]
-    trxamt = str(task_info["ALL"]["token"])
+    trxamt = str(task_info[rewards_type]["token"])
     friend_name = update.effective_user.username
     user_claim_jnl = User_claim_jnl(
             jnl_no = str(uuid.uuid4()) ,
@@ -825,8 +832,9 @@ async def deal_invite_user_login(update:Update,context:CustomContext, ori_user_i
     abs_path = os.path.join(path,img_path)
     res_p1=f"${trxamt} Recieved" 
     res_p2=f"From inviting {friend_name}"
-    res_p3=f"Earn more: press and invite more "
-    rsp_marked=[res_p1,res_p2, res_p3]
+    res_p3="Earn more: press invite"
+    res_p4="Let more friends to join"
+    rsp_marked=[res_p1,res_p2, res_p3,res_p4]
     img_file = complex_template.marked_claimed(ori_user_id,rsp_marked,rsp_img_path,abs_path)
     oribot = Bot(token=TOKEN)
     await oribot.send_photo(chat_id=ori_user_id,
