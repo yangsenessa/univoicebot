@@ -116,6 +116,67 @@ class CustomContext(CallbackContext[ExtBot, dict, ChatData, dict]):
 
         # Remember to return the object
         return context
+    
+async def play(update:Update, context:CustomContext) -> None:
+     """Display a message with a button."""
+
+     logger.info(f"{update.effective_user.id}--{update.effective_chat.id} call start")
+  
+     args = context.args
+     
+     user_id=update.effective_user.id
+     chat_id = chat_id=update.effective_chat.id
+     thread_id = update.effective_message.message_thread_id
+     if update.channel_post and update.channel_post.id:
+        logger.info("from channle ....")
+        chat_id = update.channel_post.id
+
+    
+     if args and len(args) > 0:
+        inviter_id = args[0]
+        # 在这里记录邀请信息，例如更新数据库
+        logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
+     if chat_id != user_id:
+        logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
+        await route_privacy(update, context)
+        return
+    
+     progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,context)
+     '''await context.bot.send_message( chat_id = update.effective_chat.id,
+        text=config.PANEL_IMG+prm_begin + config.PROMPT_START,
+        reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
+        parse_mode=ParseMode.HTML
+    )'''
+    
+
+   # if progress_status == config.PROGRESS_INIT or progress_status == config.PROGRESS_FINISH:
+        #await context.bot.send_message(chat_id=update.effective_chat.id,
+        #                               text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
+     if progress_status == config.PROGRESS_DEAILING:
+        rsp_msg=f"There's  ⏰ {time_remain} seconds left until your next claim."
+        await context.bot.send_message(chat_id=update.effective_user.id,
+                                       text=rsp_msg,parse_mode=ParseMode.HTML)
+     elif progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
+        path = os.path.abspath(os.path.dirname(__file__))
+        logger.info(f"Curr path is:{path}")
+        img_path="resource"
+        img_name=config.PROMPT_NOTIFY_CLAIM_IMG
+        rsp_img_path = os.path.join(path,img_path,img_name)
+        abs_path = os.path.join(path,img_path)
+        imgfile =  complex_template.marked_claim_notify(update.effective_user.id,
+                                                        [config.PROMPT_WAIT_CALIMED_1,config.PROMPT_WAIT_CALIMED_2, config.PROMPT_WAIT_CALIMED_3]
+                                                        ,rsp_img_path,abs_path)
+  
+        await context.bot.send_photo(chat_id=update.effective_user.id,
+                                photo=imgfile,                                           
+                                reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
+                                parse_mode=ParseMode.HTML)
+        os.remove(imgfile)   
+     elif progress_status == config.PROGRESS_LEVEL_IDT \
+           or progress_status == config.PROGRESS_INIT  \
+           or progress_status == config.PROGRESS_FINISH:
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
 
 async def start(update: Update, context: CustomContext) -> None:
     """Display a message with a button."""
@@ -215,7 +276,7 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
     elif (commandhandlemsg == "opr-claim"):
         await cust_claim_replay(update, context)
     elif (commandhandlemsg == "opr-play"):
-        await start(update,context)
+        await play(update,context)
     elif (commandhandlemsg == "opr-invite"):
         await sharelink_task(update, context)
     elif (commandhandlemsg =="opr-balance"):
@@ -502,11 +563,32 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
 
     user_id = update.effective_user.id
     chat_id = update.effective_message.chat_id
-    task_id:str
+    task_id = "VOICE-UPLOAD"
     task_flag = False
     cid:str
     user_level:str
     gpu_level:str
+
+    task_curr_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id,task_id)
+    if task_curr_detail.progress_status == config.PROGRESS_DEAILING:
+        timebegin = task_curr_detail.gmt_modified
+        timeend = datetime.now()
+      
+        time_remain = config.cal_task_claim_time(task_curr_detail.gpu_level,task_id) - (timeend-timebegin).seconds
+        rsp_msg=f"Please wait  ⏰ {time_remain} seconds for your next voice."
+        await context.bot.send_message(chat_id=update.effective_user.id,
+                                       text=rsp_msg,parse_mode=ParseMode.HTML)
+        return
+    if task_curr_detail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
+        timebegin = task_curr_detail.gmt_modified
+        timeend = datetime.now()
+      
+        time_remain = config.cal_task_claim_time(task_curr_detail.gpu_level,task_id) - (timeend-timebegin).seconds
+        rsp_msg=f"You would claim first:⬇️⬇️⬇️"
+        await context.bot.send_message(chat_id=update.effective_user.id,
+                                        reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
+                                       text=rsp_msg,parse_mode=ParseMode.HTML)
+        return
 
     task_details = user_buss_crud.fetch_user_curr_tase_detail_status(db,user_id,config.PROGRESS_INIT)
     for task_detail in task_details:
@@ -521,7 +603,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     if not task_flag:
         logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
         await context.bot.send_message(chat_id=update.effective_user.id,
-                                   text="Please press the play button first ⬇️⬇️⬇️",
+                                   text="Your voice has lost your path,please retry ⬇️⬇️⬇️",
                                    reply_markup=InlineKeyboardMarkup(cliamed_btn))
         return
     logger.info(f"user_id={user_id} process task")
