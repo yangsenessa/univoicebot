@@ -344,8 +344,8 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
         tp_2 = "You have the top level"
         tp_3=" "
     else:
-        tokens= task_info[user_level]["consume"]
-        futurn_rewards = task_info[user_level]["token"]
+        tokens= task_info[str(next_user_level)]["consume"]
+        futurn_rewards = task_info[str(next_user_level)]["token"]
         tp_2 = f"Use ${tokens} up to {next_user_level} level."
         tp_3=f"${futurn_rewards} can be claimed once."
         tp_3_1="------------------------------------------"
@@ -355,10 +355,10 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
         tp_5=" "
         tp_6=" "
     else:
-        tp_4=f"GPU efficiency {gpu_level}"
-        tokens = config.GPU_LEVEL_INFO[gpu_level]["consume"]
-        flatter = config.GPU_LEVEL_INFO[gpu_level]["flatter"]
-        wait_h = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
+        tp_4=f"GPU efficiency {str(next_gpu_level)}"
+        tokens = config.GPU_LEVEL_INFO[str(next_gpu_level)]["consume"]
+        flatter = config.GPU_LEVEL_INFO[str(next_gpu_level)]["flatter"]
+        wait_h = config.GPU_LEVEL_INFO[str(next_gpu_level)]["wait_h"]
         tp_5=f"Use ${tokens} up tp {next_gpu_level} level."
         tp_6=f"Waiting {wait_h} hours to claim"
         tp_7 =f"Claiming ${tokens}*{flatter} each time"
