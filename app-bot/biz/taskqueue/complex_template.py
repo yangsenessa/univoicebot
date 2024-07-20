@@ -75,4 +75,16 @@ def marked_claimed(user_id:str, texts:list,img_path:str,abs_path:str )  :
     cv2.imwrite(imageout,bk_img)
     return imageout
 
+def marked_claimed_invited(user_id:str, texts:list,img_path:str,abs_path:str )  :
+    imageout:str
+    bk_img = cv2.imread(img_path)
+    x_loc = 185
+    for text in texts :
+       cv2.putText(bk_img,text, (580,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
+                    2,(0,0,0), 3, cv2.LINE_8)
+       x_loc += 95
+    imageout= os.path.join(abs_path,f"{user_id}.jpg")
+    cv2.imwrite(imageout,bk_img)
+    return imageout
+
 

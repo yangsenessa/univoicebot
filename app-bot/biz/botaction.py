@@ -1,4 +1,4 @@
-from telegram import Update,InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update,InlineKeyboardButton, InlineKeyboardMarkup,Bot
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler ,filters, MessageHandler
 from telegram.constants import ParseMode
 from telegram.ext import (
@@ -20,7 +20,7 @@ from .dal.transaction import User_claim_jnl
 from .dal.global_config import Unvtaskinfo
 from .dal import database
 from .tonwallet import config
-from biz.tonwallet.config import TASK_INFO
+from biz.tonwallet.config import TASK_INFO, TOKEN
 from . import media
 from  .taskqueue import queue, complex_template
 import json
@@ -54,6 +54,7 @@ panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
 
 cliamed_btn=[[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")]]
 
+invote_btn=[[InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]]
 claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
 
 upgradekeyboardButton_list=list()
@@ -136,6 +137,7 @@ async def play(update:Update, context:CustomContext) -> None:
         inviter_id = args[0]
         # 在这里记录邀请信息，例如更新数据库
         logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
+        await deal_invite_user_login(update, context, inviter_id)
      if chat_id != user_id:
         logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
         await route_privacy(update, context)
@@ -152,7 +154,10 @@ async def play(update:Update, context:CustomContext) -> None:
    # if progress_status == config.PROGRESS_INIT or progress_status == config.PROGRESS_FINISH:
         #await context.bot.send_message(chat_id=update.effective_chat.id,
         #                               text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
-     if progress_status == config.PROGRESS_DEAILING:
+     if progress_status == config.PROGRESS_LEVEL_IDT \
+           or progress_status == config.PROGRESS_INIT:
+        start(update,context)
+     elif progress_status == config.PROGRESS_DEAILING:
         rsp_msg=f"There's  ⏰ {time_remain} seconds left until your next claim."
         await context.bot.send_message(chat_id=update.effective_user.id,
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
@@ -172,9 +177,7 @@ async def play(update:Update, context:CustomContext) -> None:
                                 reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
                                 parse_mode=ParseMode.HTML)
         os.remove(imgfile)   
-     elif progress_status == config.PROGRESS_LEVEL_IDT \
-           or progress_status == config.PROGRESS_INIT  \
-           or progress_status == config.PROGRESS_FINISH:
+     elif  progress_status == config.PROGRESS_FINISH:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
 
@@ -209,8 +212,9 @@ async def start(update: Update, context: CustomContext) -> None:
 
     if args and len(args) > 0:
         inviter_id = args[0]
-        # 在这里记录邀请信息，例如更新数据库
+        
         logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
+        await deal_invite_user_login(update, context, inviter_id)
     if chat_id != user_id:
         logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
         await route_privacy(update, context)
@@ -365,9 +369,6 @@ async def do_gpu_level_up(update:Update,context:CustomContext):
             \n Enhance the value of your voice."
         await context.bot.send_message(chat_id=update.effective_user.id, text=rsp_msg) 
     return
-
-
-
 
 
 
@@ -792,7 +793,46 @@ async def gener_earn_rule(update:Update, context:CustomContext):
                                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")]]),     
                                    text=content_topic1+content_split+content_topic2,parse_mode=ParseMode.HTML)
 
+#https://t.me/univoicedev?start=6039165838
+#https://t.me/univoicedevbot?start=6039165838
+async def deal_invite_user_login(update:Update,context:CustomContext, ori_user_id:str):
 
+    #user has been log,return
+    if fet_user_info(update.effective_user.id):
+        logger.info("Invite a member, return")
+        return
+
+    task_info= config.TASK_INFO["INVITE"]
+    trxamt = str(task_info["ALL"]["token"])
+    friend_name = update.effective_user.username
+    user_claim_jnl = User_claim_jnl(
+            jnl_no = str(uuid.uuid4()) ,
+            user_id = ori_user_id,
+            task_id="INVITE",
+            task_name="INVITE",
+            tokens=trxamt,
+            gmt_biz_create=config.get_datetime(),
+            gmt_biz_finish=config.get_datetime(),
+            status="FINISH"
+        )
+    user_buss_crud.invoke_acct_token(db,ori_user_id,trxamt,user_claim_jnl)
+
+    path = os.path.abspath(os.path.dirname(__file__))
+    logger.info(f"Curr path is:{path}")
+    img_path="resource"
+    img_name=config.PROMPT_NOTIFY_CLAIMED_IMG
+    rsp_img_path = os.path.join(path,img_path,img_name)
+    abs_path = os.path.join(path,img_path)
+    res_p1=f"${trxamt} Recieved" 
+    res_p2=f"From inviting {friend_name}"
+    res_p3=f"Earn more: press and invite more "
+    rsp_marked=[res_p1,res_p2, res_p3]
+    img_file = complex_template.marked_claimed(ori_user_id,rsp_marked,rsp_img_path,abs_path)
+    oribot = Bot(token=TOKEN)
+    await oribot.send_photo(chat_id=ori_user_id,
+                                 photo=img_file,                                            
+                                 reply_markup=InlineKeyboardMarkup(invote_btn),
+                                 parse_mode=ParseMode.HTML)
 
 
 
