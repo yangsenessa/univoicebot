@@ -477,7 +477,7 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
                                               text=rsp_msg,parse_mode=ParseMode.HTML) 
         elif not user_curr_task_detail or user_curr_task_detail.progress_status == config.PROGRESS_FINISH \
              or user_curr_task_detail.progress_status == config.PROGRESS_INIT \
-             or user_curr_task_detail.progress_status == config.PROGRESS_LEVEL_IDT
+             or user_curr_task_detail.progress_status == config.PROGRESS_LEVEL_IDT :
             
              await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
