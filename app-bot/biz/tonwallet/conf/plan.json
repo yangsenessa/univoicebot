@@ -8,57 +8,57 @@
         "2":{
             "duration":10,
             "token":10000,
-            "consume":50000
+            "consume":5000
         },
         "3":{
             "duration":15,
             "token":15000,
-            "consume":100000
+            "consume":10000
         },
         "4":{
             "duration":20,
             "token":20000,
-            "consume":200000
+            "consume":15000
         },
         "5":{
             "duration":25,
             "token":25000,
-            "consume":300000
+            "consume":20000
         },
         "6":{
             "duration":30,
             "token":30000,
-            "consume":400000
+            "consume":25000
         },
         "7":{
             "duration":35,
             "token":35000,
-            "consume":500000
+            "consume":30000
         },
         "8":{
             "duration":40,
             "token":40000,
-            "consume":600000
+            "consume":35000
         },
         "9":{
             "duration":45,
             "token":45000,
-            "consume":800000
+            "consume":40000
         },
         "10":{
             "duration":50,
             "token":50000,
-            "consume":1000000
+            "consume":45000
         },
         "11":{
             "duration":55,
             "token":55000,
-            "consume":1200000
+            "consume":50000
         },
         "12":{
             "duration":60,
             "token":60000,
-            "consume":1500000
+            "consume":55000
         }
     },
     "NEWER":{
