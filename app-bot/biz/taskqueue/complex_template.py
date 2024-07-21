@@ -52,10 +52,10 @@ def marked_claim_notify(user_id:str, texts:list,img_path:str,abs_path:str )  :
     i = 0
     for text in texts :
        if i==0:
-          cv2.putText(bk_img,text, (335,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
+          cv2.putText(bk_img,text, (435,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
                     2,(255,255,255), 5, cv2.LINE_8) 
        else:
-          cv2.putText(bk_img,text, (335,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
+          cv2.putText(bk_img,text, (435,x_loc), cv2.FONT_HERSHEY_SIMPLEX, 
                         2,(255,255,255), 5, cv2.LINE_8)
        x_loc += 85
        i+=1
