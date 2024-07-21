@@ -158,6 +158,7 @@ async def play(update:Update, context:CustomContext) -> None:
            or progress_status == config.PROGRESS_INIT:
         start(update,context)
      elif progress_status == config.PROGRESS_DEAILING:
+
         rsp_msg=f"There's  ⏰ {time_remain} seconds left until your next claim."
         await context.bot.send_message(chat_id=update.effective_user.id,
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
@@ -232,6 +233,8 @@ async def start(update: Update, context: CustomContext) -> None:
         #await context.bot.send_message(chat_id=update.effective_chat.id,
         #                               text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
     if progress_status == config.PROGRESS_DEAILING:
+        if time_remain <=0:
+            time_remain = 300
         rsp_msg=f"There's  ⏰ {time_remain} seconds left until your next claim."
         await context.bot.send_message(chat_id=update.effective_user.id,
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
@@ -472,6 +475,8 @@ async def cust_claim_replay (update:Update, context:CustomContext) -> None:
             time_end = datetime.now()
             gpu_level= user_curr_task_detail.gpu_level
             time_remain = config.cal_task_claim_time(gpu_level,user_curr_task_detail.task_id)-(time_end-time_begin).seconds
+            if time_remain <= 0:
+                time_remain = 300
             rsp_msg=f"There's  ⏰ {time_remain} seconds left until your next claim."
             await context.bot.send_message(chat_id=update.effective_user.id,
                                               text=rsp_msg,parse_mode=ParseMode.HTML) 
