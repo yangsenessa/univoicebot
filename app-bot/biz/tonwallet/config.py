@@ -111,7 +111,7 @@ def cal_task_claim_time(gpu_level:str, task_id:str):
     gpu_level_cfg = GPU_LEVEL_INFO[gpu_level]
 
     if task_id == TASK_VOICE_UPLOAD:
-       # fro test return 300
+       # only for test :return 30
        return gpu_level_cfg["wait_h"] * 3600
     else:
        return 10
