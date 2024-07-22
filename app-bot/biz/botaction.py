@@ -230,10 +230,6 @@ async def start(update: Update, context: CustomContext) -> None:
         parse_mode=ParseMode.HTML
     )'''
     
-
-   # if progress_status == config.PROGRESS_INIT or progress_status == config.PROGRESS_FINISH:
-        #await context.bot.send_message(chat_id=update.effective_chat.id,
-        #                               text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
     if progress_status == config.PROGRESS_DEAILING:
         if time_remain <=0:
             time_remain = 300
