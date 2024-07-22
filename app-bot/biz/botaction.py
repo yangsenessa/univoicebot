@@ -425,11 +425,13 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
     else:
         tp_4=f"GPU efficiency {gpu_level}"
         tokens = config.GPU_LEVEL_INFO[str(next_gpu_level)]["consume"]
+        base_rewards_tokens= task_info[user_level]["token"]
+
         flatter = config.GPU_LEVEL_INFO[str(next_gpu_level)]["flatter"]
         wait_h = config.GPU_LEVEL_INFO[str(next_gpu_level)]["wait_h"]
         tp_5=f"Use ${tokens} up tp {next_gpu_level} level."
         tp_6=f"Waiting {wait_h} hours to claim"
-        tp_7 =f"Claiming ${tokens}*{flatter} each time"
+        tp_7 =f"Claiming ${base_rewards_tokens}*{flatter} each time"
     rsp_msg = [tp_1,tp_2,tp_3,tp_3_1,tp_4,tp_5,tp_6,tp_7]
 
      # prepare img to rsp:
