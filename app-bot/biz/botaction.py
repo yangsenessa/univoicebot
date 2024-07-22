@@ -429,7 +429,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
 
         flatter = config.GPU_LEVEL_INFO[str(next_gpu_level)]["flatter"]
         wait_h = config.GPU_LEVEL_INFO[str(next_gpu_level)]["wait_h"]
-        tp_5=f"Use ${tokens} up tp {next_gpu_level} level."
+        tp_5=f"Use ${tokens} up to {next_gpu_level} level."
         tp_6=f"Waiting {wait_h} hours to claim"
         tp_7 =f"Claiming ${base_rewards_tokens}*{flatter} each time"
     rsp_msg = [tp_1,tp_2,tp_3,tp_3_1,tp_4,tp_5,tp_6,tp_7]
@@ -593,6 +593,25 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     cid:str
     user_level:str
     gpu_level:str
+
+    user_info = fet_user_info(user_id)
+    user_level = user_info.level
+    gpu_level = user_info.gpu_level
+    await context.bot.send_message(chat_id=update.effective_user.id,
+                                        reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
+                                       text=rsp_msg,parse_mode=ParseMode.HTML)
+
+
+    task_info = match_user_task(task_id,user_level)
+    task_duration = task_info["duration"]
+
+    if(time_duration > task_duration):
+        logger.info("Voice duation beyond...")
+        rsp_msg=f"You need to limit the lenth of voice less than {task_duration} second. \n You can press play ⬇️⬇️⬇️ and retry."
+        await context.bot.send_message(chat_id=update.effective_user.id,
+                                        reply_markup=InlineKeyboardMarkup.from_column(cliamed_btn),
+                                       text=rsp_msg,parse_mode=ParseMode.HTML)
+        return
 
     task_curr_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id,task_id)
     if task_curr_detail.progress_status == config.PROGRESS_DEAILING:
