@@ -181,6 +181,8 @@ async def play(update:Update, context:CustomContext) -> None:
      elif  progress_status == config.PROGRESS_FINISH:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
+     else:
+        start(update,context)
 
 async def start(update: Update, context: CustomContext) -> None:
     """Display a message with a button."""
@@ -408,6 +410,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
     if next_user_level >12:
         tp_2 = "You have the top level"
         tp_3=" "
+        tp_3_1="------------------------------------------"
     else:
         tokens= task_info[str(next_user_level)]["consume"]
         futurn_rewards = task_info[str(next_user_level)]["token"]
