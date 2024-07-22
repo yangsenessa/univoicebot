@@ -597,10 +597,6 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     user_info = fet_user_info(user_id)
     user_level = user_info.level
     gpu_level = user_info.gpu_level
-    await context.bot.send_message(chat_id=update.effective_user.id,
-                                        reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
-                                       text=rsp_msg,parse_mode=ParseMode.HTML)
-
 
     task_info = match_user_task(task_id,user_level)
     task_duration = task_info["duration"]
