@@ -156,7 +156,7 @@ async def play(update:Update, context:CustomContext) -> None:
         #                               text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
      if progress_status == config.PROGRESS_LEVEL_IDT \
            or progress_status == config.PROGRESS_INIT:
-        start(update,context)
+        await start(update,context)
      elif progress_status == config.PROGRESS_DEAILING:
 
         rsp_msg=f"There's  ⏰ {time_remain} seconds left until your next claim."
