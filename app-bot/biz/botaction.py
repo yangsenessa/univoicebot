@@ -418,6 +418,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
         tp_4="Your gpu is the most efficent now. "
         tp_5=" "
         tp_6=" "
+        tp_7=" "
     else:
         tp_4=f"GPU efficiency {gpu_level}"
         tokens = config.GPU_LEVEL_INFO[str(next_gpu_level)]["consume"]
