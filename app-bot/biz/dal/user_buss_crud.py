@@ -193,13 +193,16 @@ def create_task_producer(db:Session,user_task_producer:UserTaskProducer):
     finally:
         db.close()
 
-def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,progress_status:str) :
+def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,user_level:str, gpu_level:str,progress_status:str) :
      try:
+        task_detail:UserCurrTaskDetail
         task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
                                                       UserCurrTaskDetail.task_id==task_id).first()
         if task_detail:
             task_detail.progress_status = progress_status
             task_detail.gmt_modified = config.get_datetime()
+            task_detail.user_level = user_level
+            task_detail.gpu_level = gpu_level
             db.add(task_detail)
             db.commit()
             db.refresh(task_detail)
@@ -211,6 +214,7 @@ def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,progress_sta
         db.rollback()
      finally:
          db.close()
+
 
 
 def deal_task_claim(db:Session,user_id:str):

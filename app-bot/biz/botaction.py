@@ -633,9 +633,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
         if task_detail.task_id == config.TASK_VOICE_UPLOAD :
             cid = await media.save_voice(voice_file)
             task_id = task_detail.task_id
-            task_flag=user_buss_crud.update_user_curr_task_detail(db,user_id,task_id,config.PROGRESS_DEAILING)
-            user_level = task_detail.user_level
-            gpu_level = task_detail.gpu_level
+            task_flag=user_buss_crud.update_user_curr_task_detail(db,user_id,task_id,user_level,gpu_level,config.PROGRESS_DEAILING)
 
     if not task_flag:
         logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
