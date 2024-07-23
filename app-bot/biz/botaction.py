@@ -602,7 +602,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
         logger.info("Voice duation beyond...")
         rsp_msg=f"You need to limit the lenth of voice less than {task_duration} second. \n You can press play ⬇️⬇️⬇️ and retry."
         await context.bot.send_message(chat_id=update.effective_user.id,
-                                        reply_markup=InlineKeyboardMarkup.from_column(cliamed_btn),
+                                        reply_markup=InlineKeyboardMarkup(cliamed_btn),
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
         return
 
