@@ -131,8 +131,8 @@ async def play(update:Update, context:CustomContext) -> None:
      if update.channel_post and update.channel_post.id:
         logger.info("from channle ....")
         chat_id = update.channel_post.id
-
-    
+   
+     inviter_id = ""  
      if args and len(args) > 0:
         inviter_id = args[0]
         # 在这里记录邀请信息，例如更新数据库
@@ -142,8 +142,8 @@ async def play(update:Update, context:CustomContext) -> None:
         logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
         await route_privacy(update, context)
         return
-    
-     progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,context)
+     
+     progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,inviter_id,context)
      '''await context.bot.send_message( chat_id = update.effective_chat.id,
         text=config.PANEL_IMG+prm_begin + config.PROMPT_START,
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
@@ -212,7 +212,7 @@ async def start(update: Update, context: CustomContext) -> None:
                                      message_thread_id=thread_id,
                                      parse_mode=ParseMode.HTML)
       
-
+    inviter_id =""
     if args and len(args) > 0:
         inviter_id = args[0]
         
@@ -223,7 +223,7 @@ async def start(update: Update, context: CustomContext) -> None:
         await route_privacy(update, context)
         return
     
-    progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,context)
+    progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,inviter_id,context)
     '''await context.bot.send_message( chat_id = update.effective_chat.id,
         text=config.PANEL_IMG+prm_begin + config.PROMPT_START,
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
@@ -702,11 +702,11 @@ def fet_user_info(user_id:str):
     return user_buss_crud.get_user(db,user_id)
 
 
-async def deal_new_user(user_id:str,context:CustomContext):
-    userinfo = user_buss_crud.get_user(db=db, user_id=user_id)
+async def deal_new_user(userinfo:BotUserInfo,context:CustomContext):
+    
     if userinfo != None and userinfo.level == '0' and userinfo.gpu_level == '0':
          await context.bot.send_message(
-            chat_id=user_id,
+            chat_id=userinfo.tele_user_id,
             text=config.PROMPT_USER_FIRST
         )
          return True
@@ -714,7 +714,7 @@ async def deal_new_user(user_id:str,context:CustomContext):
         
 
 #@chat_id for special rewards from other group
-async def deal_user_start(user_id:str, chat_id:str, context:CustomContext):
+async def deal_user_start(user_id:str, chat_id:str, invited_id:str, context:CustomContext):
 
     gmtdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     userinfo = user_buss_crud.get_user(db=db, user_id=user_id)
@@ -722,17 +722,17 @@ async def deal_user_start(user_id:str, chat_id:str, context:CustomContext):
     if userinfo:
         '''Add code for re-define the guider message'''
         logger.info(f"This user is members!")
-        if await deal_new_user(user_id,context):
+        if await deal_new_user(userinfo,context):
           return config.PROGRESS_LEVEL_IDT,0
     else:
        logger.info(f'Init userInfo and acctinfo with userid={user_id}')
        userinfo = BotUserInfo(tele_user_id=user_id,tele_chat_id=chat_id, reg_gmtdate=gmtdate,
                               level='0',gpu_level='0',
-                              source="O")
+                              source="O",invited_by_userid = invited_id)
        userAcctBase = BotUserAcctBase(user_id=user_id, biz_id='0', tokens='0')
        user_buss_crud.create_user(db,user=userinfo, user_acct=userAcctBase)
     
-       if await deal_new_user(user_id,context):
+       if await deal_new_user(userinfo,context):
           return config.PROGRESS_LEVEL_IDT,0
 
 

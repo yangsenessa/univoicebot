@@ -11,6 +11,7 @@ class BotUserInfo(Base):
     level=Column(String)
     gpu_level=Column(String)
     source=Column(String)
+    invited_by_userid=Column(String)
 
 class BotUserAcctBase(Base):
     __tablename__="bot_user_acct_base"
