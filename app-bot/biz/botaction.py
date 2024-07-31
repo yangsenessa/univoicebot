@@ -375,7 +375,7 @@ async def do_gpu_level_up(update:Update,context:CustomContext):
 
 #https://t.me/+i7Idmn6MhVNiNmE1
 async def join_chat_group(update:Update, context:CustomContext):
-    replay_msg="https://t.me/univoicespace"
+    replay_msg="https://t.me/univoiceofspace"
     await context.bot.send_message(chat_id=update.effective_user.id, text=replay_msg) 
 
 
