@@ -823,9 +823,11 @@ async def gener_earn_rule(update:Update, context:CustomContext):
         
         content_topic2=content_topic2+item
  
+    content_href="\n\n<a>https://medium.com/@coolmoyes/univoice-bot-beginners-guide-bff6d8c8b805</a>"
     await context.bot.send_message(chat_id=update.effective_user.id,
                                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")]]),     
-                                   text=content_topic1+content_split+content_topic2,parse_mode=ParseMode.HTML)
+                                   text=content_topic1+content_split+content_topic2+content_href,
+                                   parse_mode=ParseMode.HTML)
 
 #https://t.me/univoicedev?start=6039165838
 #https://t.me/univoicedevbot?start=6039165838
