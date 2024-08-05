@@ -30,6 +30,13 @@ class TaskInfo(BaseModel):
     task_status:str | None = None
     task_id:str |None = None
 
+class AddTaskInfo(BaseModel):
+    task_id:str
+    status:str
+    rewards:str
+    task_desc:str
+    logo:str
+
 class AcctInfo(BaseModel):
     user_id:str
     wallet_addr:object |None = None
@@ -43,6 +50,27 @@ class User_appinfo_rsp_m(BaseModel):
     claim_info:ClaimInfo
     curr_task_info:TaskInfo
     user_acct_info:AcctInfo
+
+class Get_user_boost_task_rsp_m(BaseModel):
+    result:Result
+    add_tasks:list
+
+class Finsh_user_boost_task_req_m(BaseModel):
+    webAppUser:WebAppUser
+    task_id:str
+
+class Finish_user_boost_task_rsp_m(BaseModel):
+    result:Result
+    reward:str
+
+class Invite_friends_rsp_m(BaseModel):
+    result:Result
+    task_id:str
+    task_desc:str
+    reward:str
+    friend_num:str
+    friend_info_group:list
+    invite_url:str
 
 def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUserAcctBase,task_info:UserCurrTaskDetail|None,claim_info:User_claim_jnl|None) -> User_appinfo_rsp_m :
     
@@ -88,3 +116,7 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
                                              curr_task_info = task_info_m, user_acct_info=user_acct_info_m)
     return user_appinfo_rsp_m
 
+
+def construct_user_boost_task_res(result:Result,add_tasks:list)->Get_user_boost_task_rsp_m:
+    user_boost_task_rsp_m = Get_user_boost_task_rsp_m(result=result, add_tasks=add_tasks)
+    return user_boost_task_rsp_m

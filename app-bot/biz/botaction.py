@@ -143,7 +143,7 @@ async def play(update:Update, context:CustomContext) -> None:
         await route_privacy(update, context)
         return
      
-     progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,inviter_id,context)
+     progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,update.effective_user.full_name,inviter_id,context)
      '''await context.bot.send_message( chat_id = update.effective_chat.id,
         text=config.PANEL_IMG+prm_begin + config.PROMPT_START,
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
@@ -223,7 +223,7 @@ async def start(update: Update, context: CustomContext) -> None:
         await route_privacy(update, context)
         return
     
-    progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,inviter_id,context)
+    progress_status,time_remain =await deal_user_start(update.effective_user.id, update.effective_message.chat_id,update.effective_user.full_name ,inviter_id,context)
     '''await context.bot.send_message( chat_id = update.effective_chat.id,
         text=config.PANEL_IMG+prm_begin + config.PROMPT_START,
         reply_markup=InlineKeyboardMarkup.from_column(inlineKeyboardButton_list),
@@ -714,7 +714,7 @@ async def deal_new_user(userinfo:BotUserInfo,context:CustomContext):
         
 
 #@chat_id for special rewards from other group
-async def deal_user_start(user_id:str, chat_id:str, invited_id:str, context:CustomContext):
+async def deal_user_start(user_id:str, chat_id:str, user_name:str, invited_id:str, context:CustomContext):
 
     gmtdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     userinfo = user_buss_crud.get_user(db=db, user_id=user_id)
@@ -726,8 +726,8 @@ async def deal_user_start(user_id:str, chat_id:str, invited_id:str, context:Cust
           return config.PROGRESS_LEVEL_IDT,0
     else:
        logger.info(f'Init userInfo and acctinfo with userid={user_id}')
-       userinfo = BotUserInfo(tele_user_id=user_id,tele_chat_id=chat_id, reg_gmtdate=gmtdate,
-                              level='0',gpu_level='0',
+       userinfo = BotUserInfo(tele_user_id=user_id,tele_chat_id=chat_id, tele_user_name = user_name,
+                              reg_gmtdate=gmtdate,level='0',gpu_level='0', 
                               source="O",invited_by_userid = invited_id)
        userAcctBase = BotUserAcctBase(user_id=user_id, biz_id='0', tokens='0')
        user_buss_crud.create_user(db,user=userinfo, user_acct=userAcctBase)

@@ -44,10 +44,12 @@ def invoke_acct_token(db:Session, user_id:str, tokens:str,user_claim_jnl:User_cl
         db.commit()
         db.refresh(user_acct_info)
         db.refresh(user_claim_jnl)
+        return True
 
     except Exception as e:
         db.rollback()
         logger.error(f"update user acct info err:{str(e)}")
+        return False
     finally:
         db.close()
 

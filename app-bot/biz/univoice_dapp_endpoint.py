@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from .model.common_app_m import Result
 from .model import common_app_m
 from .model import user_app_info_m
-from .model.user_app_info_m import User_appinfo_rsp_m
+from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo
 from .dal import user_buss_crud
 from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
 from .dal.transaction import User_claim_jnl
@@ -20,6 +20,7 @@ import json
 from datetime import datetime
 import time
 import os
+import uuid
 
 
 router = APIRouter()
@@ -89,8 +90,88 @@ def do_getuserappinfo(userid=Query(None), db:Session = Depends(get_db)):
 
 
 #getuserboosttask
-@router.get("/univoice/getuserboosttask.do")
+@router.get("/univoice/getuserboosttask.do",response_model=user_app_info_m.Get_user_boost_task_rsp_m)
 def do_getuserboosttask(userid=Query(None), db:Session = Depends(get_db)):
+    add_task_infos = config.ADD_TASK_INFO
+    task_item:dict
+    user_curr_task_detail:UserCurrTaskDetail
+    task_groups=list()
+    add_task_item:AddTaskInfo
+
+    for task_item in add_task_infos:
+        task_id = task_item['taskid']
+        token_amount = task_item['rewards']
+        task_desc = task_item['task_desc']
+        logo = task_item['logo']
+        user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id=userid,task_id=task_id)
+
+        #not have task, init task
+        if not user_curr_task_detail:
+            curr_task_detail_new = UserCurrTaskDetail(user_id=userid, chat_id=userid,task_id=task_id,
+                                                      token_amount=token_amount,
+                                                      progress_status= config.PROGRESS_INIT, gmt_create=config.get_datetime(),
+                                                      gmt_modified=config.get_datetime())
+            user_buss_crud.create_user_curr_task_detail(db,curr_task_detail_new)
+            
+            add_task_item = AddTaskInfo(task_id=task_id,status=config.PROGRESS_INIT,rewards=token_amount,task_desc=task_desc,logo=logo)
+            task_groups.append(add_task_item)
+        else:
+            add_task_item = AddTaskInfo(task_id=user_curr_task_detail.task_id, status=user_curr_task_detail.progress_status,
+                                        rewards=user_curr_task_detail.token_amount,task_desc=task_desc,logo=logo)
+            task_groups.append(add_task_item)
+        
+        result = Result("SUCCESS", "SUCCESS")
+        user_boost_task_rsp_m = user_app_info_m.construct_user_boost_task_res(result=result,add_tasks=task_groups)
+        return user_boost_task_rsp_m
+
+@router.post("/univoice/finshuserboosttask.do")
+def do_finshuserboosttask(request:user_app_info_m.Finsh_user_boost_task_req_m,db:Session = Depends(get_db)):
+    user_id = request.webAppUser.id
+    task_id = request.task_id
+    task_conf_item:dict
+    result:Result
+
+    user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id=user_id, task_id = task_id)
+    add_task_info = config.fetch_add_task_info(task_id)
+
+    if (not user_curr_task_detail) or (not add_task_info) :
+        logger.error(f"Addtion task info param error:{task_id}")
+        result = Result(res_code="FAIL", res_msg="System parm error")
+    user_claim_jnl = User_claim_jnl(
+                          jnl_no = str(uuid.uuid4()) ,
+                          user_id = user_id,
+                          task_id=add_task_info['taskid'],
+                          task_name=add_task_info['task_desc'],
+                          tokens=user_curr_task_detail.token_amount,
+                          gmt_biz_create=config.get_datetime(),
+                          gmt_biz_finish=config.get_datetime(),
+                          status="FINISH"
+                          )
+    
+    flag = user_buss_crud.invoke_acct_token(db,user_id,user_curr_task_detail.token_amount,user_claim_jnl)
+    if flag:
+        result = Result(res_code="SUCCESS", res_msg="SUCCESS")
+    else:
+        result = Result(res_code="FAIL", res_msg="Deal acct buss error")
+    
+    finish_user_boost_task_rsp = Finish_user_boost_task_rsp_m(result = result, reward=user_curr_task_detail.token_amount)
+    return finish_user_boost_task_rsp
+
+
+@router.get("/univoice/invitefriends.do",response_model=user_app_info_m.Get_user_boost_task_rsp_m)
+def do_getuserboosttask(userid=Query(None), db:Session = Depends(get_db)):
+
+        
+
+        
+
+
+            
+
+
+
+
+
     
 
     

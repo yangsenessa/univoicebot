@@ -6,6 +6,7 @@ class BotUserInfo(Base):
     __tablename__ ="bot_user_info"
     tele_user_id=Column(String,primary_key=True)
     tele_chat_id=Column(String)
+    tele_user_name=Column(String)
     wallet_id=Column(String)
     reg_gmtdate=Column(DateTime)
     level=Column(String)

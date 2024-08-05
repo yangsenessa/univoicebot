@@ -78,9 +78,20 @@ TASK_INFO=json.load(open(path))
 path = os.path.join(os.path.dirname(__file__),"conf","gpu_level.json")
 GPU_LEVEL_INFO=json.load(open(path))
 
+path = os.path.join(os.path.dirname(__file__),"conf","add_task.json")
+ADD_TASK_INFO = json.load(open(path))
+
+
+def fetch_add_task_info(task_id:str):
+    for task_item in ADD_TASK_INFO :
+        if task_id == task_item['taskid']:
+            return task_item
+    return None
+
 def paramloader(paramstr:str):
     paramobj =json.loads(paramstr)
     return (paramobj['param'], paramobj['value'])
+
 
 # @curr-context param
 # @param-tripule
