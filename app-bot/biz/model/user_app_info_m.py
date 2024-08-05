@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 import json
-import Result from common_app_m
+from common_app_m import Result
 
 #webAppUser
 class WebAppUser(BaseModel):
