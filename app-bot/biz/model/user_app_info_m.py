@@ -1,6 +1,12 @@
 from pydantic import BaseModel
 import json
 from common_app_m import Result
+from ..dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
+from ..dal.transaction import User_claim_jnl
+from datetime import datetime
+from ..tonwallet import config
+
+
 
 #webAppUser
 class WebAppUser(BaseModel):
@@ -32,9 +38,53 @@ class AcctInfo(BaseModel):
     invite_from:str|None = None
     balance:str|None = None
 
-class user_appinfo_rsp_m(BaseModel):
+class User_appinfo_rsp_m(BaseModel):
     result:Result
     claim_info:ClaimInfo
     curr_task_info:TaskInfo
     user_acct_info:AcctInfo
+
+def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUserAcctBase,task_info:UserCurrTaskDetail|None,claim_info:User_claim_jnl|None) -> User_appinfo_rsp_m :
+    
+
+    
+    user_acct_info_m = AcctInfo(user_id=user_info.tele_user_id,
+                              wallet_addr=user_acct.wallet_id,
+                              VSD_level = user_info.level,
+                              gpu_level=user_info.gpu_level,
+                              invite_from = user_info.invited_by_userid,
+                              balance=user_acct.tokens)
+    
+   
+    
+    #cal waiting time
+    time_begin = task_info.gmt_modified
+    time_end = datetime.now()
+    gpu_level = task_info.gpu_level
+    time_remain = config.cal_task_claim_time(gpu_level, task_info.task_id) - (time_end-time_begin).seconds
+    if time_remain <= 0:
+        time_remain = 0
+
+    
+    
+    claim_info_m = ClaimInfo()
+    if not claim_info :
+        claim_info_m.claim_status = config.PROGRESS_INIT
+    else:
+        claim_info_m.claim_jnl = claim_info.jnl_no
+        claim_info_m.claim_status = claim_info.status
+        claim_info_m.wait_time = time_remain
+    
+    task_info_m = TaskInfo()
+    if not task_info:
+       task_info_m.task_id=''
+       task_info_m.task_status=config.PROGRESS_INIT
+    else:
+       task_info_m.task_id = task_info.task_id
+       task_info_m.task_status = task_info.progress_status
+    
+
+    user_appinfo_rsp_m = User_appinfo_rsp_m(result= result, claim_info= claim_info_m,
+                                             curr_task_info = task_info_m, user_acct_info=user_acct_info_m)
+    return user_appinfo_rsp_m
 

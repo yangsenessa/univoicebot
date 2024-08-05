@@ -291,8 +291,19 @@ def deal_custom_claim(db:Session, user_id:str):
          db.close()
     
     
+def fetch_curr_claim(db:Session, user_id:str) :
+    try:
+        claim_jnl = db.query(User_claim_jnl).filter(User_claim_jnl.user_id==user_id,
+                                                      User_claim_jnl.status == config.PROGRESS_WAIT_CUS_CLAIM).first()
+        
+        return claim_jnl
+    
+    except Exception as e:
+         logger.error(f"Deal claim err userid={user_id} e={str(e)}")
+         return None
+    finally:
+         db.close()
 
-     
 
     
 
