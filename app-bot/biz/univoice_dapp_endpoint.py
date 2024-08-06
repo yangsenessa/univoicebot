@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from .model.common_app_m import Result
 from .model import common_app_m
 from .model import user_app_info_m
-from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m
+from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m,Vsd_level_m,Gpu_level_m,Producer_item_m,Voicetaskview_rsp_m
 from .dal import user_buss_crud
 from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
 from .dal.transaction import User_claim_jnl
@@ -179,6 +179,49 @@ def do_getuserboosttask(userid=Query(None), db:Session = Depends(get_db)):
                                      rewards=rewards, friend_num=len(user_info_list),friend_info_group= friend_info_group,
                                      invite_url= invite_link)
     return res_model
+
+@router.get("/univoice/voicetaskview.do",response_model=user_app_info_m.Get_user_boost_task_rsp_m)
+def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
+    user_info:BotUserInfo
+    user_info = user_buss_crud.get_user(db=db,user_id=userid)
+    vsd_level = user_info.level
+    gpu_level = user_info.gpu_level
+
+    vsd_level_conf = config.TASK_INFO[config.TASK_VOICE_UPLOAD]
+    vsd_level_info = vsd_level_conf[vsd_level]
+    vsd_level_next = str( int(vsd_level) +1 )
+    vsd_level_next_info = vsd_level_conf[vsd_level_next]
+
+    gpu_level_conf = config.GPU_LEVEL_INFO
+    gpu_level_info = gpu_level_conf[gpu_level]
+    gpu_level_next = str(int(gpu_level)+1)
+    gpu_level_next_info = gpu_level_conf(gpu_level_next)
+
+    
+
+    VSD_LEVEL = Vsd_level_m(level=vsd_level,top_level="12",upgrade_cost=vsd_level_next_info["consume"], duration=vsd_level_info["token"])
+    
+    GPU_LEVEL = Gpu_level_m(level=gpu_level,top_level="6",upgrade_cost=gpu_level_next_info["consume"], 
+                            times= str(24/int(gpu_level_info["wait_h"])) )
+    
+
+    producer_group= list()
+    
+    product_list = user_buss_crud.fet_product_list(db=db, user_id=userid)
+    if product_list:
+        for prd_item in product_list :
+            prd_item_m = Producer_item_m(prd_id=prd_item.prd_id,task_id=prd_item.task_id, file_obj=prd_item.prd_entity,prd_type="VOICE")
+            producer_group.append(prd_item_m)
+    
+    result = common_app_m.buildResult("SUCCESS", "SUCCESS")
+    rsp_m = Voicetaskview_rsp_m(result=result, VSD_LEVEL= VSD_LEVEL, GPU_LEVEL=GPU_LEVEL,producer_group= producer_group)
+    return rsp_m
+
+
+
+
+
+
 
 
 

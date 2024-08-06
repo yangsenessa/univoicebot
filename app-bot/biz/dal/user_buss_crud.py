@@ -317,7 +317,26 @@ def fetch_user_invited(db:Session, user_id:str):
         db.close()
 
 
-    
+def fet_product_list(db:Session, user_id:str):
+    try:
+        product_list = db.query(UserTaskProducer).filter(UserTaskProducer.user_id == user_id).all()
+        return product_list
+    except Exception as e:
+        logger.error(f"fetch product error {user_id} e={str(e)}")
+        return None
+    finally:
+        db.close()
+
+def delete_product(db:Session, product_id:str):
+    try:
+        product = db.query(UserTaskProducer).filter(UserTaskProducer.prd_id == product_id).first()
+        if product:
+            db.delete(product)
+            db.commit()
+    except Exception as e:
+        logger.error(f"delete product error {product_id} e={str(e)}")
+    finally:
+        db.close()
 
      
 

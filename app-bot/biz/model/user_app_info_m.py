@@ -72,6 +72,29 @@ class Invite_friends_rsp_m(BaseModel):
     friend_info_group:list
     invite_url:str
 
+class Vsd_level_m(BaseModel):
+    level:str
+    top_level:str
+    upgrade_cost:str
+    duration:str
+
+class Gpu_level_m(BaseModel):
+    level:str
+    top_level:str
+    upgrade_cost:str
+    times:str
+
+class Producer_item_m(BaseModel):
+    prd_id:str
+    task_id:str
+    file_obj:str
+    prd_type:str
+
+class Voicetaskview_rsp_m(BaseModel):
+    result:Result
+    VSD_LEVEL:Vsd_level_m
+    GPU_LEVEL:Gpu_level_m
+    producer_group:list
 
 def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUserAcctBase,task_info:UserCurrTaskDetail|None,claim_info:User_claim_jnl|None) -> User_appinfo_rsp_m :
     
