@@ -229,7 +229,7 @@ def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,user_level:s
 
 def deal_task_claim(db:Session,user_id:str):
     try:
-        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id).first()
+        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id, UserCurrTaskDetail.task_id=="VOICE-UPLOAD").first()
         if task_detail == None or task_detail.progress_status != config.PROGRESS_DEAILING :
             logger.error(f"Claim is timing, but can't find the task detail!" )
             # Dirty data ,ignore
