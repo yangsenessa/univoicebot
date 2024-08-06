@@ -84,9 +84,12 @@ def create_user(db:Session, user:BotUserInfo, user_acct:BotUserAcctBase):
         db.refresh(user)
         db.refresh(user_acct)
     except Exception as e:
+        logger.error(f"db err: {str(e)}")
         db.rollback()
     finally:
         db.close()
+
+         
 
 
 def match_task(db:Session,action:str, level:str,chat_id:str):
@@ -132,6 +135,8 @@ def create_user_curr_task_detail(db:Session, user_curr_task_detail:UserCurrTaskD
                 return False
     except Exception as e:
         db.rollback()
+        logger.error(f"db err: {str(e)}")
+
     finally:
         db.close() 
 
@@ -171,8 +176,9 @@ def remove_curr_task_detail(db:Session,user_curr_task_detail:UserCurrTaskDetail)
             db.commit()
      except Exception as e:
         db.rollback()
+        logger.error(f"db err: {str(e)}")
      finally:
-         db.close()
+        db.close()
 
 def fetch_user_curr_tase_detail_status(db:Session,user_id:str,progress_status:str):
     try:
@@ -192,6 +198,7 @@ def create_task_producer(db:Session,user_task_producer:UserTaskProducer):
         db.refresh(user_task_producer)
     except Exception as e:
         db.rollback()
+        logger.error(f"db err: {str(e)}")
     finally:
         db.close()
 
@@ -214,6 +221,7 @@ def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,user_level:s
             return False
      except Exception as e:
         db.rollback()
+        logger.error(f"db err: {str(e)}")
      finally:
          db.close()
 
@@ -334,6 +342,7 @@ def delete_product(db:Session, product_id:str):
             db.delete(product)
             db.commit()
     except Exception as e:
+        db.rollback()
         logger.error(f"delete product error {product_id} e={str(e)}")
     finally:
         db.close()

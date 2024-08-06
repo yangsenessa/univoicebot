@@ -9,10 +9,13 @@ from comfyai import usermanner_endpoint
 from comfyai import mixlab_endpoint
 from comfyai import wsserver_endpoint
 from comfyai import telegram_bot_endpoint
+from biz import univoice_dapp_endpoint
 from biz.media import parsewav
 from biz.botaction import start,callback_inline,voice_upload,show_cus_upgrade,sharelink_task
 from biz.tonwallet.config import TOKEN
 from loguru import logger
+from threading import Thread
+
 import uvicorn
 
 async def set_right(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -92,7 +95,7 @@ application.add_handler(voice_handler)
 application.add_handler(CallbackQueryHandler(callback_inline))
 
 # run!
-application.run_polling()
+#application.run_polling()
 
 
 ############################################################################################################
@@ -110,10 +113,16 @@ app.add_middleware(
 app.include_router(usermanner_endpoint.router)
 app.include_router(mixlab_endpoint.router)
 app.include_router(wsserver_endpoint.router)
+app.include_router(univoice_dapp_endpoint.router)
 
 
+def run_bot():
+    application.run_polling()
 
 
 if __name__ == '__main__':
-   uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True, debug=True)
-   application.run_polling()
+    #Thread(target=run_bot).start()
+    run_bot()
+    #uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=True)
+
+   

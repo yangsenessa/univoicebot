@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 import json
-from common_app_m import Result
+from .common_app_m import Result
 from ..dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
 from ..dal.transaction import User_claim_jnl
 from datetime import datetime
@@ -61,7 +61,7 @@ class Finsh_user_boost_task_req_m(BaseModel):
 
 class Finish_user_boost_task_rsp_m(BaseModel):
     result:Result
-    reward:str
+    reward:str|None=None
 
 class Invite_friends_rsp_m(BaseModel):
     result:Result
@@ -105,7 +105,7 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
                               VSD_level = user_info.level,
                               gpu_level=user_info.gpu_level,
                               invite_from = user_info.invited_by_userid,
-                              balance=user_acct.tokens)
+                              balance= str(user_acct.tokens))
     
    
     
@@ -119,7 +119,7 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
 
     
     
-    claim_info_m = ClaimInfo()
+    claim_info_m = ClaimInfo(claim_status=config.PROGRESS_INIT,wait_time=None, claim_jnl=None)
     if not claim_info :
         claim_info_m.claim_status = config.PROGRESS_INIT
     else:
@@ -144,3 +144,5 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
 def construct_user_boost_task_res(result:Result,add_tasks:list)->Get_user_boost_task_rsp_m:
     user_boost_task_rsp_m = Get_user_boost_task_rsp_m(result=result, add_tasks=add_tasks)
     return user_boost_task_rsp_m
+
+
