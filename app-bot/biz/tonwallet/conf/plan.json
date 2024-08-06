@@ -68,9 +68,11 @@
     },
     "INVITE":{
         "ALL":{
+            "taskdesc":"Invite friends earn tokens",
             "token":5000
         },
         "PRO":{
+            "taskdesc":"Invite friends earn tokens",
             "token":10000
         }
     }

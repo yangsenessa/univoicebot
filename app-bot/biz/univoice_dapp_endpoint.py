@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from .model.common_app_m import Result
 from .model import common_app_m
 from .model import user_app_info_m
-from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo
+from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m
 from .dal import user_buss_crud
 from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
 from .dal.transaction import User_claim_jnl
@@ -160,6 +160,30 @@ def do_finshuserboosttask(request:user_app_info_m.Finsh_user_boost_task_req_m,db
 
 @router.get("/univoice/invitefriends.do",response_model=user_app_info_m.Get_user_boost_task_rsp_m)
 def do_getuserboosttask(userid=Query(None), db:Session = Depends(get_db)):
+    invitetask = config.TASK_INFO[config.TASK_INVITE]["ALL"]
+    task_id = config.TASK_INVITE
+    task_desc = invitetask["taskdesc"]
+    rewards = invitetask["token"]
+    invite_link = f"https://t.me/univoice2bot?start={userid}"
+    friend_info_group = list()
+
+    user_info_list = user_buss_crud.fetch_user_invited(db=db, user_id=userid)
+
+    if user_info_list:
+        for user_item in user_info_list :
+            friend_info_group.append({"name": user_item.tele_user_name, "rewards":rewards})
+    
+    result = common_app_m.buildResult("SUCCESS","SUCCESS")
+
+    res_model = Invite_friends_rsp_m(result=result, task_id=task_id, task_desc=task_desc, 
+                                     rewards=rewards, friend_num=len(user_info_list),friend_info_group= friend_info_group,
+                                     invite_url= invite_link)
+    return res_model
+
+
+
+
+
 
         
 

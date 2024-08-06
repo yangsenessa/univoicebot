@@ -67,10 +67,11 @@ class Invite_friends_rsp_m(BaseModel):
     result:Result
     task_id:str
     task_desc:str
-    reward:str
+    rewards:str
     friend_num:str
     friend_info_group:list
     invite_url:str
+
 
 def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUserAcctBase,task_info:UserCurrTaskDetail|None,claim_info:User_claim_jnl|None) -> User_appinfo_rsp_m :
     

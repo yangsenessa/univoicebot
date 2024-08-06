@@ -306,6 +306,16 @@ def fetch_curr_claim(db:Session, user_id:str) :
     finally:
          db.close()
 
+def fetch_user_invited(db:Session, user_id:str):
+    try:
+        user_info_list = db.query(BotUserInfo).filter(BotUserInfo.invited_by_userid ==  user_id).all()
+        return user_info_list
+    except Exception as e:
+        logger.error(f"fetch user who was invited by {user_id} e ={str(e)}")
+        return None
+    finally:
+        db.close()
+
 
     
 
