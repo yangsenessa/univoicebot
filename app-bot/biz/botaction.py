@@ -690,7 +690,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
 
     #create producer entity
     entity=dict()
-    entity["type"]="filename"
+    entity["type"]="osskey"
     entity["value"]=cid
     entity_str = json.dumps(entity)
     prd_id = hash(entity_str)

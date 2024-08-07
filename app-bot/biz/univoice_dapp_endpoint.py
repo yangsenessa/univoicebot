@@ -14,7 +14,7 @@ from .dal.transaction import User_claim_jnl
 from .dal.global_config import Unvtaskinfo
 from .dal.database import SessionLocal
 from .tonwallet import config
-from .media import get_oss_download_url
+from .media import get_oss_download_url,get_oss_bucket
 
 import requests
 import json
@@ -300,6 +300,18 @@ def do_getuserboosttask(userid=Query(None), db:Session = Depends(get_db)):
                                      rewards=rewards, friend_num=str(len(user_info_list)) ,friend_info_group= friend_info_group,
                                      invite_url= invite_link)
     return res_model
+
+
+@router.get("/univoice/deletevoice.do", response_model=common_app_m.Result)
+def do_deletevoice(prd_id=Query(None),osskey=Query(None), db:Session = Depends(get_db)):
+
+    res_flag = user_buss_crud.delete_product(db,product_id=prd_id)
+    if res_flag:
+        bucket = get_oss_bucket()
+        resp = bucket.delete_object(osskey)
+        logger.info(f"Delete oss-key result {resp.status}")
+        return common_app_m.buildResult("SUCCESS", str(resp.status))
+    return common_app_m.buildResult("FAIL","Delete voice fail")
 
 @router.get("/univoice/voicetaskview.do",response_model=user_app_info_m.Voicetaskview_rsp_m)
 def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):

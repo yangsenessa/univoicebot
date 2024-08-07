@@ -348,12 +348,13 @@ def delete_product(db:Session, product_id:str):
         if product:
             db.delete(product)
             db.commit()
+            return True
     except Exception as e:
         db.rollback()
         logger.error(f"delete product error {product_id} e={str(e)}")
     finally:
         db.close()
-
+    return False
      
 
 
