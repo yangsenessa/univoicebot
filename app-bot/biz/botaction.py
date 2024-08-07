@@ -313,6 +313,7 @@ async def do_share_inner_process(update:Update, context:CustomContext):
     img_name="TGbanner.jpg"
 
     user_id=update.effective_user.id
+    user_info = fet_user_info(user_id)
 
     token_base = config.TASK_INFO['VOICE-UPLOAD'][user_info.level]['token']
     flatter = config.GPU_LEVEL_INFO[user_info.gpu_level]['flatter']
