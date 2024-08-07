@@ -9,11 +9,30 @@ import base64
 import json
 import subprocess
 import re
+import oss2
+import uuid
 
 import sys
 sys.path.append('..')
 from comfyai import telegram_bot_endpoint
 
+endpoint = 'http://oss-us-east-1.aliyuncs.com'
+
+#oss
+def get_oss_bucket():
+   bucket_name = 'univoice'
+   access_key_id=os.getenv("OSS_ACCESS_KEY_ID")
+   access_key_secret = os.getenv("OSS_ACCESS_KEY_SECRET")
+   
+   bucket = oss2.Bucket(oss2.Auth(access_key_id, access_key_secret), endpoint, bucket_name=bucket_name)
+   return bucket
+
+
+def get_oss_download_url(key:str):
+    logger.debug("Get oss with key:" + key)
+    bucket = get_oss_bucket()
+    url =  bucket.sign_url('GET', key, 3600*24*7)
+    return url
 
 async def parsewav(user_token:str, voice_file:File,context:ContextTypes.DEFAULT_TYPE):
    with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_ogg_file:
@@ -45,11 +64,17 @@ async def save_voice( voice_file:File):
           tmp_ogg_file.flush()
           os.fsync(tmp_ogg_file.fileno())
           logger.info(f"ogg dir: {tmp_ogg_file.name}")
+
+          oss_key=str(uuid.uuid4())+str(hash(tmp_ogg_file.name))
        #   return tmp_ogg_file.name
      #set_environment_variables()
      # 调用编译好的二进制文件
-     logger.info(f'Upload file={tmp_ogg_file.name}')
-     result = subprocess.run(
+          logger.info(f'Upload file={tmp_ogg_file.name}')
+          result = get_oss_bucket().put_object_from_file(oss_key,tmp_ogg_file.name)
+          return oss_key
+         
+
+     '''result = subprocess.run(
         #--['/home/ubuntu/app/bin/example', 'upload','--make-car=true',tmp_ogg_file.name],
         ['/home/ubuntu/app/bin/example', 'upload',tmp_ogg_file.name],
         #['D:\\project\\titan-storage-sdk\\example\\example', 'upload', tmp_ogg_file.name],
@@ -75,7 +100,7 @@ async def save_voice( voice_file:File):
          print("Upload failed")
          print("Error:", result.stderr)
          return ""
-
+     '''
 
 #transfer wkflow content
 def parseAudioBase64IntoWorkflow(base64date:bytes):

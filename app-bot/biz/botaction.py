@@ -652,7 +652,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
         return
 
     task_curr_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id,task_id)
-    if task_curr_detail.progress_status == config.PROGRESS_DEAILING:
+    if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_DEAILING:
         timebegin = task_curr_detail.gmt_modified
         timeend = datetime.now()
       
@@ -661,7 +661,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
         await context.bot.send_message(chat_id=update.effective_user.id,
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
         return
-    if task_curr_detail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
+    if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
         timebegin = task_curr_detail.gmt_modified
         timeend = datetime.now()
       
