@@ -14,6 +14,8 @@ MANIFEST_URL='https://raw.githubusercontent.com/XaBbl4/pytonconnect/main/pytonco
 
 CHANNLE_CHAT_ID=-1002177350295
 
+OUTTER_PARTNER_ID='99999991'
+
 
 #from os import environ as env
 

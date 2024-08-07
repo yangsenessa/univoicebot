@@ -141,7 +141,8 @@ async def play(update:Update, context:CustomContext) -> None:
         inviter_id = args[0]
         # 在这里记录邀请信息，例如更新数据库
         logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
-        await deal_invite_user_login(update, context, inviter_id)
+        if inviter_id != config.OUTTER_PARTNER_ID:
+            await deal_invite_user_login(update, context, inviter_id)
      if chat_id != user_id:
         logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
         await route_privacy(update, context)
@@ -221,7 +222,9 @@ async def start(update: Update, context: CustomContext) -> None:
         inviter_id = args[0]
         
         logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
-        await deal_invite_user_login(update, context, inviter_id)
+
+        if inviter_id != config.OUTTER_PARTNER_ID:
+            await deal_invite_user_login(update, context, inviter_id)
     if chat_id != user_id:
         logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
         await route_privacy(update, context)
