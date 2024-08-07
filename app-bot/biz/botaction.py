@@ -754,7 +754,14 @@ async def deal_new_user(userinfo:BotUserInfo,context:CustomContext):
             chat_id=userinfo.tele_user_id,
             text=config.PROMPT_USER_FIRST
         )'''
-        return True
+        path = os.path.abspath(os.path.dirname(__file__))
+        img_path="resource"
+        img_name=config.PROMPT_NOTIFY_CLAIMED_IMG
+        with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
+           await context.bot.send_photo(chat_id=userinfo.tele_user_id,
+                                        photo=imgfile,                                            
+                                         parse_mode=ParseMode.HTML)
+           return True
     return False
         
 
