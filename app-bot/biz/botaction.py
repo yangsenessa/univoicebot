@@ -434,6 +434,12 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
 
     tp_1=f"The current VSD is at {user_level} level."
 
+    if int(user_level) == 0 :
+        user_level = str(int(user_level)+1)
+
+    if int(gpu_level) == 0 :
+        gpu_level = str(int(gpu_level)+1)
+
 
     next_user_level = int(user_level) +1
     next_gpu_level = int(gpu_level) +1
