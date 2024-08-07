@@ -12,6 +12,9 @@ TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'
 MANIFEST_URL='https://raw.githubusercontent.com/XaBbl4/pytonconnect/main/pytonconnect-manifest.json'
 
 
+CHANNLE_CHAT_ID=-1002177350295
+
+
 #from os import environ as env
 
 #from dotenv import load_dotenv
