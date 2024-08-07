@@ -750,11 +750,11 @@ def fet_user_info(user_id:str):
 async def deal_new_user(userinfo:BotUserInfo,context:CustomContext):
     
     if userinfo != None and userinfo.level == '0' and userinfo.gpu_level == '0':
-         await context.bot.send_message(
+        ''' await context.bot.send_message(
             chat_id=userinfo.tele_user_id,
             text=config.PROMPT_USER_FIRST
-        )
-         return True
+        )'''
+        return True
     return False
         
 
