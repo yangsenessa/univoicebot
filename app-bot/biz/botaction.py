@@ -331,7 +331,7 @@ async def do_share_inner_process(update:Update, context:CustomContext):
     with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
         await context.bot.send_photo(chat_id=chat_id, 
                                      photo=imgfile,
-                                     caption=prm_begin + config.PROMPT_START,
+                                     caption=prm_begin + rsp_msg,
                                      reply_markup=InlineKeyboardMarkup(cliamed_btn),
                                      parse_mode=ParseMode.HTML)
     return
