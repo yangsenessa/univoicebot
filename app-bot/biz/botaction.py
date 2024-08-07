@@ -54,12 +54,16 @@ panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
 
 cliamed_btn=[[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")]]
 
+share_inner_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],[InlineKeyboardButton(text="share to Univoice-Group", callback_data="opr_share_inner")]]
+
 invote_btn=[[InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]]
 claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
 
 upgradekeyboardButton_list=list()
 upgradekeyboardButton_list.append(InlineKeyboardButton(text="level-upgrade",callback_data="opr-level-upgrade"))
 upgradekeyboardButton_list.append(InlineKeyboardButton(text="gpu-upgrade",callback_data="opr-gpu-upgrade"))
+
+
 
 
 
@@ -296,6 +300,37 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
         await do_gpu_level_up(update, context)
     elif (commandhandlemsg == "opr-earn"):
         await gener_earn_rule(update, context)
+    elif (commandhandlemsg == "opr_share_inner"):
+        await do_share_inner_process(update,context)
+
+async def do_share_inner_process(update:Update, context:CustomContext):
+    path = os.path.abspath(os.path.dirname(__file__))
+    logger.info(f"Curr path is:{path}")
+    img_path="resource"
+    img_name="TGbanner.jpg"
+
+    user_id=update.effective_user.id
+
+    token_base = config.TASK_INFO['VOICE-UPLOAD'][user_info.level]['token']
+    flatter = config.GPU_LEVEL_INFO[user_info.gpu_level]['flatter']
+    token_fee = int(float(token_base) * float(flatter))
+
+    user_info = user_buss_crud.get_user(db,user_id)
+
+    prm_begin=f"<b>Hi </b> {update.effective_user.name},welcome"
+    rsp_msg = f"Congratulation ! \n Your voice storage duration are currently at {user_info.level} level, GPU efficiency {user_info.gpu_level} level\
+        \n${str(token_fee)} has been credited to your account. \
+        \n Click '🗣 play' to test your voice too ⬇️⬇️⬇️ ."
+
+    chat_id = config.CHANNLE_CHAT_ID
+
+    with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
+        await context.bot.send_photo(chat_id=chat_id, 
+                                     photo=imgfile,
+                                     caption=prm_begin + config.PROMPT_START,
+                                     reply_markup=InlineKeyboardMarkup(cliamed_btn),
+                                     parse_mode=ParseMode.HTML)
+    return
 
 async def do_user_level_up(update:Update,context:CustomContext):
     user_info = fet_user_info(update.effective_user.id)
@@ -569,7 +604,7 @@ async def voice_judge(update:Update,context:CustomContext):
 
 
         await context.bot.send_message(chat_id=update.effective_user.id,
-                                       reply_markup=InlineKeyboardMarkup(cliamed_btn),
+                                       reply_markup=InlineKeyboardMarkup(share_inner_btn),
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
         return True
     return False
