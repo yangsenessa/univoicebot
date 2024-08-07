@@ -73,7 +73,8 @@ PROMPT_HAS_CAILMED_5="Let's go"
 PROMPT_RECORD_FINISH_IMG = "record-complete.jpg"
 PROMPT_UPGRADE_SUCCESS="upgrade-success.jpg"
 PROMPT_NOTIFY_CLAIM_IMG="notify-claim.jpg"
-PROMPT_NOTIFY_CLAIMED_IMG="newmember.jpg"
+PROMPT_NOTIFY_CLAIMED_IMG="cliam-success.jpg"
+PROMPT_NEW_MEMBER_IMG="newmember.jpg"
 
 
 #########################################TASK########################################

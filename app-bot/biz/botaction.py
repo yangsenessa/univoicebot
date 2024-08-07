@@ -756,7 +756,7 @@ async def deal_new_user(userinfo:BotUserInfo,context:CustomContext):
         )'''
         path = os.path.abspath(os.path.dirname(__file__))
         img_path="resource"
-        img_name=config.PROMPT_NOTIFY_CLAIMED_IMG
+        img_name=config.PROMPT_NEW_MEMBER_IMG
         with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
            await context.bot.send_photo(chat_id=userinfo.tele_user_id,
                                         photo=imgfile,                                            

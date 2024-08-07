@@ -14,6 +14,7 @@ from .dal.transaction import User_claim_jnl
 from .dal.global_config import Unvtaskinfo
 from .dal.database import SessionLocal
 from .tonwallet import config
+from .media import get_oss_download_url
 
 import requests
 import json
@@ -313,7 +314,7 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
 
     if int(vsd_level) < 12:      
        vsd_level_next_info = vsd_level_conf[vsd_level_next]
-       VSD_LEVEL = Vsd_level_m(level=vsd_level,top_level="12",upgrade_cost=vsd_level_next_info["consume"], duration=str(vsd_level_info["duration"]))
+       VSD_LEVEL = Vsd_level_m(level=vsd_level,top_level="12",upgrade_cost=str(vsd_level_next_info["consume"]), duration=str(vsd_level_info["duration"]))
 
     else:
        VSD_LEVEL = Vsd_level_m(level=vsd_level,top_level="12",upgrade_cost="0", duration=str(vsd_level_info["duration"]))
@@ -337,7 +338,9 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
     product_list = user_buss_crud.fet_product_list(db=db, user_id=userid)
     if product_list:
         for prd_item in product_list :
-            prd_item_m = Producer_item_m(prd_id=prd_item.prd_id,task_id=prd_item.task_id, file_obj=prd_item.prd_entity,prd_type="VOICE")
+            key_info = json.loads(prd_item.prd_entity)
+
+            prd_item_m = Producer_item_m(prd_id=prd_item.prd_id,task_id=prd_item.task_id, file_obj=get_oss_download_url(key_info["value"]),prd_type="VOICE")
             producer_group.append(prd_item_m)
     
     result = common_app_m.buildResult("SUCCESS", "SUCCESS")
