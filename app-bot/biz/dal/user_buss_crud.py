@@ -5,6 +5,7 @@ from ..tonwallet import config
 from .transaction import User_claim_jnl
 from loguru import logger
 import uuid
+import json
 
 
 def get_user(db:Session, user_id:str):
@@ -233,14 +234,17 @@ def update_user_curr_task_detail(db:Session,user_id:str,task_id:str,user_level:s
 
 def deal_task_claim(db:Session,user_id:str):
     try:
-        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id, UserCurrTaskDetail.task_id=="VOICE-UPLOAD").first()
-        if task_detail == None or task_detail.progress_status != config.PROGRESS_DEAILING :
+        db.commit()
+        task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id, UserCurrTaskDetail.task_id=="VOICE-UPLOAD",
+                                                          UserCurrTaskDetail.progress_status== config.PROGRESS_DEAILING).with_for_update().first()
+        logger.info(task_detail.task_id)
+        if task_detail == None :
             logger.error(f"Claim is timing, but can't find the task detail!" )
             # Dirty data ,ignore
             return True
          
         task_detail.progress_status = config.PROGRESS_WAIT_CUS_CLAIM
-        db.add(task_detail)
+        #db.add(task_detail)
 
         user_claim_jnl = User_claim_jnl(jnl_no = str(uuid.uuid4()),
                                      user_id =  user_id,
@@ -251,9 +255,9 @@ def deal_task_claim(db:Session,user_id:str):
                                      gmt_biz_finish =  config.get_datetime(),
                                      status = config.PROGRESS_WAIT_CUS_CLAIM)
         db.add(user_claim_jnl)
-        db.commit()
-        db.refresh(task_detail)
-        
+        logger.info(f"userid:{task_detail.user_id} task_id:{task_detail.task_id}--status:{task_detail.progress_status}")
+
+        db.commit()        
         logger.info(f"user:{user_id} have finish claim")
     except Exception as e:
          logger.error(f"Deal claim err userid={user_id} e={str(e)}")

@@ -125,7 +125,7 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
     else:
         claim_info_m.claim_jnl = claim_info.jnl_no
         claim_info_m.claim_status = claim_info.status
-        claim_info_m.wait_time = time_remain
+        claim_info_m.wait_time = str(time_remain)
     
     task_info_m = TaskInfo()
     if not task_info:

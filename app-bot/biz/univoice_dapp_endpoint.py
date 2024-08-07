@@ -80,9 +80,34 @@ def do_getuserappinfo(userid=Query(None), db:Session = Depends(get_db)):
     if (not user_info) or (not user_acct) :
         result =  common_app_m.buildResult("FAIL","Please go to univoice-bot and play once")
     
+
+    
     user_info,user_acct = fetch_user_inner_info(userid,db)
-    claim_jnl = fetch_curr_claim_info(userid, db)
     curr_task = fetch_task_info(userid, db)
+
+    if curr_task:
+        logger.info(f"Do task claim call {userid}")
+        task_id = curr_task.task_id
+        task_info_cfg= config.TASK_INFO
+        base_reward = float(task_info_cfg[task_id][user_info.level]["token"])
+
+        gpu_info_cfg = config.GPU_LEVEL_INFO
+        flatter = float(gpu_info_cfg[user_info.gpu_level]["flatter"])
+
+        reward_amt = str(int(base_reward * flatter)) 
+       
+        if  curr_task.progress_status == config.PROGRESS_DEAILING:
+            logger.info(f"Load curr task detail {curr_task.task_id}-{curr_task.progress_status}")
+           
+            timebegin = curr_task.gmt_modified
+            timeend = datetime.now()
+            if (timeend-timebegin).seconds >config.cal_task_claim_time(user_info.gpu_level,task_id):
+                user_buss_crud.deal_task_claim(db,userid)
+                progress_status = config.PROGRESS_WAIT_CUS_CLAIM
+                time_remain = 0
+   
+    claim_jnl = fetch_curr_claim_info(userid, db)
+
     user_appinfo_rsp : User_appinfo_rsp_m
     result=common_app_m.buildResult("SUCCESS","SUCCESS")
     user_appinfo_rsp = user_app_info_m.construct_userinfp_res(result,user_info,user_acct,curr_task, claim_jnl)

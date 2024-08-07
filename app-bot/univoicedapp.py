@@ -45,5 +45,5 @@ app.include_router(univoice_dapp_endpoint.router)
 
 if __name__ == '__main__':
     #Thread(target=run_bot).start()  
-    uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=True)
+    uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=False)
    

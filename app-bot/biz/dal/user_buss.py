@@ -23,11 +23,11 @@ class BotUserAcctBase(Base):
 
 class UserCurrTaskDetail(Base):
     __tablename__="unv_user_curr_task_detail"
-    user_id=Column(String, primary_key=True)
+    user_id=Column(String,primary_key=True)
     user_level=Column(String)
     gpu_level=Column(String)
     chat_id=Column(String)
-    task_id=Column(String)
+    task_id=Column(String,primary_key=True)
     token_amount=Column(BIGINT)
     progress_status=Column(String)
     gmt_create=Column(DateTime)
