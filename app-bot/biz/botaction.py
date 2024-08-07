@@ -567,9 +567,9 @@ async def voice_judge(update:Update,context:CustomContext):
 
         voice_file = await update.effective_message.voice.get_file()
         time_duration = update.effective_message.voice.duration
-        if voice_file == None or time_duration <3:
+        if voice_file == None or time_duration <1:
             await context.bot.send_message(chat_id=update.effective_user.id,
-                                   text="Please let us hear you ,at least 3 sec.",parse_mode=ParseMode.HTML)
+                                   text="Please let us hear you ,at least 1 sec.",parse_mode=ParseMode.HTML)
             return False
         
         radom_level =int(config.get_rd_user_level()) 
