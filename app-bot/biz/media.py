@@ -51,8 +51,8 @@ async def save_voice( voice_file:File):
      logger.info(f'Upload file={tmp_ogg_file.name}')
      result = subprocess.run(
         #--['/home/ubuntu/app/bin/example', 'upload','--make-car=true',tmp_ogg_file.name],
-        #['/home/ubuntu/app/bin/example', 'upload',tmp_ogg_file.name],
-        ['D:\\project\\titan-storage-sdk\\example\\example', 'upload', tmp_ogg_file.name],
+        ['/home/ubuntu/app/bin/example', 'upload',tmp_ogg_file.name],
+        #['D:\\project\\titan-storage-sdk\\example\\example', 'upload', tmp_ogg_file.name],
          stdout=subprocess.PIPE,
          stderr=subprocess.PIPE,
          text=True
