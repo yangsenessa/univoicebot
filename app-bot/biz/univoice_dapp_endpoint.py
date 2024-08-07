@@ -66,7 +66,7 @@ def fetch_task_info(user_id:str, db:Session):
 
 
 #getuserappinfo
-@router.get("/univoice/getuserappinfo.do", )
+@router.get("/univoice/getuserappinfo.do" )
 def do_getuserappinfo(userid=Query(None), db:Session = Depends(get_db)):
     user_info: BotUserInfo
     user_acct: BotUserAcctBase
@@ -88,6 +88,92 @@ def do_getuserappinfo(userid=Query(None), db:Session = Depends(get_db)):
     user_appinfo_rsp = user_app_info_m.construct_userinfp_res(result,user_info,user_acct,curr_task, claim_jnl)
 
     return user_appinfo_rsp
+
+
+@router.get("univoice/upgradevsd.do", response_model=Result)
+def do_vsd_upgradde(userid=Query(None), db:Session = Depends(get_db)):
+    if userid==None or len(userid) <=0:
+        return common_app_m.buildResult("ERROR","Param Invalid")
+
+    user_info = user_buss_crud.get_user(db,userid)
+    user_acct = user_buss_crud.get_user_acct(db, userid)
+
+    if user_info == None or user_acct == None :
+        return common_app_m.buildResult("FAIL","The user is not a member now")
+    
+
+    balance_amount = int(user_acct.tokens) 
+    user_level = int(user_info.level)
+    task_info = config.TASK_INFO["VOICE-UPLOAD"]
+
+    if user_level >= 12:
+        return common_app_m.buildResult("SUCCESS","You are already on the top level")
+    else:
+        user_level_next = str(user_level+1)
+        if(balance_amount < task_info[user_level_next]["consume"]):
+            return common_app_m.buildResult("SUCCESS", "You have no enough tokens")
+
+        user_info.level = user_level_next
+
+        trx_fee = str(-task_info[user_level_next]["consume"]) 
+
+        user_claim_jnl = User_claim_jnl(
+            jnl_no = str(uuid.uuid4()) ,
+            user_id = user_info.tele_user_id,
+            task_id="USER_LEVEL_UP",
+            task_name="USER_LEVEL_UP",
+            tokens=trx_fee,
+            gmt_biz_create=config.get_datetime(),
+            gmt_biz_finish=config.get_datetime(),
+            status="FINISH"
+        )
+        flag =  user_buss_crud.acct_update_deal(db,user_info.tele_user_id,
+                                         trx_fee,user_claim_jnl, user_info)
+        if flag:
+            return common_app_m.buildResult("SUCCESS","Upgrade Success")
+        else:
+            return common_app_m.buildResult("FAIL", "Upgrade fail")
+
+@router.get("univoice/upgradegpu.do", response_model=Result)
+def do_gpu_upgradde(userid=Query(None), db:Session = Depends(get_db)):
+    if userid==None or len(userid) <=0:
+        return common_app_m.buildResult("ERROR","Param Invalid")
+    user_info = user_buss_crud.get_user(db=db, user_id=userid)
+    user_acct = user_buss_crud.get_user_acct(db=db,user_id=userid)
+
+    if user_info == None or user_acct == None :
+        return common_app_m.buildResult("FAIL","The user is not a member now")
+    
+
+    balance_amount = int(user_acct.tokens) 
+    gpu_level = int(user_info.gpu_level)
+    gpu_info = config.GPU_LEVEL_INFO
+
+    if gpu_level >=6:
+        return common_app_m.buildResult("SUCCESS","You are already on the top level")
+    else:
+        gpu_level_next = str(gpu_level+1)
+        if(balance_amount < gpu_info[gpu_level_next]["consume"]):
+            return common_app_m.buildResult("SUCCESS", "You have no enough tokens")
+       
+        user_info.gpu_level = gpu_level_next
+        trx_fee = str(-gpu_info[gpu_level_next]["consume"])
+        user_claim_jnl = User_claim_jnl(
+            jnl_no = str(uuid.uuid4()) ,
+            user_id = user_info.tele_user_id,
+            task_id="GPU_LEVEL_UP",
+            task_name="GPU_LEVEL_UP",
+            tokens=trx_fee,
+            gmt_biz_create=config.get_datetime(),
+            gmt_biz_finish=config.get_datetime(),
+            status="FINISH"
+        )
+        flag = user_buss_crud.acct_update_deal(db,user_info.tele_user_id,
+                                              trx_fee,user_claim_jnl, user_info)
+        if flag:
+             return common_app_m.buildResult("SUCCESS","Upgrade Success")
+        else:
+             return common_app_m.buildResult("FAIL", "Upgrade fail")
 
 
 #getuserboosttask

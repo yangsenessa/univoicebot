@@ -14,6 +14,7 @@ def get_user(db:Session, user_id:str):
        logger.error(f"query user info err:{str(e)}")
     finally:
        db.close()
+    return None
 
 def get_user_acct(db:Session, user_id:str):
     try:
@@ -22,6 +23,7 @@ def get_user_acct(db:Session, user_id:str):
        logger.error(f"query user_acct base info err:{str(e)}")
     finally:
         db.close()
+    return None
 
 def update_user_info(db:Session, user_info:BotUserInfo):
     try:
@@ -66,12 +68,14 @@ def acct_update_deal(db:Session, user_id:str,tokens:str,user_claim_jnl:User_clai
         db.refresh(user_acct_info)
         db.refresh(user_claim_jnl)
         db.refresh(user_info)
+        return True
 
     except Exception as e:
         db.rollback()
         logger.error(f"update user level info err:{str(e)}")
     finally:
         db.close()
+    return False
 
 
 
