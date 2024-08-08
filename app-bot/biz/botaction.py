@@ -856,7 +856,7 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, gpu_level:str,task
 
 async def gener_earn_rule_img(update:Update,context:CustomContext):
      # prepare img to rsp:
-     user_id = update.update.effective_user.id
+     user_id = update.effective_user.id
      path = os.path.abspath(os.path.dirname(__file__))
      logger.info(f"Curr path is:{path}")
      img_path="resource"
@@ -865,7 +865,7 @@ async def gener_earn_rule_img(update:Update,context:CustomContext):
 
      with open(rsp_img_path,"rb") as imgfile:
 
-        await context.bot.send_photo(chat_id=update.effective_user.id, 
+        await context.bot.send_photo(chat_id=user_id, 
                                       photo=imgfile,
                                       reply_markup=InlineKeyboardMarkup(invote_btn),
                                       parse_mode=ParseMode.HTML)
