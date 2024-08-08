@@ -867,7 +867,7 @@ async def gener_earn_rule_img(update:Update,context:CustomContext):
 
         await context.bot.send_photo(chat_id=user_id, 
                                       photo=imgfile,
-                                      reply_markup=InlineKeyboardMarkup(invote_btn),
+                                      reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")]]),     
                                       parse_mode=ParseMode.HTML)
 
 async def gener_earn_rule(update:Update, context:CustomContext):
