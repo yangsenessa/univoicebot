@@ -299,7 +299,7 @@ async def callback_inline(update:Update, context:CustomContext) -> None:
     elif (commandhandlemsg == "opr-gpu-upgrade"):
         await do_gpu_level_up(update, context)
     elif (commandhandlemsg == "opr-earn"):
-        await gener_earn_rule(update, context)
+        await gener_earn_rule_img(update, context)
     elif (commandhandlemsg == "opr_share_inner"):
         await do_share_inner_process(update,context)
 
@@ -705,7 +705,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     hours = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
     replaymsg = f"{hours} hours later"
 
-    # prepare img to rsp:
+    # prepare img to rsp: 
     path = os.path.abspath(os.path.dirname(__file__))
     logger.info(f"Curr path is:{path}")
     img_path="resource"
@@ -842,6 +842,22 @@ def deploy_user_curr_task(user_id:str, chat_id:str,level:str, gpu_level:str,task
        if not time_remain:
            time_remain = 0
        return progress_status,time_remain
+
+async def gener_earn_rule_img(update:Update,context:CustomContext):
+     # prepare img to rsp:
+     user_id = update.update.effective_user.id
+     path = os.path.abspath(os.path.dirname(__file__))
+     logger.info(f"Curr path is:{path}")
+     img_path="resource"
+     img_name=config.PROMPT_UPDATE_RULE_IMG
+     rsp_img_path = os.path.join(path,img_path,img_name)
+
+     with open(rsp_img_path,"rb") as imgfile:
+
+        await context.bot.send_photo(chat_id=update.effective_user.id, 
+                                      photo=imgfile,
+                                      reply_markup=InlineKeyboardMarkup(invote_btn)
+                                      parse_mode=ParseMode.HTML)
 
 async def gener_earn_rule(update:Update, context:CustomContext):
     task_info:dict

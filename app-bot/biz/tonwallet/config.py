@@ -72,6 +72,7 @@ PROMPT_RECORD_FINISH_IMG = "record-complete.jpg"
 PROMPT_UPGRADE_SUCCESS="upgrade-success.jpg"
 PROMPT_NOTIFY_CLAIM_IMG="notify-claim.jpg"
 PROMPT_NOTIFY_CLAIMED_IMG="cliam-success.jpg"
+PROMPT_UPDATE_RULE_IMG="updaterule.jpg"
 
 
 #########################################TASK########################################
