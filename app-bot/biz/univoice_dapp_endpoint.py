@@ -14,6 +14,7 @@ from .dal.transaction import User_claim_jnl
 from .dal.global_config import Unvtaskinfo
 from .dal.database import SessionLocal
 from .tonwallet import config
+from .media import get_oss_download_url,get_oss_bucket
 
 import requests
 import json
@@ -300,6 +301,47 @@ def do_getuserboosttask(userid=Query(None), db:Session = Depends(get_db)):
                                      invite_url= invite_link)
     return res_model
 
+
+@router.get("/univoice/claimtask.do", response_model=common_app_m.Result)
+def do_claimtask(userid=Query(None), db:Session = Depends(get_db)):
+      
+    user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail_can_be_claimed(db,userid)
+    if user_curr_task_detail == None:
+        user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db, userid,config.TASK_VOICE_UPLOAD)
+        if user_curr_task_detail and user_curr_task_detail.progress_status == config.PROGRESS_DEAILING:
+            time_begin = user_curr_task_detail.gmt_modified
+            time_end = datetime.now()
+            gpu_level= user_curr_task_detail.gpu_level
+            time_remain = config.cal_task_claim_time(gpu_level,user_curr_task_detail.task_id)-(time_end-time_begin).seconds
+            if time_remain <= 0:
+                time_remain = 300
+            rsp_msg=f"There's  {time_remain} seconds left until your next claim."
+            return common_app_m.buildResult("FAIL", rsp_msg)
+        elif not user_curr_task_detail or user_curr_task_detail.progress_status == config.PROGRESS_FINISH \
+             or user_curr_task_detail.progress_status == config.PROGRESS_INIT \
+             or user_curr_task_detail.progress_status == config.PROGRESS_LEVEL_IDT :
+            
+             return common_app_m.buildResult("FAIL","No task could be claimed")
+
+
+    flag, trx_val, balance_amt= user_buss_crud.deal_custom_claim(db,userid)
+    if flag:
+        msg = f"{trx_val} tokens has been send to your wallet"
+        return common_app_m.buildResult("SUCCESS", msg)
+    return common_app_m.buildResult("FAIL","Claiming fail,please retry")
+
+
+@router.get("/univoice/deletevoice.do", response_model=common_app_m.Result)
+def do_deletevoice(prd_id=Query(None),osskey=Query(None), db:Session = Depends(get_db)):
+
+    res_flag = user_buss_crud.delete_product(db,product_id=prd_id)
+    if res_flag:
+        bucket = get_oss_bucket()
+        resp = bucket.delete_object(osskey)
+        logger.info(f"Delete oss-key result {resp.status}")
+        return common_app_m.buildResult("SUCCESS", str(resp.status))
+    return common_app_m.buildResult("FAIL","Delete voice fail")
+
 @router.get("/univoice/voicetaskview.do",response_model=user_app_info_m.Voicetaskview_rsp_m)
 def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
     user_info:BotUserInfo
@@ -313,7 +355,7 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
 
     if int(vsd_level) < 12:      
        vsd_level_next_info = vsd_level_conf[vsd_level_next]
-       VSD_LEVEL = Vsd_level_m(level=vsd_level,top_level="12",upgrade_cost=vsd_level_next_info["consume"], duration=str(vsd_level_info["duration"]))
+       VSD_LEVEL = Vsd_level_m(level=vsd_level,top_level="12",upgrade_cost=str(vsd_level_next_info["consume"]), duration=str(vsd_level_info["duration"]))
 
     else:
        VSD_LEVEL = Vsd_level_m(level=vsd_level,top_level="12",upgrade_cost="0", duration=str(vsd_level_info["duration"]))
@@ -337,12 +379,17 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
     product_list = user_buss_crud.fet_product_list(db=db, user_id=userid)
     if product_list:
         for prd_item in product_list :
-            prd_item_m = Producer_item_m(prd_id=prd_item.prd_id,task_id=prd_item.task_id, file_obj=prd_item.prd_entity,prd_type="VOICE")
+            key_info = json.loads(prd_item.prd_entity)
+
+            prd_item_m = Producer_item_m(prd_id=prd_item.prd_id,task_id=prd_item.task_id, file_obj=get_oss_download_url(key_info["value"]),prd_type="VOICE")
             producer_group.append(prd_item_m)
     
     result = common_app_m.buildResult("SUCCESS", "SUCCESS")
     rsp_m = Voicetaskview_rsp_m(result=result, VSD_LEVEL= VSD_LEVEL, GPU_LEVEL=GPU_LEVEL,producer_group= producer_group)
     return rsp_m
+
+
+
 
 
 

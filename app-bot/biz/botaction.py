@@ -141,7 +141,8 @@ async def play(update:Update, context:CustomContext) -> None:
         inviter_id = args[0]
         # 在这里记录邀请信息，例如更新数据库
         logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
-        await deal_invite_user_login(update, context, inviter_id)
+        if inviter_id != config.OUTTER_PARTNER_ID:
+            await deal_invite_user_login(update, context, inviter_id)
      if chat_id != user_id:
         logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
         await route_privacy(update, context)
@@ -221,7 +222,9 @@ async def start(update: Update, context: CustomContext) -> None:
         inviter_id = args[0]
         
         logger.info(f"{update.effective_user.id} invited by  {inviter_id} ")
-        await deal_invite_user_login(update, context, inviter_id)
+
+        if inviter_id != config.OUTTER_PARTNER_ID:
+            await deal_invite_user_login(update, context, inviter_id)
     if chat_id != user_id:
         logger.info(f"userid={user_id}-chatid={chat_id} is from group,route message ...")
         await route_privacy(update, context)
@@ -310,6 +313,7 @@ async def do_share_inner_process(update:Update, context:CustomContext):
     img_name="TGbanner.jpg"
 
     user_id=update.effective_user.id
+    user_info = fet_user_info(user_id)
 
     token_base = config.TASK_INFO['VOICE-UPLOAD'][user_info.level]['token']
     flatter = config.GPU_LEVEL_INFO[user_info.gpu_level]['flatter']
@@ -327,7 +331,7 @@ async def do_share_inner_process(update:Update, context:CustomContext):
     with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
         await context.bot.send_photo(chat_id=chat_id, 
                                      photo=imgfile,
-                                     caption=prm_begin + config.PROMPT_START,
+                                     caption=prm_begin + rsp_msg,
                                      reply_markup=InlineKeyboardMarkup(cliamed_btn),
                                      parse_mode=ParseMode.HTML)
     return
@@ -648,7 +652,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
         return
 
     task_curr_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id,task_id)
-    if task_curr_detail.progress_status == config.PROGRESS_DEAILING:
+    if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_DEAILING:
         timebegin = task_curr_detail.gmt_modified
         timeend = datetime.now()
       
@@ -657,7 +661,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
         await context.bot.send_message(chat_id=update.effective_user.id,
                                        text=rsp_msg,parse_mode=ParseMode.HTML)
         return
-    if task_curr_detail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
+    if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
         timebegin = task_curr_detail.gmt_modified
         timeend = datetime.now()
       
@@ -686,7 +690,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
 
     #create producer entity
     entity=dict()
-    entity["type"]="filename"
+    entity["type"]="osskey"
     entity["value"]=cid
     entity_str = json.dumps(entity)
     prd_id = hash(entity_str)
@@ -746,11 +750,18 @@ def fet_user_info(user_id:str):
 async def deal_new_user(userinfo:BotUserInfo,context:CustomContext):
     
     if userinfo != None and userinfo.level == '0' and userinfo.gpu_level == '0':
-         await context.bot.send_message(
+        ''' await context.bot.send_message(
             chat_id=userinfo.tele_user_id,
             text=config.PROMPT_USER_FIRST
-        )
-         return True
+        )'''
+        path = os.path.abspath(os.path.dirname(__file__))
+        img_path="resource"
+        img_name=config.PROMPT_NEW_MEMBER_IMG
+        with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
+           await context.bot.send_photo(chat_id=userinfo.tele_user_id,
+                                        photo=imgfile,                                            
+                                         parse_mode=ParseMode.HTML)
+           return True
     return False
         
 

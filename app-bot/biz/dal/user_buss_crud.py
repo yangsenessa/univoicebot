@@ -237,8 +237,7 @@ def deal_task_claim(db:Session,user_id:str):
         db.commit()
         task_detail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id, UserCurrTaskDetail.task_id=="VOICE-UPLOAD",
                                                           UserCurrTaskDetail.progress_status== config.PROGRESS_DEAILING).with_for_update().first()
-        logger.info(task_detail.task_id)
-        if task_detail == None :
+        if task_detail == None  :
             logger.error(f"Claim is timing, but can't find the task detail!" )
             # Dirty data ,ignore
             return True
@@ -349,12 +348,13 @@ def delete_product(db:Session, product_id:str):
         if product:
             db.delete(product)
             db.commit()
+            return True
     except Exception as e:
         db.rollback()
         logger.error(f"delete product error {product_id} e={str(e)}")
     finally:
         db.close()
-
+    return False
      
 
 

@@ -14,6 +14,8 @@ MANIFEST_URL='https://raw.githubusercontent.com/XaBbl4/pytonconnect/main/pytonco
 
 CHANNLE_CHAT_ID=-1002177350295
 
+OUTTER_PARTNER_ID='99999991'
+
 
 #from os import environ as env
 
@@ -38,11 +40,11 @@ PROGRESS_LEVEL_IDT = 'IDT'
 
 
 PANEL_IMG="<img src='./resource/univouce/univoice.png'/>"
-PROMPT_START="\nDon't overlook your voice and the voices you hear. Let every voice generate value. Univoice is your Web3 bank of voice. Deposit your voice into your account and unlock unlimited creativity. Co-create voice value with friends , community and AI."+\
-"\n\n💎Farm $voice daily"+\
-"\n\n🎁Enjoy NFTs"+\
-"\n\n🚀Upgrade your voice storage duration and GPU efficiency to earn more"+\
-"\n\n🗣Let’s start VOICE-TO-EARN ⬇️⬇️⬇️"
+PROMPT_START="\n\n🌍✨ Welcome to Univoice! ✨🌍 "+\
+"\n\nI’m the Univoice bot, designed to store and manage voices in a decentralized, encrypted way. I can hear everything around me, but I can’t speak yet."+\
+"\nTeach me how to speak and listen, and help me understand the world of sounds. Let’s journey together, becoming confidants and meeting new friends."+\
+"\n\nUnlock my magic and co-create Univoice—the voice of every unique soul in the universe."+\
+"\n\nClick play to start. ⬇️⬇️⬇️"
 
 
 PROMPT_GUIDE="Please upload your voice: 🗣" +\
@@ -72,8 +74,8 @@ PROMPT_RECORD_FINISH_IMG = "record-complete.jpg"
 PROMPT_UPGRADE_SUCCESS="upgrade-success.jpg"
 PROMPT_NOTIFY_CLAIM_IMG="notify-claim.jpg"
 PROMPT_NOTIFY_CLAIMED_IMG="cliam-success.jpg"
+PROMPT_NEW_MEMBER_IMG="newmember.jpg"
 PROMPT_UPDATE_RULE_IMG="updaterule.jpg"
-
 
 #########################################TASK########################################
 path = os.path.join(os.path.dirname(__file__),"conf","plan.json")
