@@ -5,6 +5,8 @@
 import json
 import time
 import uuid
+from loguru import logger
+
 
 import redis
 
@@ -33,6 +35,7 @@ class DelayQueue(object):
         self.client.set(data_key, data)
         # add zset(queue_key=>data_key,ts)
         self.client.zadd(self.QUEUE_KEY, data_key, int(task_sec))
+        logger.info("Put into queue success")
         
     def pop(self, num=500, previous=3):
         """pop多条数据
