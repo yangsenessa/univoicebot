@@ -14,9 +14,19 @@ from biz.media import parsewav
 from biz.botaction import start,callback_inline,voice_upload,show_cus_upgrade,sharelink_task
 from biz.tonwallet.config import TOKEN
 from loguru import logger
+import threading
 from threading import Thread
 
 import uvicorn
+
+import globalval as webapp
+
+
+
+logger.info("Write globals")
+webapp._init()
+webapp.set_value("name","dapp")
+
 
 
 
@@ -45,5 +55,6 @@ app.include_router(univoice_dapp_endpoint.router)
 
 if __name__ == '__main__':
     #Thread(target=run_bot).start()  
+  
     uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=False)
    
