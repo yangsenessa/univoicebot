@@ -38,10 +38,12 @@ def do_pop():
        time.sleep(10)
        exe_target = webapp.get_value("name")
        userids = queue.pop(10)
-       logger.info(f"ext_target={exe_target}")
-       if  exe_target =='dapp' :
+      
+       if exe_target !='bot':
            logger.info("For dapp only,exit thread func")
-        
+           return
+       else:
+                  
            for user_id in userids :
               if False == tonbuss.deal_task_claim(user_id):
                   logger.warning(f"User = {user_id} claim err,re-queue")

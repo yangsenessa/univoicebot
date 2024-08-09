@@ -18,6 +18,14 @@ from threading import Thread
 
 import uvicorn
 
+import globalval as webapp
+
+
+
+logger.info("Write globals")
+webapp._init()
+webapp.set_value("name","bot")
+
 async def set_right(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''设置成员权限和头衔'''
     chat_id = update.effective_chat.id
