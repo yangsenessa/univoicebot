@@ -110,7 +110,7 @@ def poll_start():
         nest_asyncio.apply()
         loop = asyncio.get_event_loop()
         loop.run_until_complete(pollstart(bot))
-        time.sleep(3600*5)
+        time.sleep(60*5)
 
         
     
