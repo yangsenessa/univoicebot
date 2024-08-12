@@ -20,10 +20,16 @@ sys.path.append("..")
 sys.path.append("..")
 
 import globalval as webapp
+from biz.tonwallet import config
 
 
 
 
+panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
+             [InlineKeyboardButton(text="👝 balance",callback_data="opr-balance"),InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")],
+             [InlineKeyboardButton(text="🌟 earn",callback_data="opr-earn"),InlineKeyboardButton(text="💸claim",callback_data="opr-claim")],
+             [InlineKeyboardButton(text="✨ Join Group",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
+             ]
 
 redis_conf = {'host': '8.141.81.75', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 queue = DelayQueue(redis_conf)
@@ -71,5 +77,42 @@ def do_pop():
                   os.remove(imgfile)
                   #loop.close()
 
+
+async def pollstart(bot:Bot)->None:
+    logger.info("Show welcome card poll")
+    prm_begin=f"<b>Hi </b> sours,welcome"
+    path = os.path.abspath(os.path.dirname(__file__))
+    logger.info(f"Curr path is:{path}")
+    img_path="resource"
+    img_name="TGbanner.jpg"
+
+    
+    chat_id = config.CHANNLE_CHAT_ID
+    time.sleep(10)
+    exe_target = webapp.get_value("name")
+     
+    if exe_target !='bot':
+        logger.info("For dapp only,exit thread func")
+        return
+    else:
+
+        with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
+            await bot.send_photo(chat_id=chat_id, 
+                                     photo=imgfile,
+                                     caption=prm_begin + config.PROMPT_START,
+                                     reply_markup=InlineKeyboardMarkup(panel_btn),
+                                     parse_mode=ParseMode.HTML)
+
+def poll_start():
+    time.sleep(50)
+    while True:
+        logger.info("Start poll start")
+        nest_asyncio.apply()
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(pollstart(bot))
+        time.sleep(3600*5)
+
+        
     
 Thread(target=do_pop).start()
+Thread(target=poll_start).start()
