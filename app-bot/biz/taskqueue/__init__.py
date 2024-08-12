@@ -85,6 +85,7 @@ async def pollstart(bot:Bot)->None:
     logger.info(f"Curr path is:{path}")
     img_path="resource"
     img_name="TGbanner.jpg"
+    img_guide_name = "guide.png"
 
     
     chat_id = config.CHANNLE_CHAT_ID
@@ -101,6 +102,12 @@ async def pollstart(bot:Bot)->None:
                                      photo=imgfile,
                                      caption=prm_begin + config.PROMPT_START,
                                      reply_markup=InlineKeyboardMarkup(panel_btn),
+                                     parse_mode=ParseMode.HTML)
+            
+        with open(os.path.join(path,img_path,img_guide_name),"rb") as imgfile:
+            await bot.send_photo(chat_id=chat_id, 
+                                     photo=imgfile,
+                                     caption="Then '/start' our bot like this...",
                                      parse_mode=ParseMode.HTML)
 
 def poll_start():
