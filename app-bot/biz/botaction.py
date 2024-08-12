@@ -60,8 +60,8 @@ invote_btn=[[InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-in
 claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
 
 upgradekeyboardButton_list=list()
-upgradekeyboardButton_list.append(InlineKeyboardButton(text="level-upgrade",callback_data="opr-level-upgrade"))
-upgradekeyboardButton_list.append(InlineKeyboardButton(text="gpu-upgrade",callback_data="opr-gpu-upgrade"))
+upgradekeyboardButton_list.append(InlineKeyboardButton(text="duration level",callback_data="opr-level-upgrade"))
+upgradekeyboardButton_list.append(InlineKeyboardButton(text="Training time",callback_data="opr-gpu-upgrade"))
 
 
 
@@ -322,7 +322,7 @@ async def do_share_inner_process(update:Update, context:CustomContext):
     user_info = user_buss_crud.get_user(db,user_id)
 
     prm_begin=f"<b>Hi </b> {update.effective_user.name},welcome"
-    rsp_msg = f"Congratulation ! \n Your voice storage duration are currently at {user_info.level} level, GPU efficiency {user_info.gpu_level} level\
+    rsp_msg = f"Congratulation ! \n Your voice storage duration level is currently at {user_info.level} level, Training level at {user_info.gpu_level} level\
         \n${str(token_fee)} has been credited to your account. \
         \n Click '🗣 play' to test your voice too ⬇️⬇️⬇️ ."
 
@@ -369,7 +369,7 @@ async def do_user_level_up(update:Update,context:CustomContext):
         user_buss_crud.acct_update_deal(db,user_info.tele_user_id,
                                          trx_fee,user_claim_jnl, user_info)
         rsp_msg=f"Upgrade successful! \
-            \n Your VSD is now at {user_level_next} level .  \
+            \n Your duration level is now at {user_level_next} level .  \
             \n Enhance the value of your voice."
         await context.bot.send_message(chat_id=update.effective_user.id, text=rsp_msg) 
     return
@@ -405,7 +405,7 @@ async def do_gpu_level_up(update:Update,context:CustomContext):
         user_buss_crud.acct_update_deal(db,user_info.tele_user_id,
                                          trx_fee,user_claim_jnl, user_info)
         rsp_msg=f"Upgrade successful! \
-            \n Your GPU is at {gpu_level_next} level now .  \
+            \n Your training level is at {gpu_level_next} level now .  \
             \n Enhance the value of your voice."
         await context.bot.send_message(chat_id=update.effective_user.id, text=rsp_msg) 
     return
@@ -423,8 +423,8 @@ async def show_cus_balance(update:Update, context:CustomContext) -> None:
     user_info = fet_user_info(update.effective_user.id)
     user_level = user_info.level
     gpu_level = user_info.gpu_level
-    replay_msg=f"Your voice storage duration are currently at **{user_level} level**.\
-    \n\nGPU efficiency **{gpu_level} level**\
+    replay_msg=f"Your voice storage duration level currently at **{user_level} level**.\
+    \n\nTraining level is **{gpu_level}**\
     \n\nYour balance is :{user_acct_base.tokens} 💰 "
     await context.bot.send_message(chat_id=user_acct_base.user_id, text=replay_msg)
 
@@ -436,7 +436,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
 
     task_info = config.TASK_INFO['VOICE-UPLOAD']
 
-    tp_1=f"The current VSD is at {user_level} level."
+    tp_1=f"The current duration times is at {user_level} level."
 
     if int(user_level) == 0 :
         user_level = str(int(user_level)+1)
@@ -460,12 +460,12 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
         tp_3_1="------------------------------------------"
     
     if next_gpu_level > 6 :
-        tp_4="Your gpu is the most efficent now. "
+        tp_4="Your training level is on the top now. "
         tp_5=" "
         tp_6=" "
         tp_7=" "
     else:
-        tp_4=f"GPU efficiency {gpu_level}"
+        tp_4=f"Training level : {gpu_level}"
         tokens = config.GPU_LEVEL_INFO[str(next_gpu_level)]["consume"]
         base_rewards_tokens= task_info[user_level]["token"]
 
