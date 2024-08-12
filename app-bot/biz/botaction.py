@@ -603,7 +603,7 @@ async def voice_judge(update:Update,context:CustomContext):
             gmt_biz_finish = config.get_datetime(),
             status = "FINISH"
         )
-        rsp_msg = f"Congratulation ! \n Your voice storage duration are currently at {user_info.level} level, GPU efficiency {user_info.gpu_level} level\
+        rsp_msg = f"Congratulation ! \n Your voice storage duration level is currently at {user_info.level} level,Training level at {user_info.gpu_level} level\
         \n${str(token_fee)} has been credited to your account. \nCHECK it in your '👝 balance' \
         \n Click '🗣 play' to continue ⬇️⬇️⬇️ ."
         user_buss_crud.acct_update_deal(db, user_info.tele_user_id,
