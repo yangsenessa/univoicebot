@@ -436,7 +436,7 @@ async def show_cus_upgrade(update:Update, context:CustomContext) -> None:
 
     task_info = config.TASK_INFO['VOICE-UPLOAD']
 
-    tp_1=f"The current duration times is \n at {user_level} level."
+    tp_1=f"Current duration-level is {user_level}th."
 
     if int(user_level) == 0 :
         user_level = str(int(user_level)+1)
