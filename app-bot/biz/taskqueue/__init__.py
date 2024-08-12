@@ -80,7 +80,7 @@ def do_pop():
 
 async def pollstart(bot:Bot)->None:
     logger.info("Show welcome card poll")
-    prm_begin=f"<b>Hi </b> sours,welcome"
+    prm_begin=f"<b>Hi </b> souls,welcome"
     path = os.path.abspath(os.path.dirname(__file__))
     logger.info(f"Curr path is:{path}")
     img_path="resource"
