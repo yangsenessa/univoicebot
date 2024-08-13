@@ -67,14 +67,25 @@ def do_pop():
                   imgfile =  complex_template.marked_claim_notify(user_id,
                                                               [PROMPT_WAIT_CALIMED_1,PROMPT_WAIT_CALIMED_2,PROMPT_WAIT_CALIMED_3],
                                                               rsp_img_path,abs_path)
-              
                   nest_asyncio.apply()
-                  loop = asyncio.get_event_loop()
-                  loop.run_until_complete( bot.send_photo(chat_id=user_id,
+                  try:
+                     loop = asyncio.new_event_loop()
+                     loop.run_until_complete( bot.send_photo(chat_id=user_id,
                                                           photo=imgfile,                                            
                                                           reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
                                                           parse_mode=ParseMode.HTML))
-                  os.remove(imgfile)
+                  except:
+                     if loop is not None:
+                         loop.close()
+                     loop = asyncio.new_event_loop()
+                     loop.run_until_complete( bot.send_photo(chat_id=user_id,
+                                                          photo=imgfile,                                            
+                                                          reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
+                                                          parse_mode=ParseMode.HTML))
+                  finally:
+                     if loop is not None:
+                         loop.close()
+                     os.remove(imgfile)
                   #loop.close()
 
 
@@ -115,8 +126,17 @@ def poll_start():
     while True:
         logger.info("Start poll start")
         nest_asyncio.apply()
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(pollstart(bot))
+        try:       
+           loop = asyncio.new_event_loop()
+           loop.run_until_complete(pollstart(bot))
+        except:
+            if loop is not None:
+                loop.close()
+            loop= asyncio.new_event_loop()
+            loop.run_until_complete(pollstart(bot))
+        finally:
+            if loop is not None:
+                loop.close()
         time.sleep(60*5)
 
         
