@@ -133,7 +133,7 @@ async def pollstart(bot:Bot)->None:
 def poll_start():
     time.sleep(50)
     exe_target = webapp.get_value("name")
-    if exe_target !='dapp':
+    if exe_target !='bot':
         logger.info("For dapp only,exit thread func")
         return
     while True:
