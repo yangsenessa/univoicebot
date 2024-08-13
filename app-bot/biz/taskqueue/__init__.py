@@ -38,7 +38,7 @@ panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
 redis_conf = {'host': '8.141.81.75', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 queue = DelayQueue(redis_conf)
 
-trequest = HTTPXRequest(connection_pool_size=30)
+trequest = HTTPXRequest(connection_pool_size=500)
 bot = telegram.Bot(token=TOKEN, request=trequest)
 
 
