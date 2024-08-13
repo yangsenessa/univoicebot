@@ -8,6 +8,10 @@ from loguru import logger
 
 from telegram import Update,InlineKeyboardButton, InlineKeyboardMarkup,Bot
 from telegram.constants import ParseMode
+from telegram.request import HTTPXRequest
+import telegram
+
+
 
 from biz.tonwallet.config import TOKEN,PROMPT_WAIT_CALIMED_1,PROMPT_WAIT_CALIMED_2,PROMPT_WAIT_CALIMED_3,PROMPT_NOTIFY_CLAIM_IMG
 
@@ -33,7 +37,10 @@ panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
 
 redis_conf = {'host': '8.141.81.75', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 queue = DelayQueue(redis_conf)
-bot = Bot(token=TOKEN)
+
+trequest = HTTPXRequest(connection_pool_size=30)
+bot = telegram.Bot(token=TOKEN, request=trequest)
+
 
 claimedKeyboardButton_list=list()
 claimedKeyboardButton_list.append(InlineKeyboardButton(text="🎉 claim",callback_data="opr-claim"))
