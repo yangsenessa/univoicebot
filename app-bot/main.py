@@ -128,9 +128,7 @@ def run_bot():
 
 if __name__ == '__main__':
     #Thread(target=run_bot).start()
-    logger.info("Write globals")
-    webapp._init()
-    webapp.set_value("name","bot")
+    
     run_bot()
     #uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=True)
 
