@@ -132,7 +132,6 @@ def poll_start():
             if loop is not None:
                 loop.close()
         time.sleep(60*5)
-
-     
+        
 #Thread(target=do_pop).start()
 #Thread(target=poll_start).start()
