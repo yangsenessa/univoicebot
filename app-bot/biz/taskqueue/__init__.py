@@ -50,7 +50,7 @@ claimedKeyboardButton_list.append(InlineKeyboardButton(text="🎉 claim",callbac
 
 def do_pop():
     while True:
-       time.sleep(10)
+       time.sleep(50)
        exe_target = webapp.get_value("name")
        userids = queue.pop(10)
       
