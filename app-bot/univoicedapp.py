@@ -25,7 +25,7 @@ import globalval as webapp
 
 logger.info("Write globals")
 webapp._init()
-webapp.set_value("name","dapp")
+webapp.set_value("dappname","dapp")
 
 
 
