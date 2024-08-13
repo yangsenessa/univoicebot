@@ -40,6 +40,8 @@ queue = DelayQueue(redis_conf)
 
 trequest = HTTPXRequest(connection_pool_size=500)
 bot = telegram.Bot(token=TOKEN, request=trequest)
+pollBot = telegram.Bot(token=TOKEN, request=trequest)
+
 
 
 claimedKeyboardButton_list=list()
@@ -135,12 +137,12 @@ def poll_start():
         nest_asyncio.apply()
         try:       
            loop = asyncio.new_event_loop()
-           loop.run_until_complete(pollstart(bot))
+           loop.run_until_complete(pollstart(pollBot))
         except:
             if loop is not None:
                 loop.close()
             loop= asyncio.new_event_loop()
-            loop.run_until_complete(pollstart(bot))
+            loop.run_until_complete(pollstart(pollBot))
         finally:
             if loop is not None:
                 loop.close()
