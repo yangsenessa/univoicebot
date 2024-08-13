@@ -5,10 +5,10 @@ import random
 
 #.env
 #bot1
-#TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
+TOKEN='7371683651:AAFaAGcxZOuICMNfPCuShyHhnhciPYldPDE'
 
 #bot2
-TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'  
+#TOKEN='7325602719:AAFIS1aDLqO6nVCAaD20MMAi47pycXqpHlU'  
 MANIFEST_URL='https://raw.githubusercontent.com/XaBbl4/pytonconnect/main/pytonconnect-manifest.json'
 
 
