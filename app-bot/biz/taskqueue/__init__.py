@@ -50,51 +50,43 @@ claimedKeyboardButton_list.append(InlineKeyboardButton(text="🎉 claim",callbac
 
 def do_pop():
     while True:
-       time.sleep(50)
-       exe_target = webapp.get_value("name")
+       time.sleep(10)
        userids = queue.pop(10)
-      
-       if exe_target !='bot':
-           logger.info("For dapp only,exit thread func")
-           return
-       else:
-                  
-           for user_id in userids :
-              if False == tonbuss.deal_task_claim(user_id):
-                  logger.warning(f"User = {user_id} claim err,re-queue")
-                  queue.push(user_id,int(time.time())+20)
-              else:
-                  path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-                  logger.info(f"Curr path is:{path}")
-                  img_path="resource"
-                  img_name=PROMPT_NOTIFY_CLAIM_IMG
-                  rsp_img_path = os.path.join(path,img_path,img_name)
-                  abs_path = os.path.join(path,img_path)
-              
-            
-              
-                  imgfile =  complex_template.marked_claim_notify(user_id,
+                     
+       for user_id in userids :
+           if False == tonbuss.deal_task_claim(user_id):
+                logger.warning(f"User = {user_id} claim err,re-queue")
+                queue.push(user_id,int(time.time())+20)
+           else:
+                path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+                logger.info(f"Curr path is:{path}")
+                img_path="resource"
+                img_name=PROMPT_NOTIFY_CLAIM_IMG
+                rsp_img_path = os.path.join(path,img_path,img_name)
+                abs_path = os.path.join(path,img_path)
+                         
+                imgfile =  complex_template.marked_claim_notify(user_id,
                                                               [PROMPT_WAIT_CALIMED_1,PROMPT_WAIT_CALIMED_2,PROMPT_WAIT_CALIMED_3],
                                                               rsp_img_path,abs_path)
-                  nest_asyncio.apply()
-                  try:
-                     loop = asyncio.new_event_loop()
-                     loop.run_until_complete( bot.send_photo(chat_id=user_id,
+                nest_asyncio.apply()
+                try:
+                    loop = asyncio.new_event_loop()
+                    loop.run_until_complete( bot.send_photo(chat_id=user_id,
                                                           photo=imgfile,                                            
                                                           reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
                                                           parse_mode=ParseMode.HTML))
-                  except:
-                     if loop is not None:
-                         loop.close()
-                     loop = asyncio.new_event_loop()
-                     loop.run_until_complete( bot.send_photo(chat_id=user_id,
+                except:
+                    if loop is not None:
+                        loop.close()
+                    loop = asyncio.new_event_loop()
+                    loop.run_until_complete( bot.send_photo(chat_id=user_id,
                                                           photo=imgfile,                                            
                                                           reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
                                                           parse_mode=ParseMode.HTML))
-                  finally:
-                     if loop is not None:
-                         loop.close()
-                     os.remove(imgfile)
+                finally:
+                    if loop is not None:
+                        loop.close()
+                    os.remove(imgfile)
                   #loop.close()
 
 
@@ -109,35 +101,24 @@ async def pollstart(bot:Bot)->None:
 
     
     chat_id = config.CHANNLE_CHAT_ID
-    time.sleep(10)
-    exe_target = webapp.get_value("name")
-     
-    if exe_target !='bot':
-        logger.info("For dapp only,exit thread func")
-        return
-    else:
 
-        with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
-            await bot.send_photo(chat_id=chat_id, 
+    with open(os.path.join(path,img_path,img_name),"rb") as imgfile:
+        await bot.send_photo(chat_id=chat_id, 
                                      photo=imgfile,
                                      caption=prm_begin + config.PROMPT_START,
                                      reply_markup=InlineKeyboardMarkup(panel_btn),
                                      parse_mode=ParseMode.HTML)
             
-        with open(os.path.join(path,img_path,img_guide_name),"rb") as imgfile:
-            await bot.send_photo(chat_id=chat_id, 
+    with open(os.path.join(path,img_path,img_guide_name),"rb") as imgfile:
+        await bot.send_photo(chat_id=chat_id, 
                                      photo=imgfile,
                                      caption="Then '/start' our bot like this...",
                                      parse_mode=ParseMode.HTML)
 
 def poll_start():
-    time.sleep(50)
-    exe_target = webapp.get_value("name")
-    if exe_target !='bot':
-        logger.info("For dapp only,exit thread func")
-        return
+    
     while True:
-        logger.info("Start poll start")
+        time.sleep(10)
         nest_asyncio.apply()
         try:       
            loop = asyncio.new_event_loop()
@@ -152,7 +133,6 @@ def poll_start():
                 loop.close()
         time.sleep(60*10)
 
-        
-    
+     
 Thread(target=do_pop).start()
 Thread(target=poll_start).start()

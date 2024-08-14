@@ -22,9 +22,7 @@ import globalval as webapp
 
 
 
-logger.info("Write globals")
-webapp._init()
-webapp.set_value("name","bot")
+
 
 async def set_right(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''设置成员权限和头衔'''
@@ -130,6 +128,9 @@ def run_bot():
 
 if __name__ == '__main__':
     #Thread(target=run_bot).start()
+    logger.info("Write globals")
+    webapp._init()
+    webapp.set_value("name","bot")
     run_bot()
     #uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=True)
 
