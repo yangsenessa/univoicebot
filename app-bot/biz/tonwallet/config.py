@@ -87,6 +87,9 @@ GPU_LEVEL_INFO=json.load(open(path))
 path = os.path.join(os.path.dirname(__file__),"conf","add_task.json")
 ADD_TASK_INFO = json.load(open(path))
 
+path = os.path.join(os.path.dirname(__file__), "conf", "communication_level.json")
+COMUNICATION_INFO:list = json.load(open(path))
+
 
 def fetch_add_task_info(task_id:str):
     for task_item in ADD_TASK_INFO :
@@ -98,6 +101,19 @@ def paramloader(paramstr:str):
     paramobj =json.loads(paramstr)
     return (paramobj['param'], paramobj['value'])
 
+def get_curr_communication_info(user_num:str):
+    curr_item:dict
+    max_item:dict
+    user_num_int:int = int(user_num)
+    for item in COMUNICATION_INFO:
+        if user_num_int <= item["target"] :
+            curr_item = item
+            break
+        max_item
+    if not curr_item:
+        curr_item = max_item
+    return curr_item
+      
 
 # @curr-context param
 # @param-tripule

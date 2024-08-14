@@ -403,6 +403,23 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
     rsp_m = Voicetaskview_rsp_m(result=result, VSD_LEVEL= VSD_LEVEL, GPU_LEVEL=GPU_LEVEL,producer_group= producer_group)
     return rsp_m
 
+@router.get("/univoice/getcommoninfo.do",response_model=user_app_info_m.CommonInfo_rsp_m)
+def do_getcommoninfo(db:Session = Depends(get_db)):
+    #Need counting by redis
+    user_num:str = "1046" 
+    communication_info:dict = config.get_curr_communication_info(user_num)
+    res_communication_m=user_app_info_m.CommunicationInfo_m(target=str(communication_info['target']),
+                                                            curr_num=user_num,
+                                                            level=communication_info['level'],                                    
+                                                            des_info=communication_info['desc_info'])
+    result = common_app_m.buildResult("SUCCESS","SUCCESS")
+
+    res_obj = user_app_info_m.CommonInfo_rsp_m(result=result, communication_info=res_communication_m)
+    return res_obj
+    
+
+
+
 
 
 
