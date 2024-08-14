@@ -35,6 +35,7 @@ class AddTaskInfo(BaseModel):
     status:str
     rewards:str
     task_desc:str
+    task_url:str
     logo:str
 
 class AcctInfo(BaseModel):

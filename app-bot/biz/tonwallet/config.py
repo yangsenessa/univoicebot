@@ -77,6 +77,10 @@ PROMPT_NOTIFY_CLAIMED_IMG="cliam-success.jpg"
 PROMPT_NEW_MEMBER_IMG="newmember.jpg"
 PROMPT_UPDATE_RULE_IMG="updaterule.jpg"
 
+
+URL_LOGO_X="https://univoice.oss-us-east-1.aliyuncs.com/logo-white.png"
+URL_ACCT_X="https://x.com/univoice_"
+
 #########################################TASK########################################
 path = os.path.join(os.path.dirname(__file__),"conf","plan.json")
 TASK_INFO=json.load(open(path))

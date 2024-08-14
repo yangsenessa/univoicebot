@@ -216,6 +216,7 @@ def do_getuserboosttask(userid=Query(None), db:Session = Depends(get_db)):
         token_amount = task_item['rewards']
         task_desc = task_item['task_desc']
         logo = task_item['logo']
+        task_url = task_item['task_url']
         user_curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id=userid,task_id=task_id)
 
         #not have task, init task
@@ -226,11 +227,13 @@ def do_getuserboosttask(userid=Query(None), db:Session = Depends(get_db)):
                                                       gmt_modified=config.get_datetime())
             user_buss_crud.create_user_curr_task_detail(db,curr_task_detail_new)
             
-            add_task_item = AddTaskInfo(task_id=task_id,status=config.PROGRESS_INIT,rewards=token_amount,task_desc=task_desc,logo=logo)
+            add_task_item = AddTaskInfo(task_id=task_id,status=config.PROGRESS_INIT,rewards=token_amount,
+                                        task_desc=task_desc,task_url=task_url,logo=logo)
             task_groups.append(add_task_item)
         else:
             add_task_item = AddTaskInfo(task_id=user_curr_task_detail.task_id, status=user_curr_task_detail.progress_status,
-                                        rewards= str(user_curr_task_detail.token_amount),task_desc=task_desc,logo=logo)
+                                        rewards= str(user_curr_task_detail.token_amount),task_desc=task_desc,
+                                        task_url=task_url,logo=logo)
             task_groups.append(add_task_item)
         
         result = common_app_m.buildResult("SUCCESS", "SUCCESS")

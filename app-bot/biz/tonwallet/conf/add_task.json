@@ -3,6 +3,7 @@
     "taskid":"FOLLOW-X",
     "rewards":"5000",
     "task_desc":"FOLLOW our X account",
-    "logo":"task_follow_x.png"
+    "logo":"https://univoice.oss-us-east-1.aliyuncs.com/logo-white.png",
+    "task_url":"https://x.com/univoice_"
    }
 ]
