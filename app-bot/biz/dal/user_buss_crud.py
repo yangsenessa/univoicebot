@@ -345,16 +345,17 @@ def fet_product_list(db:Session, user_id:str):
 def delete_product(db:Session, product_id:str):
     try:
         product = db.query(UserTaskProducer).filter(UserTaskProducer.prd_id == product_id).first()
+        prd_entity = product.prd_entity
         if product:
             db.delete(product)
             db.commit()
-            return True
+            return (True, prd_entity)
     except Exception as e:
         db.rollback()
         logger.error(f"delete product error {product_id} e={str(e)}")
     finally:
         db.close()
-    return False
+    return (False,None)
      
 
 

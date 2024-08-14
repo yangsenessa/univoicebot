@@ -332,15 +332,30 @@ def do_claimtask(userid=Query(None), db:Session = Depends(get_db)):
 
 
 @router.get("/univoice/deletevoice.do", response_model=common_app_m.Result)
-def do_deletevoice(prd_id=Query(None),osskey=Query(None), db:Session = Depends(get_db)):
+def do_deletevoice(prd_id=Query(None), db:Session = Depends(get_db)):
 
-    res_flag = user_buss_crud.delete_product(db,product_id=prd_id)
-    if res_flag:
-        bucket = get_oss_bucket()
-        resp = bucket.delete_object(osskey)
-        logger.info(f"Delete oss-key result {resp.status}")
-        return common_app_m.buildResult("SUCCESS", str(resp.status))
-    return common_app_m.buildResult("FAIL","Delete voice fail")
+    res_flag,prd_entity = user_buss_crud.delete_product(db,product_id=prd_id)
+    if res_flag and prd_entity is not None:
+        try:
+           prd_entity_json:dict = json.loads(prd_entity)
+           prd_type:str = prd_entity_json['type']
+           if prd_type == 'osskey' :
+               osskey = prd_entity_json['value']     
+               bucket = get_oss_bucket()
+               resp = bucket.delete_object(osskey)
+               logger.info(f"Delete oss-key result {resp.status}")
+               return common_app_m.buildResult("SUCCESS", str(resp.status))
+           else:
+               return common_app_m.buildResult("SUCCESS", str(resp.status))
+        except Exception as e:
+            logger.error(f"delete product error {prd_id}")       
+            res_flag = False
+        finally:
+            if not res_flag:
+               return common_app_m.buildResult("FAIL", "Delete prd error!")
+            else:
+               return common_app_m.buildResult("SUCCESS","SUCCESS")
+    return common_app_m.buildResult("FAIL", "Delete prd error!")
 
 @router.get("/univoice/voicetaskview.do",response_model=user_app_info_m.Voicetaskview_rsp_m)
 def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
