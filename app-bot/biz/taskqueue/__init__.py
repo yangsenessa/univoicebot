@@ -135,4 +135,4 @@ def poll_start():
 
      
 Thread(target=do_pop).start()
-Thread(target=poll_start).start()
+#Thread(target=poll_start).start()
