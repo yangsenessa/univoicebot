@@ -423,8 +423,20 @@ def do_getcommoninfo(db:Session = Depends(get_db)):
 
 
 @router.get("/univoice/getusercountfromchannel.do",response_model=dict)
-def do_getusercount(channelid=Query(None),db:Session=Depends(get_db)):
-    num = statement_query.query_channel_usernum(db=db,channelid=channelid)
+def do_getusercount(channelid=Query(None),begintime=Query(None),endtime=Query(None),db:Session=Depends(get_db)):
+    datefmt = "%Y%m%d%H%M%S"
+    date_db_fmt = "%Y-%m-%d %H:%M:%S"
+    begin_date:datetime = datetime.strptime(begintime,datefmt)
+    end_date:datetime = datetime.strptime(endtime,datefmt)
+    
+    begin_date_str = begin_date.strftime(date_db_fmt)
+    end_date_str = end_date.strftime(date_db_fmt)
+
+    num = statement_query.query_channel_usernum(db=db, begintime=begin_date_str,
+                                                endtime=end_date_str,channelid=channelid)
+    
+    
+    
     res:dict = {"result_code":"FAIL"}
     if num is not None:
        res = {"result_code":"SUCCESS", "user_num":str(num)}
