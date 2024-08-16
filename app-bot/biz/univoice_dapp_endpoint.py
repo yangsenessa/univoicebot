@@ -8,7 +8,7 @@ from .model.common_app_m import Result
 from .model import common_app_m
 from .model import user_app_info_m
 from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m,Vsd_level_m,Gpu_level_m,Producer_item_m,Voicetaskview_rsp_m
-from .dal import user_buss_crud
+from .dal import user_buss_crud, statement_query
 from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
 from .dal.transaction import User_claim_jnl
 from .dal.global_config import Unvtaskinfo
@@ -419,6 +419,18 @@ def do_getcommoninfo(db:Session = Depends(get_db)):
 
     res_obj = user_app_info_m.CommonInfo_rsp_m(result=result, communication_info=res_communication_m)
     return res_obj
+
+
+
+@router.get("/univoice/getusercountfromchannel.do",response_model=dict)
+def do_getusercount(channelid=Query(None),db:Session=Depends(get_db)):
+    num = statement_query.query_channel_usernum(db=db,channelid=channelid)
+    res:dict = {"result_code":"FAIL"}
+    if num is not None:
+       res = {"result_code":"SUCCESS", "user_num":str(num)}
+    
+    return res
+    
     
 
 
