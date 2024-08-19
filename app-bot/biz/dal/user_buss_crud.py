@@ -173,6 +173,20 @@ def fetch_user_curr_task_detail(db:Session, user_id:str, task_id:str):
     finally:
         db.close()
 
+def update_user_curr_task_detail_ori(db:Session, user_curr_task_detail:UserCurrTaskDetail):
+    resflag = False
+    try:
+        db.add(user_curr_task_detail)
+        db.commit()
+        resflag = True
+    except Exception as e:
+        logger.error("Update user_curr_task_detail err")
+    finally:
+        db.close()
+    
+    return resflag 
+    
+
 def remove_curr_task_detail(db:Session,user_curr_task_detail:UserCurrTaskDetail):
      logger.info(f"Delete the detail which already claimed")
      try:

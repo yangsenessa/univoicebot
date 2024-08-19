@@ -267,7 +267,10 @@ def do_finshuserboosttask(request:user_app_info_m.Finsh_user_boost_task_req_m,db
                           )
     
     flag = user_buss_crud.invoke_acct_token(db,user_id,str(user_curr_task_detail.token_amount),user_claim_jnl)
-    if flag:
+    user_curr_task_detail.progress_status = config.PROGRESS_FINISH
+    task_flag =  user_buss_crud.update_user_curr_task_detail_ori(db=db, user_curr_task_detail=user_curr_task_detail)
+    
+    if flag and task_flag:
         result = Result(res_code="SUCCESS", res_msg="SUCCESS")
         finish_user_boost_task_rsp = Finish_user_boost_task_rsp_m(result = result, reward=str(user_curr_task_detail.token_amount))
 
