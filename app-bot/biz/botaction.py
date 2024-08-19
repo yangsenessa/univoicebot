@@ -777,7 +777,7 @@ async def deal_user_start(user_id:str, chat_id:str, user_name:str, invited_id:st
         '''Add code for re-define the guider message'''
         logger.info(f"This user is members!")
         if not userinfo.tele_user_name:
-            userinfo.tele_user_name = user_name
+            userinfo.tele_user_name = user_name 
             user_buss_crud.update_user_info(db, userinfo)
 
         if await deal_new_user(userinfo,context):
