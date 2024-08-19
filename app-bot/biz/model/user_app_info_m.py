@@ -122,10 +122,15 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
    
     
     #cal waiting time
-    time_begin = task_info.gmt_modified
-    time_end = datetime.now()
-    gpu_level = task_info.gpu_level
-    time_remain = config.cal_task_claim_time(gpu_level, task_info.task_id) - (time_end-time_begin).seconds
+    time_remain = 0
+    if task_info is not None:
+        time_begin = task_info.gmt_modified
+        time_end = datetime.now()
+        gpu_level = task_info.gpu_level
+        time_remain = config.cal_task_claim_time(gpu_level, task_info.task_id) - (time_end-time_begin).seconds
+    else:
+        time_begin = 0
+
     if time_remain <= 0:
         time_remain = 0
 
