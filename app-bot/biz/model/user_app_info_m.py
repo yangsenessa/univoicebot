@@ -124,6 +124,8 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
     #cal waiting time
     time_remain = 0
     if task_info is not None:
+        time_remain = 0
+    if task_info is not None:
         time_begin = task_info.gmt_modified
         time_end = datetime.now()
         gpu_level = task_info.gpu_level
