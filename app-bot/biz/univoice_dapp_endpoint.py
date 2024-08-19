@@ -367,6 +367,12 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
     vsd_level = user_info.level
     gpu_level = user_info.gpu_level
 
+
+    if vsd_level is None or int(vsd_level) <1:
+        vsd_level = '1'
+    if gpu_level is None or int(gpu_level) <1:
+        gpu_level = '1'
+
     vsd_level_conf = config.TASK_INFO[config.TASK_VOICE_UPLOAD]
     vsd_level_info = vsd_level_conf[vsd_level]
     vsd_level_next = str( int(vsd_level) +1 )
