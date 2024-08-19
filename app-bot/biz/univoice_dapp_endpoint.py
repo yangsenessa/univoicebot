@@ -116,7 +116,7 @@ def do_getuserappinfo(userid=Query(None), db:Session = Depends(get_db)):
     return user_appinfo_rsp
 
 
-@router.get("univoice/upgradevsd.do", response_model=Result)
+@router.get("/univoice/upgradevsd.do", response_model=Result)
 def do_vsd_upgradde(userid=Query(None), db:Session = Depends(get_db)):
     if userid==None or len(userid) <=0:
         return common_app_m.buildResult("ERROR","Param Invalid")
@@ -160,7 +160,7 @@ def do_vsd_upgradde(userid=Query(None), db:Session = Depends(get_db)):
         else:
             return common_app_m.buildResult("FAIL", "Upgrade fail")
 
-@router.get("univoice/upgradegpu.do", response_model=Result)
+@router.get("/univoice/upgradegpu.do", response_model=Result)
 def do_gpu_upgradde(userid=Query(None), db:Session = Depends(get_db)):
     if userid==None or len(userid) <=0:
         return common_app_m.buildResult("ERROR","Param Invalid")
