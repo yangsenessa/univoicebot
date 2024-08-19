@@ -173,10 +173,14 @@ def fetch_user_curr_task_detail(db:Session, user_id:str, task_id:str):
     finally:
         db.close()
 
-def update_user_curr_task_detail_ori(db:Session, user_curr_task_detail:UserCurrTaskDetail):
+def update_user_curr_task_detail_ori(db:Session, user_id:str, task_id:str, status:str):
     resflag = False
     try:
-        db.add(user_curr_task_detail)
+        task_curr_obj:UserCurrTaskDetail = db.query(UserCurrTaskDetail).filter(UserCurrTaskDetail.user_id==user_id,
+                                                      UserCurrTaskDetail.task_id==task_id).with_for_update().first()
+        task_curr_obj.progress_status = status
+        
+        db.add(task_curr_obj)
         db.commit()
         resflag = True
     except Exception as e:
