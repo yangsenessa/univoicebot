@@ -76,13 +76,16 @@ def do_pop():
                                                           reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
                                                           parse_mode=ParseMode.HTML))
                 except:
-                    if loop is not None:
-                        loop.close()
-                    loop = asyncio.new_event_loop()
-                    loop.run_until_complete( bot.send_photo(chat_id=user_id,
-                                                          photo=imgfile,                                            
-                                                          reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
-                                                          parse_mode=ParseMode.HTML))
+                    try:
+                        if loop is not None:
+                            loop.close()
+                            loop = asyncio.new_event_loop()
+                            loop.run_until_complete( bot.send_photo(chat_id=user_id,
+                                                                    photo=imgfile,                                            
+                                                                    reply_markup=InlineKeyboardMarkup.from_column(claimedKeyboardButton_list),
+                                                                    parse_mode=ParseMode.HTML))
+                    except:
+                        logger.warning("loop send err ,continue")
                 finally:
                     if loop is not None:
                         loop.close()
