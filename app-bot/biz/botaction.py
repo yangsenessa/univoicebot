@@ -241,6 +241,7 @@ async def start(update: Update, context: CustomContext) -> None:
     
     if progress_status == config.PROGRESS_DEAILING:
         if time_remain <=0:
+            queue.push(update.effective_user.id,task_sec= int(time.time())+300)
             time_remain = 300
         rsp_msg=f"There's  ⏰ {time_remain} seconds left until your next claim."
         await context.bot.send_message(chat_id=update.effective_user.id,
