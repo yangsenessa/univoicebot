@@ -786,7 +786,7 @@ async def deal_user_start(user_id:str, chat_id:str, user_name:str, invited_id:st
     else:
        logger.info(f'Init userInfo and acctinfo with userid={user_id}')
        userinfo = BotUserInfo(tele_user_id=user_id,tele_chat_id=chat_id, tele_user_name = user_name,
-                              reg_gmtdate=gmtdate,level='0',gpu_level='0', 
+                              reg_gmtdate=gmtdate,level='1',gpu_level='1', 
                               source="O",invited_by_userid = invited_id)
        userAcctBase = BotUserAcctBase(user_id=user_id, biz_id='0', tokens='0')
        user_buss_crud.create_user(db,user=userinfo, user_acct=userAcctBase)
