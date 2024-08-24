@@ -54,8 +54,7 @@ def fetch_user_inner_info(user_id:str, db:Session):
     
 
 def fetch_curr_claim_info(user_id:str, db:Session):
-     claim_jnl:User_claim_jnl
-     claim_jnl = user_buss_crud.fetch_curr_claim(db,user_id)
+     claim_jnl:User_claim_jnl = user_buss_crud.fetch_curr_claim(db,user_id)
      return claim_jnl
 
 ##the main bussiness only deal with the main type of task :VOICE-UPLOAD
@@ -98,20 +97,18 @@ def do_getuserappinfo(userid=Query(None), db:Session = Depends(get_db)):
         reward_amt = str(int(base_reward * flatter)) 
        
         if  curr_task.progress_status == config.PROGRESS_DEAILING:
-            logger.info(f"Load curr task detail {curr_task.task_id}-{curr_task.progress_status}")
            
             timebegin = curr_task.gmt_modified
             timeend = datetime.now()
             if (timeend-timebegin).seconds >config.cal_task_claim_time(user_info.gpu_level,task_id):
+                logger.info(f"Load curr task detail {curr_task.task_id}-{curr_task.progress_status}")
                 user_buss_crud.deal_task_claim(db,userid)
-                progress_status = config.PROGRESS_WAIT_CUS_CLAIM
-                time_remain = 0
+               
    
     claim_jnl = fetch_curr_claim_info(userid, db)
 
-    user_appinfo_rsp : User_appinfo_rsp_m
     result=common_app_m.buildResult("SUCCESS","SUCCESS")
-    user_appinfo_rsp = user_app_info_m.construct_userinfp_res(result,user_info,user_acct,curr_task, claim_jnl)
+    user_appinfo_rsp:User_appinfo_rsp_m = user_app_info_m.construct_userinfp_res(result,user_info,user_acct,curr_task, claim_jnl)
 
     return user_appinfo_rsp
 
