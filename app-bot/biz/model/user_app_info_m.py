@@ -141,7 +141,6 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
     claim_info_m = ClaimInfo(claim_status=config.PROGRESS_INIT,wait_time=None, claim_jnl=None)
     if not claim_info :
         claim_info_m.claim_status = config.PROGRESS_INIT
-        claim_info_m.wait_time = -1
     else:
         claim_info_m.claim_jnl = claim_info.jnl_no
         claim_info_m.claim_status = claim_info.status
