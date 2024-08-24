@@ -123,15 +123,19 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
     
     #cal waiting time
     time_remain = 0
-    if task_info is not None:
-        time_remain = 0
-    if task_info is not None:
+    if task_info is None:
+        time_remain = None
+    elif  task_info.progress_status == config.PROGRESS_DEAILING \
+          or  task_info.progress_status == config.PROGRESS_WAIT_TASK_FINISH:
         time_begin = task_info.gmt_modified
         time_end = datetime.now()
         gpu_level = task_info.gpu_level
         time_remain = config.cal_task_claim_time(gpu_level, task_info.task_id) - (time_end-time_begin).seconds
+    elif task_info.progress_status == config.PROGRESS_FINISH \
+         or  task_info.progress_status == config.PROGRESS_WAIT_CUS_CLAIM :
+         time_remain = 0
     else:
-        time_remain = 0
+        time_remain = None
 
     if time_remain <= 0:
         time_remain = 0
