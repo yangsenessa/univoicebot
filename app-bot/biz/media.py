@@ -65,7 +65,7 @@ async def save_voice( voice_file:File):
           os.fsync(tmp_ogg_file.fileno())
           logger.info(f"ogg dir: {tmp_ogg_file.name}")
 
-          oss_key=str(uuid.uuid4())+str(hash(tmp_ogg_file.name))+'.ogg'
+          oss_key=str(uuid.uuid4())+str(tmp_ogg_file.name)
        #   return tmp_ogg_file.name
      #set_environment_variables()
      # 调用编译好的二进制文件
