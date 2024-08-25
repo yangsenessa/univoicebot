@@ -64,14 +64,19 @@ async def save_voice( voice_file:File):
           tmp_ogg_file.flush()
           os.fsync(tmp_ogg_file.fileno())
           logger.info(f"ogg dir: {tmp_ogg_file.name}")
+          with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_wav_file:
+              audio = AudioSegment.from_ogg(tmp_ogg_file.name)
+              audio.export(tmp_wav_file.name, format="wav")
+              logger.info(f"wav dir: {tmp_wav_file.name}")
+              audiowav = AudioSegment.from_file(tmp_wav_file,format="wav")
 
-          oss_key=str(uuid.uuid4())+str(tmp_ogg_file.name)
-       #   return tmp_ogg_file.name
+              oss_key=str(uuid.uuid4())+str(tmp_wav_file.name)
+   #   return tmp_ogg_file.name
      #set_environment_variables()
      # 调用编译好的二进制文件
-          logger.info(f'Upload file={tmp_ogg_file.name}')
-          result = get_oss_bucket().put_object_from_file(oss_key,tmp_ogg_file.name)
-          return oss_key
+              logger.info(f'Upload file={tmp_wav_file.name}')
+              result = get_oss_bucket().put_object_from_file(oss_key,tmp_wav_file.name)
+              return oss_key
          
 
      '''result = subprocess.run(
