@@ -137,7 +137,7 @@ def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUse
     else:
         time_remain = None
 
-    if time_remain is not None or time_remain <= 0:
+    if time_remain is not None and time_remain <= 0:
         time_remain = 0
 
     
