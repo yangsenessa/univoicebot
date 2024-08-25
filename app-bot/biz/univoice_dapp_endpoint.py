@@ -233,9 +233,9 @@ def do_getuserboosttask(userid=Query(None), db:Session = Depends(get_db)):
                                         task_url=task_url,logo=logo)
             task_groups.append(add_task_item)
         
-        result = common_app_m.buildResult("SUCCESS", "SUCCESS")
-        user_boost_task_rsp_m = user_app_info_m.construct_user_boost_task_res(result=result,add_tasks=task_groups)
-        return user_boost_task_rsp_m
+    result = common_app_m.buildResult("SUCCESS", "SUCCESS")
+    user_boost_task_rsp_m = user_app_info_m.construct_user_boost_task_res(result=result,add_tasks=task_groups)
+    return user_boost_task_rsp_m
 
 @router.post("/univoice/finshuserboosttask.do")
 def do_finshuserboosttask(request:user_app_info_m.Finsh_user_boost_task_req_m,db:Session = Depends(get_db)):

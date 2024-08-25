@@ -352,7 +352,7 @@ def fetch_user_invited(db:Session, user_id:str):
 
 def fet_product_list(db:Session, user_id:str):
     try:
-        product_list = db.query(UserTaskProducer).filter(UserTaskProducer.user_id == user_id).all()
+        product_list = db.query(UserTaskProducer).filter(UserTaskProducer.user_id == user_id).order_by(UserTaskProducer.gmt_create.desc()).all()
         return product_list
     except Exception as e:
         logger.error(f"fetch product error {user_id} e={str(e)}")
