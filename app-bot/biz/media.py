@@ -74,6 +74,12 @@ async def save_voice( voice_file:File):
      # 调用编译好的二进制文件
               logger.info(f'Upload file={tmp_wav_file.name}')
               result = get_oss_bucket().put_object_from_file(oss_key,tmp_wav_file.name)
+              tmp_ogg_file.close()
+              os.remove(tmp_ogg_file.name)
+       
+              tmp_wav_file.close()
+              os.remove(tmp_wav_file.name)
+
               return oss_key
          
 
