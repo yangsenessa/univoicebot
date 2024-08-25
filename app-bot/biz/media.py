@@ -68,8 +68,6 @@ async def save_voice( voice_file:File):
               audio = AudioSegment.from_ogg(tmp_ogg_file.name)
               audio.export(tmp_wav_file.name, format="wav")
               logger.info(f"wav dir: {tmp_wav_file.name}")
-              audiowav = AudioSegment.from_file(tmp_wav_file,format="wav")
-
               oss_key=str(uuid.uuid4())+str(tmp_wav_file.name)
    #   return tmp_ogg_file.name
      #set_environment_variables()
