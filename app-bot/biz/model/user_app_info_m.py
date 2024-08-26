@@ -90,6 +90,7 @@ class Producer_item_m(BaseModel):
     task_id:str
     file_obj:str
     prd_type:str
+    gmt_create:str
 
 class Voicetaskview_rsp_m(BaseModel):
     result:Result

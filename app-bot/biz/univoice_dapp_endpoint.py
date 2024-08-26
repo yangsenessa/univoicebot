@@ -411,7 +411,9 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
         for prd_item in product_list :
             key_info = json.loads(prd_item.prd_entity)
 
-            prd_item_m = Producer_item_m(prd_id=prd_item.prd_id,task_id=prd_item.task_id, file_obj=get_oss_download_url(key_info["value"]),prd_type="VOICE")
+            gmt_create:str
+
+            prd_item_m = Producer_item_m(prd_id=prd_item.prd_id,task_id=prd_item.task_id, file_obj=get_oss_download_url(key_info["value"]),prd_type="VOICE",gmt_create=gmt_create)
             producer_group.append(prd_item_m)
     
     result = common_app_m.buildResult("SUCCESS", "SUCCESS")
