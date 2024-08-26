@@ -410,8 +410,10 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
     if product_list:
         for prd_item in product_list :
             key_info = json.loads(prd_item.prd_entity)
-
-            gmt_create:str
+            datefmt = "%Y/%m/%d/%H/%M/%S"
+            date_db_fmt = "%Y-%m-%d %H:%M:%S"
+            gmt_create_datetime:datetime = datetime.strptime(prd_item.gmt_create,date_db_fmt)
+            gmt_create:str = gmt_create_datetime.strftime(datefmt)
 
             prd_item_m = Producer_item_m(prd_id=prd_item.prd_id,task_id=prd_item.task_id, file_obj=get_oss_download_url(key_info["value"]),prd_type="VOICE",gmt_create=gmt_create)
             producer_group.append(prd_item_m)
