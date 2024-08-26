@@ -199,7 +199,7 @@ async def start(update: Update, context: CustomContext) -> None:
     # WelCome Card
     logger.info("Show welcome card")
     args = context.args
-    prm_begin=f"<b>Hi </b> {update.effective_user.name},welcome to laugch our minniApp: \n {config.MINI_APP_URL}"
+    prm_begin=f"<b>Hi </b> {update.effective_user.name},welcome to laugch our minniApp: \n <a>{config.MINI_APP_URL}</a>"
     path = os.path.abspath(os.path.dirname(__file__))
     logger.info(f"Curr path is:{path}")
     img_path="resource"

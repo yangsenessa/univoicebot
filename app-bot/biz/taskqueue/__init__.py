@@ -54,7 +54,7 @@ def do_pop():
        userids = queue.pop(10)
                      
        for user_id in userids :
-           flag, trx_val, balance_amt = tonbuss.deal_task_claim(user_id):
+           flag, trx_val, balance_amt = tonbuss.deal_task_claim(user_id)
            if False == flag:
                 logger.warning(f"User = {user_id} claim err,re-queue")
                 queue.push(user_id,int(time.time())+20)
