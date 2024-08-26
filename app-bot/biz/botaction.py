@@ -52,7 +52,7 @@ claimedKeyboardButton_list=list()
 #             [InlineKeyboardButton(text="✨ Join Group",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
 #             ]
 
-panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],[InlineKeyboardButton(text="LAUNCH APP", web_app=WebAppInfo(url=config.MINI_APP_URL))]]
+panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],[InlineKeyboardButton(text="LAUNCH APP", url=config.MINI_APP_URL, web_app=WebAppInfo(url=config.MINI_APP_URL))]]
 cliamed_btn=[[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")]]
 
 share_inner_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],[InlineKeyboardButton(text="share to Univoice-Group", callback_data="opr_share_inner")]]
