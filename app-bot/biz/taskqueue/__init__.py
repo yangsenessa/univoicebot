@@ -13,7 +13,7 @@ import telegram
 
 
 
-from biz.tonwallet.config import TOKEN,PROMPT_WAIT_CALIMED_1,PROMPT_WAIT_CALIMED_2,PROMPT_WAIT_CALIMED_3,PROMPT_NOTIFY_CLAIM_IMG
+from biz.tonwallet.config import TOKEN,PROMPT_WAIT_CALIMED_1,PROMPT_WAIT_CALIMED_2,PROMPT_WAIT_CALIMED_3,PROMPT_NOTIFY_CLAIM_IMG,PROMPT_NOTIFY_CLAIMED_IMG,PROMPT_HAS_CAILMED_3,PROMPT_HAS_CAILMED_4,PROMPT_HAS_CAILMED_5
 
 import asyncio
 import nest_asyncio
@@ -45,7 +45,7 @@ pollBot = telegram.Bot(token=TOKEN, request=trequest)
 
 
 claimedKeyboardButton_list=list()
-claimedKeyboardButton_list.append(InlineKeyboardButton(text="🎉 claim",callback_data="opr-claim"))
+claimedKeyboardButton_list.append(InlineKeyboardButton(text="🗣 play",callback_data="opr-play"))
 
 
 def do_pop():
@@ -54,20 +54,22 @@ def do_pop():
        userids = queue.pop(10)
                      
        for user_id in userids :
-           if False == tonbuss.deal_task_claim(user_id):
+           flag, trx_val, balance_amt = tonbuss.deal_task_claim(user_id):
+           if False == flag:
                 logger.warning(f"User = {user_id} claim err,re-queue")
                 queue.push(user_id,int(time.time())+20)
            else:
                 path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
                 logger.info(f"Curr path is:{path}")
                 img_path="resource"
-                img_name=PROMPT_NOTIFY_CLAIM_IMG
+                img_name=PROMPT_NOTIFY_CLAIMED_IMG
                 rsp_img_path = os.path.join(path,img_path,img_name)
                 abs_path = os.path.join(path,img_path)
                          
-                imgfile =  complex_template.marked_claim_notify(user_id,
-                                                              [PROMPT_WAIT_CALIMED_1,PROMPT_WAIT_CALIMED_2,PROMPT_WAIT_CALIMED_3],
-                                                              rsp_img_path,abs_path)
+                
+                res_p1=f"Claimed Success Now!!!"
+                rsp_marked=[res_p1, PROMPT_HAS_CAILMED_3,PROMPT_HAS_CAILMED_4,PROMPT_HAS_CAILMED_5]
+                imgfile = complex_template.marked_claimed(user_id,rsp_marked,rsp_img_path,abs_path)
                 nest_asyncio.apply()
                 try:
                     loop = asyncio.new_event_loop()
