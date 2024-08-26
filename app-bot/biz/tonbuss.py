@@ -61,6 +61,7 @@ def deal_task_claim( user_id:str):
      task_info = config.TASK_INFO
     
      flag = user_buss_crud.deal_task_claim(db,user_id)
+     user_buss_crud.deal_custom_claim(db,user_id)
     
      return flag
 

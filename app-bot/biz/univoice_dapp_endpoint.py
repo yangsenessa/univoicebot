@@ -322,9 +322,10 @@ def do_claimtask(userid=Query(None), db:Session = Depends(get_db)):
             gpu_level= user_curr_task_detail.gpu_level
             time_remain = config.cal_task_claim_time(gpu_level,user_curr_task_detail.task_id)-(time_end-time_begin).seconds
             if time_remain <= 0:
-                time_remain = 300
-            rsp_msg=f"There's  {time_remain} seconds left until your next claim."
-            return common_app_m.buildResult("FAIL", rsp_msg)
+                user_buss_crud.deal_task_claim(db, userid)
+            else:
+               rsp_msg=f"There's  {time_remain} seconds left until your next claim."
+               return common_app_m.buildResult("FAIL", rsp_msg)
         elif not user_curr_task_detail or user_curr_task_detail.progress_status == config.PROGRESS_FINISH \
              or user_curr_task_detail.progress_status == config.PROGRESS_INIT \
              or user_curr_task_detail.progress_status == config.PROGRESS_LEVEL_IDT :
