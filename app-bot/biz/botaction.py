@@ -1,4 +1,4 @@
-from telegram import Update,InlineKeyboardButton, InlineKeyboardMarkup,Bot
+from telegram import Update,InlineKeyboardButton, InlineKeyboardMarkup,Bot,WebAppInfo
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler ,filters, MessageHandler
 from telegram.constants import ParseMode
 from telegram.ext import (
@@ -52,7 +52,7 @@ claimedKeyboardButton_list=list()
 #             [InlineKeyboardButton(text="✨ Join Group",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
 #             ]
 
-panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")]]
+panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],[InlineKeyboardButton(text="LAUNCH APP", web_app=WebAppInfo(url=config.MINI_APP_URL))]]
 cliamed_btn=[[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")]]
 
 share_inner_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],[InlineKeyboardButton(text="share to Univoice-Group", callback_data="opr_share_inner")]]
