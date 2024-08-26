@@ -410,7 +410,7 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
     if product_list:
         for prd_item in product_list :
             key_info = json.loads(prd_item.prd_entity)
-            datefmt = "%Y/%m/%d/%H/%M/%S"
+            datefmt = "%Y/%m/%d %H:%M:%S"
             date_db_fmt = "%Y-%m-%d %H:%M:%S"
             gmt_create_datetime:datetime = prd_item.gmt_create
             gmt_create:str = gmt_create_datetime.strftime(datefmt)
