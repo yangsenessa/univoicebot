@@ -46,12 +46,13 @@ claimedKeyboardButton_list=list()
 #inlineKeyboardButton_list.append(InlineKeyboardButton(text="Ton Wallet",callback_data='opr_tonwallet'))
 #inlineKeyboardButton_list.append(InlineKeyboardButton(text="play",callback_data="opr-play",pay=True))
 
-panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
-             [InlineKeyboardButton(text="👝 balance",callback_data="opr-balance"),InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")],
-             [InlineKeyboardButton(text="🌟 earn",callback_data="opr-earn"),InlineKeyboardButton(text="💸claim",callback_data="opr-claim")],
-             [InlineKeyboardButton(text="✨ Join Group",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
-             ]
+#panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
+#             [InlineKeyboardButton(text="👝 balance",callback_data="opr-balance"),InlineKeyboardButton(text="🚀upgrade",callback_data="opr-upgrade")],
+#             [InlineKeyboardButton(text="🌟 earn",callback_data="opr-earn"),InlineKeyboardButton(text="💸claim",callback_data="opr-claim")],
+#             [InlineKeyboardButton(text="✨ Join Group",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
+#             ]
 
+panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")]]
 cliamed_btn=[[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")]]
 
 share_inner_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],[InlineKeyboardButton(text="share to Univoice-Group", callback_data="opr_share_inner")]]
@@ -198,7 +199,7 @@ async def start(update: Update, context: CustomContext) -> None:
     # WelCome Card
     logger.info("Show welcome card")
     args = context.args
-    prm_begin=f"<b>Hi </b> {update.effective_user.name},welcome"
+    prm_begin=f"<b>Hi </b> {update.effective_user.name},welcome to laugch our minniApp: \n {config.MINI_APP_URL}"
     path = os.path.abspath(os.path.dirname(__file__))
     logger.info(f"Curr path is:{path}")
     img_path="resource"
