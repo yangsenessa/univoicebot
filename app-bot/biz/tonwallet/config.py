@@ -16,7 +16,7 @@ CHANNLE_CHAT_ID=-1002177350295
 
 OUTTER_PARTNER_ID=['99999991','99999992','99999980','99999981','99999982','99999983','99999984','99999985','99999986','99999987','99999988','99999989']
 
-MINI_APP_URL="http://t.me/univoice2bot/univoiceworld"
+MINI_APP_URL="t.me/univoice2bot/univoiceworld"
 #from os import environ as env
 
 #from dotenv import load_dotenv
