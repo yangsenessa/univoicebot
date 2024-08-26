@@ -58,7 +58,7 @@ cliamed_btn=[[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")]]
 share_inner_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],[InlineKeyboardButton(text="share to Univoice-Group", callback_data="opr_share_inner")]]
 
 invote_btn=[[InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]]
-claimedKeyboardButton_list.append(InlineKeyboardButton(text="claim",callback_data="opr-claim"))
+claimedKeyboardButton_list.append([InlineKeyboardButton(text="🗣 play",callback_data="opr-play")])
 
 upgradekeyboardButton_list=list()
 upgradekeyboardButton_list.append(InlineKeyboardButton(text="duration level",callback_data="opr-level-upgrade"))
