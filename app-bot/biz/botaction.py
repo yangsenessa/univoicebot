@@ -687,7 +687,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     if not task_flag:
         logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
         await context.bot.send_message(chat_id=update.effective_user.id,
-                                   text="Your voice has lost your path,please retry ⬇️⬇️⬇️",
+                                   text="Your voice has lost your path,please press play-button and retry ⬇️⬇️⬇️",
                                    reply_markup=InlineKeyboardMarkup(cliamed_btn))
         return
     logger.info(f"user_id={user_id} process task")
