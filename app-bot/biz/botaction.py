@@ -657,6 +657,9 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
         return
 
     task_curr_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id,task_id)
+    if task_curr_detail is None:
+          deploy_user_curr_task(user_id=user_id,chat_id=chat_id,level=user_level,gpu_level=gpu_level,task_action=config.TASK_VOICE_UPLOAD)
+          task_curr_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id,task_id)
     if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_DEAILING:
         timebegin = task_curr_detail.gmt_modified
         timeend = datetime.now()
