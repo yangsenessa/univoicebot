@@ -12,5 +12,12 @@
       "task_desc":"FOLLOW our telegram channel",
       "logo":"https://univoice.oss-us-east-1.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-08-25%2022.38.42.png",
       "task_url":"https://t.me/univoiceofficial"
-     }
+   },
+   {
+      "taskid":"FOLLOW-TG-Group",
+      "rewards":"5000",
+      "task_desc":"FOLLOW our telegram group",
+      "logo":"https://univoice.oss-us-east-1.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-08-25%2022.38.42.png",
+      "task_url":"https://t.me/univoiceofspace"
+   }
 ]
