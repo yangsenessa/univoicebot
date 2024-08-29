@@ -426,7 +426,7 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
 @router.get("/univoice/getcommoninfo.do",response_model=user_app_info_m.CommonInfo_rsp_m)
 def do_getcommoninfo(db:Session = Depends(get_db)):
     #Need counting by redis
-    user_num:str = "13475" 
+    user_num:str = "20118" 
     communication_info:dict = config.get_curr_communication_info(user_num)
     res_communication_m=user_app_info_m.CommunicationInfo_m(target=str(communication_info['target']),
                                                             curr_num=user_num,
