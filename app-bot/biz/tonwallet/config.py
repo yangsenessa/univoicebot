@@ -76,6 +76,7 @@ PROMPT_NOTIFY_CLAIM_IMG="notify-claim.jpg"
 PROMPT_NOTIFY_CLAIMED_IMG="cliam-success.jpg"
 PROMPT_NEW_MEMBER_IMG="newmember.jpg"
 PROMPT_UPDATE_RULE_IMG="updaterule.jpg"
+PROMPT_OPR_GUIDE_IMG="opr-guide.jpg"
 
 #########################################TASK########################################
 path = os.path.join(os.path.dirname(__file__),"conf","plan.json")

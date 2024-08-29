@@ -267,8 +267,16 @@ async def start(update: Update, context: CustomContext) -> None:
     elif progress_status == config.PROGRESS_LEVEL_IDT \
            or progress_status == config.PROGRESS_INIT  \
            or progress_status == config.PROGRESS_FINISH:
-        await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text=config.PROMPT_GUIDE,parse_mode=ParseMode.HTML)
+         path = os.path.abspath(os.path.dirname(__file__))
+         img_path="resource"
+         img_name=config.PROMPT_OPR_GUIDE_IMG
+         rsp_img_path = os.path.join(path,img_path,img_name)
+         with open(rsp_img_path,"rb") as imgfile:
+             await context.bot.send_photo(chat_id=update.effective_chat.id,
+                                          photo=imgfile, 
+                                          message_thread_id=thread_id,   
+                                          caption=config.PROMPT_GUIDE,
+                                          parse_mode=ParseMode.HTML)
        
 
 
