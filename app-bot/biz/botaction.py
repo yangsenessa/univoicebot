@@ -272,6 +272,7 @@ async def start(update: Update, context: CustomContext) -> None:
          img_name=config.PROMPT_OPR_GUIDE_IMG
          rsp_img_path = os.path.join(path,img_path,img_name)
          with open(rsp_img_path,"rb") as imgfile:
+             logger.info(f"Show guide for {update.effective_chat.id}")
              await context.bot.send_photo(chat_id=update.effective_chat.id,
                                           photo=imgfile, 
                                           message_thread_id=thread_id,   
