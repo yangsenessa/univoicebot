@@ -971,7 +971,7 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
     user_id = update.effective_user.id
     oribot = Bot(token=TOKEN)
 
-    if user_id != '6470370650':
+    if user_id != 6470370650:
         logger.error(f"user:{user_id} have to authoration")
         return
     user_id_set:set = user_buss_crud.fetch_finish_task_users(db=db, user_id=user_id,end_date=config.load_dirdrop_datetime())
