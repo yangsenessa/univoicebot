@@ -76,6 +76,9 @@ start_handler = CommandHandler('start', start)
 
 invite_handler = CommandHandler('invite', sharelink_task)
 
+airdorp_handler = CommandHandler('adminairdrop',airdrop_task)
+
+
 set_right_handler = CommandHandler('p', set_right)
 unknown_handler = MessageHandler(filters.COMMAND, unknown)
 filter_ohayo = filters.Regex('早安|早上好|哦哈哟|ohayo')
