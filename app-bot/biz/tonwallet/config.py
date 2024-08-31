@@ -59,6 +59,12 @@ PROMPT_USER_FIRST="Thank you for embarking on this voice exploration journey. \
 PROMPT_RECORD_FINISH="Recording successful! Your fifth-dimensional space now has more voices asset preserved for you!"+\
 "\n\nPlease wait {hours} hours to receive your points."
 
+PROMPT_AIRDROP="Hello Univoice's beautiful souls,😉 \n\n" + \
+"Thank you very much for your support." +\
+"For those souls who have successfully uploaded their voices and earned points, we have airdropped 1️⃣0️⃣0️⃣0️⃣0️⃣points into your accounts. Please check your balance💰 in the miniapp! \n\n" + \
+"Let's continue to express our true voices on Univoice, capture the \"value of the present moment,\" explore the \"value of the true self,\" and fully utilize the value of modern technology. \n\n"
+
+
 
 PROMPT_WAIT_CALIMED_1="$VOICE is available"
 PROMPT_WAIT_CALIMED_2=" "
