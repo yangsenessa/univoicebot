@@ -973,8 +973,11 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
 
     if user_id != 6470370650:
         logger.error(f"user:{user_id} have to authoration")
+
+
+        
         return
-    user_id_set:set = user_buss_crud.fetch_finish_task_users(db=db, user_id=user_id,end_date=config.load_dirdrop_datetime())
+    user_id_set:set = user_buss_crud.fetch_finish_task_users(db=db, user_id=str(user_id),end_date=config.load_dirdrop_datetime())
 
     rsp_msg_end:str=f"group:https://t.me/univoiceofspace    X:{config.URL_ACCT_X}"
     
