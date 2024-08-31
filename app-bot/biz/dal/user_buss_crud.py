@@ -3,6 +3,7 @@ from .user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskP
 from .global_config import Unvtaskinfo
 from ..tonwallet import config
 from .transaction import User_claim_jnl
+from datetime import datetime
 from loguru import logger
 import uuid
 import json
@@ -374,6 +375,20 @@ def delete_product(db:Session, product_id:str):
     finally:
         db.close()
     return (False,None)
+
+def fetch_finish_task_users(db:Session,user_id:str,end_date:datetime) -> set:
+    res_set:set = set()
+    try:
+        dbres:list = db.query(UserTaskProducer).filter(UserTaskProducer.user_id==user_id, UserTaskProducer.gmt_create <= end_date).all()
+        for item_user in dbres:
+          res_set.add(item_user)
+    except Exception as e:
+        logger.error("Load airdrop task user error")
+    finally:
+        db.close()
+    return res_set
+
+
      
 
 

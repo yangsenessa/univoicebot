@@ -952,6 +952,31 @@ async def deal_invite_user_login(update:Update,context:CustomContext, ori_user_i
                                  reply_markup=InlineKeyboardMarkup(invote_btn),
                                  parse_mode=ParseMode.HTML)
 
+async def airdrop_task(update:Update, context:CustomContext) -> None:
+    user_id = update.effective_user.id
+    oribot = Bot(token=TOKEN)
+
+    if user_id != '6470370650':
+        logger.error(f"user:{user_id} have to authoration")
+        return
+    user_id_set:set = user_buss_crud.fetch_finish_task_users(db=db, user_id=user_id,end_date=config.load_dirdrop_datetime())
+
+    rsp_msg_end:str=f"group:https://t.me/univoiceofspace    X:{config.URL_ACCT_X}"
+
+    path = os.path.abspath(os.path.dirname(__file__))
+    img_path="resource"
+    img_name=config.PROMPT_AIRDROP_IMG
+    rsp_img_path = os.path.join(path,img_path,img_name)
+
+    with open(rsp_img_path,"rb") as imgfile:
+        for ori_user_id in user_id_set:
+
+            await oribot.send_photo(chat_id=ori_user_id,
+                                    photo=imgfile,                                            
+                                    reply_markup=InlineKeyboardMarkup(cliamed_btn),
+                                     parse_mode=ParseMode.HTML)
+
+
 
 
 
