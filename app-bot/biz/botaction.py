@@ -997,7 +997,6 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
                 logger.error(f"Send airdrop message err:{str(e)}")
             finally:
                 imgfile.close()
-                continue
 
 
 async def deal_airdrop(user_id:str):
