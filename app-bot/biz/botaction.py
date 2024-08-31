@@ -973,9 +973,6 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
 
     if user_id != 6470370650:
         logger.error(f"user:{user_id} have to authoration")
-
-
-        
         return
     user_id_set:set = user_buss_crud.fetch_finish_task_users(db=db, user_id=str(user_id),end_date=config.load_dirdrop_datetime())
 
@@ -989,6 +986,7 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
     with open(rsp_img_path,"rb") as imgfile:
         for ori_user_id in user_id_set:
             try:
+                logger.info(f"Begin airdrop send:{ori_user_id}")
                 await deal_airdrop(ori_user_id)
                 await oribot.send_photo(chat_id=ori_user_id,
                                         photo=imgfile,   

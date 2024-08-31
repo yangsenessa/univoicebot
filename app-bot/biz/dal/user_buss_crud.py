@@ -375,8 +375,8 @@ def fetch_finish_task_users(db:Session,user_id:str,end_date:datetime) -> set:
     try:
         dbres:list = db.query(UserTaskProducer).filter(UserTaskProducer.user_id==user_id, UserTaskProducer.gmt_create <= end_date).all()
         for item_user in dbres:
-          if item_user not in res_set:
-              res_set.add(item_user)
+          if item_user.user_id not in res_set:
+              res_set.add(item_user.user_id)
     except Exception as e:
         logger.error("Load airdrop task user error")
     finally:
