@@ -64,7 +64,7 @@ PROMPT_AIRDROP="Hello Univoice's beautiful souls,😉 \n\n" + \
 "For those souls who have successfully uploaded their voices and earned points, we have airdropped 1️⃣0️⃣0️⃣0️⃣0️⃣points into your accounts. Please check your balance💰 in the miniapp! \n\n" + \
 "Let's continue to express our true voices on Univoice, capture the \"value of the present moment,\" explore the \"value of the true self,\" and fully utilize the value of modern technology. \n\n"
 
-
+AIRDROP_TOKED="10000"
 
 PROMPT_WAIT_CALIMED_1="$VOICE is available"
 PROMPT_WAIT_CALIMED_2=" "

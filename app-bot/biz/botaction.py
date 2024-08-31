@@ -985,11 +985,50 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
 
     with open(rsp_img_path,"rb") as imgfile:
         for ori_user_id in user_id_set:
+            try:
+                await deal_airdrop(ori_user_id)
+                await oribot.send_photo(chat_id=ori_user_id,
+                                        photo=imgfile,                                            
+                                        reply_markup=InlineKeyboardMarkup(cliamed_btn),
+                                        parse_mode=ParseMode.HTML)
+            except Exception as e:
+                logger.error(f"Send airdrop message err:{str(e)}")
+            finally:
+                continue
 
-            await oribot.send_photo(chat_id=ori_user_id,
-                                    photo=imgfile,                                            
-                                    reply_markup=InlineKeyboardMarkup(cliamed_btn),
-                                     parse_mode=ParseMode.HTML)
+
+async def deal_airdrop(user_id:str):
+    trx_amt = config.AIRDROP_TOKED
+
+    user_claim_jnl = User_claim_jnl(
+                     jnl_no = str(uuid.uuid4()) ,
+                     user_id = user_id,
+                     task_id="AIRDROP_UPLOAD_VOICE",
+                     task_name="AIRDROP_UPLOAD_VOICE",
+                     tokens=trx_amt,
+                     gmt_biz_create=config.get_datetime(),
+                     gmt_biz_finish=config.get_datetime(),
+                     status="FINISH"
+                     )
+    user_buss_crud.invoke_acct_token(db,user_id,trx_amt,user_claim_jnl)
+
+async def fail_airdrop(user_id:str):
+     trx_amt = config.AIRDROP_TOKED
+
+     user_claim_jnl = User_claim_jnl(
+                     jnl_no = str(uuid.uuid4()) ,
+                     user_id = user_id,
+                     task_id="AIRDROP_UPLOAD_VOICE",
+                     task_name="AIRDROP_UPLOAD_VOICE",
+                     tokens=trx_amt,
+                     gmt_biz_create=config.get_datetime(),
+                     gmt_biz_finish=config.get_datetime(),
+                     status="FINISH"
+                     )
+     user_buss_crud.add_user_claim_jnl(db=db, user_claim_jnl=user_claim_jnl)
+
+
+
 
 
 

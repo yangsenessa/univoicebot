@@ -57,6 +57,18 @@ def invoke_acct_token(db:Session, user_id:str, tokens:str,user_claim_jnl:User_cl
     finally:
         db.close()
 
+def add_user_claim_jnl(db:Session,user_claim_jnl:User_claim_jnl):
+    try:
+        db.add(user_claim_jnl)
+        db.commit()
+        return True
+    except Exception as e:
+        db.rollback()
+        logger.error(f"update user_claim_jnl info err:{str(e)}")
+        return False
+    finally:
+        db.close()
+
 def acct_update_deal(db:Session, user_id:str,tokens:str,user_claim_jnl:User_claim_jnl, user_info:BotUserInfo):
     try:
         user_acct_info = get_user_acct(db,user_id)
