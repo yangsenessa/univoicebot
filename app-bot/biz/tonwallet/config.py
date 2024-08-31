@@ -125,7 +125,7 @@ def load_datetime(timestamp)->datetime:
     return datetime.strptime(timestamp,"%Y-%m-%d %H:%M:%S")
 
 def load_dirdrop_datetime()->datetime:
-    return datetime.strptime("2024-09-01 00:00:00")
+    return datetime.strptime("2024-09-01 00:00:00","%Y-%m-%d %H:%M:%S")
 
 
 #RANDOM
