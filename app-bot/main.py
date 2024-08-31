@@ -11,7 +11,7 @@ from comfyai import wsserver_endpoint
 from comfyai import telegram_bot_endpoint
 from biz import univoice_dapp_endpoint
 from biz.media import parsewav
-from biz.botaction import start,callback_inline,voice_upload,show_cus_upgrade,sharelink_task
+from biz.botaction import start,callback_inline,voice_upload,show_cus_upgrade,sharelink_task,airdrop_task
 from biz.tonwallet.config import TOKEN
 from loguru import logger
 from threading import Thread
