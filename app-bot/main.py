@@ -76,7 +76,7 @@ start_handler = CommandHandler('start', start)
 
 invite_handler = CommandHandler('invite', sharelink_task)
 
-airdrop_handler = MessageHandler('adminairdrop',airdrop_task)
+airdrop_handler = CommandHandler('adminairdrop',airdrop_task)
 
 
 set_right_handler = CommandHandler('p', set_right)
