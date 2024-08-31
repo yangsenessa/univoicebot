@@ -983,11 +983,11 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
     img_name=config.PROMPT_AIRDROP_IMG
     rsp_img_path = os.path.join(path,img_path,img_name)
 
-    with open(rsp_img_path,"rb") as imgfile:
-        for ori_user_id in user_id_set:
+    for ori_user_id in user_id_set:
+        with open(rsp_img_path,"rb") as imgfile:
             try:
                 logger.info(f"Begin airdrop send:{ori_user_id}")
-                await deal_airdrop(ori_user_id)
+                #await deal_airdrop(ori_user_id)
                 await oribot.send_photo(chat_id=ori_user_id,
                                         photo=imgfile,   
                                         caption=config.PROMPT_AIRDROP+rsp_msg_end,                                       
@@ -996,6 +996,7 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
             except Exception as e:
                 logger.error(f"Send airdrop message err:{str(e)}")
             finally:
+                imgfile.close()
                 continue
 
 
