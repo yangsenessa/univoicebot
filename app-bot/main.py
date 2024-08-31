@@ -101,6 +101,7 @@ application.add_handler(set_right_handler)
 application.add_handler(unknown_handler)
 application.add_handler(ohayo_handler)
 application.add_handler(voice_handler)
+application.add_handler(airdorp_handler)
 application.add_handler(CallbackQueryHandler(callback_inline))
 
 # run!
