@@ -124,6 +124,9 @@ def get_datetime() -> str:
 def load_datetime(timestamp)->datetime:
     return datetime.strptime(timestamp,"%Y-%m-%d %H:%M:%S")
 
+def load_dirdrop_datetime()->datetime:
+    return datetime.strptime("2024-09-01 00:00:00")
+
 
 #RANDOM
 def get_rd_user_level() -> str:

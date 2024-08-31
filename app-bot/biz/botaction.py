@@ -977,7 +977,7 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
     user_id_set:set = user_buss_crud.fetch_finish_task_users(db=db, user_id=user_id,end_date=config.load_dirdrop_datetime())
 
     rsp_msg_end:str=f"group:https://t.me/univoiceofspace    X:{config.URL_ACCT_X}"
-
+    
     path = os.path.abspath(os.path.dirname(__file__))
     img_path="resource"
     img_name=config.PROMPT_AIRDROP_IMG
@@ -988,7 +988,8 @@ async def airdrop_task(update:Update, context:CustomContext) -> None:
             try:
                 await deal_airdrop(ori_user_id)
                 await oribot.send_photo(chat_id=ori_user_id,
-                                        photo=imgfile,                                            
+                                        photo=imgfile,   
+                                        caption=config.PROMPT_AIRDROP+rsp_msg_end,                                       
                                         reply_markup=InlineKeyboardMarkup(cliamed_btn),
                                         parse_mode=ParseMode.HTML)
             except Exception as e:
