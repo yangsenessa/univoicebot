@@ -75,6 +75,8 @@ PROMPT_HAS_CAILMED_3="You can continue..."
 PROMPT_HAS_CAILMED_4="Press 'play' to earn more."
 PROMPT_HAS_CAILMED_5="Let's go"
 
+URL_ACCT_X="https://x.com/univoice_"
+
 
 PROMPT_RECORD_FINISH_IMG = "record-complete.jpg"
 PROMPT_UPGRADE_SUCCESS="upgrade-success.jpg"
