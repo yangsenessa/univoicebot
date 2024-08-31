@@ -76,7 +76,7 @@ start_handler = CommandHandler('start', start)
 
 invite_handler = CommandHandler('invite', sharelink_task)
 
-airdorp_handler = CommandHandler('adminairdrop',airdrop_task)
+airdrop_handler = CommandHandler('adminairdrop',airdrop_task)
 
 
 set_right_handler = CommandHandler('p', set_right)
@@ -101,7 +101,7 @@ application.add_handler(set_right_handler)
 application.add_handler(unknown_handler)
 application.add_handler(ohayo_handler)
 application.add_handler(voice_handler)
-application.add_handler(airdorp_handler)
+application.add_handler(airdrop_handler)
 application.add_handler(CallbackQueryHandler(callback_inline))
 
 # run!
