@@ -370,10 +370,10 @@ def delete_product(db:Session, product_id:str):
     return False
      
 
-def fetch_finish_task_users(db:Session,user_id:str,end_date:datetime) -> set:
+def fetch_finish_task_users(db:Session,end_date:datetime) -> set:
     res_set:set = set()
     try:
-        dbres:list = db.query(UserTaskProducer).filter(UserTaskProducer.user_id==user_id, UserTaskProducer.gmt_create <= end_date).all()
+        dbres:list = db.query(UserTaskProducer).filter(UserTaskProducer.gmt_create <= end_date).all()
         for item_user in dbres:
           if item_user.user_id not in res_set:
               res_set.add(item_user.user_id)
