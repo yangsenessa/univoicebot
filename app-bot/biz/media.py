@@ -65,42 +65,21 @@ async def save_voice( voice_file:File):
           os.fsync(tmp_ogg_file.fileno())
           logger.info(f"ogg dir: {tmp_ogg_file.name}")
 
-          oss_key=str(uuid.uuid4())+str(hash(tmp_ogg_file.name))
-       #   return tmp_ogg_file.name
-     #set_environment_variables()
-     # 调用编译好的二进制文件
-          logger.info(f'Upload file={tmp_ogg_file.name}')
-          result = get_oss_bucket().put_object_from_file(oss_key,tmp_ogg_file.name)
-          return oss_key
-         
+          with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_wav_file:
+              audio = AudioSegment.from_ogg(tmp_ogg_file.name)
+              audio.export(tmp_wav_file.name, format="wav")
+              logger.info(f"wav dir: {tmp_wav_file.name}")
+              oss_key=str(uuid.uuid4())+str(tmp_wav_file.name)
+  
+              logger.info(f'Upload file={tmp_wav_file.name}')
+              result = get_oss_bucket().put_object_from_file(oss_key,tmp_wav_file.name)
+              tmp_ogg_file.close()
+              os.remove(tmp_ogg_file.name)
+       
+              tmp_wav_file.close()
+              os.remove(tmp_wav_file.name)
 
-     '''result = subprocess.run(
-        #--['/home/ubuntu/app/bin/example', 'upload','--make-car=true',tmp_ogg_file.name],
-        ['/home/ubuntu/app/bin/example', 'upload',tmp_ogg_file.name],
-        #['D:\\project\\titan-storage-sdk\\example\\example', 'upload', tmp_ogg_file.name],
-         stdout=subprocess.PIPE,
-         stderr=subprocess.PIPE,
-         text=True
-     )
-
-     if result.returncode == 0:
-         logger.info("Upload successful")
-         logger.info(f"Output stdout:{result.stdout}")
-         logger.info(f"Output stderr:{result.stderr}")
-         os.remove(tmp_ogg_file.name)
-         match = re.search(r'cid ([a-zA-Z0-9]+)', result.stderr)
-         if match:
-             cid = match.group(1)
-             print("Extracted CID:", cid)
-             return cid
-         else:
-             print("CID not found in the output.")
-             return ""
-     else:
-         print("Upload failed")
-         print("Error:", result.stderr)
-         return ""
-     '''
+              return oss_key
 
 #transfer wkflow content
 def parseAudioBase64IntoWorkflow(base64date:bytes):
