@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from .model.common_app_m import Result
 from .model import common_app_m
 from .model import user_app_info_m
-from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m,Vsd_level_m,Gpu_level_m,Producer_item_m,Voicetaskview_rsp_m
+from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m,Vsd_level_m,Gpu_level_m,Producer_item_m,Voicetaskview_rsp_m,AIGC_task_rsp_m
 from .dal import user_buss_crud, statement_query
 from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
 from .dal.transaction import User_claim_jnl
@@ -422,6 +422,28 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
     result = common_app_m.buildResult("SUCCESS", "SUCCESS")
     rsp_m = Voicetaskview_rsp_m(result=result, VSD_LEVEL= VSD_LEVEL, GPU_LEVEL=GPU_LEVEL,producer_group= producer_group)
     return rsp_m
+
+@router.post("/univoice/invokeaigctask.do")
+def do_aigctask(request:user_app_info_m.AIGC_task_req_m,db:Session = Depends(get_db),response_model=user_app_info_m.AIGC_task_rsp_m):
+    result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
+    prd_item:UserTaskProducer = user_buss_crud.fetch_product_detail(db=db,prd_id=request.prd_id)
+    if prd_item is None:
+        result.res_code="FAIL"
+        result.res_msg="Product info invalid"
+        return AIGC_task_rsp_m(result=result)
+    try:
+        prd_entity_json:dict = json.loads(prd_item.prd_entity)
+        
+    
+    except Exception as e:
+        logger.error(f"Do media AIGC proc error {str(e)}")
+        result.res_code="FAIL"
+        result.res_msg="System error"
+    
+    return AIGC_task_rsp_m(result=result)
+
+
+
 
 @router.get("/univoice/getcommoninfo.do",response_model=user_app_info_m.CommonInfo_rsp_m)
 def do_getcommoninfo(db:Session = Depends(get_db)):

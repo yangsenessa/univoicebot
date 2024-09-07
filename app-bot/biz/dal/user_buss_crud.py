@@ -351,7 +351,7 @@ def fetch_user_invited(db:Session, user_id:str):
         db.close()
 
 
-def fet_product_list(db:Session, user_id:str):
+def fet_product_list(db:Session, user_id:str) :
     try:
         product_list = db.query(UserTaskProducer).filter(UserTaskProducer.user_id == user_id).order_by(UserTaskProducer.gmt_create.desc()).all()
         return product_list
@@ -360,6 +360,18 @@ def fet_product_list(db:Session, user_id:str):
         return None
     finally:
         db.close()
+
+
+def fetch_product_detail(db:Session, prd_id:str)-> UserTaskProducer:
+    try:
+        prd_item:UserTaskProducer = db.query(UserTaskProducer).filter(UserTaskProducer.prd_id == prd_id).first()
+        return prd_item
+    except Exception as e:
+        logger.error(f"fetch product error {prd_id} e={str(e)}")
+        return None
+    finally:
+        db.close()
+
 
 def delete_product(db:Session, product_id:str):
     try:

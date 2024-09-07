@@ -108,6 +108,14 @@ class CommonInfo_rsp_m(BaseModel):
     result:Result
     communication_info:CommunicationInfo_m
 
+class AIGC_task_req_m(BaseModel):
+    prd_id:str
+    task_id:str  #MUSE_TALK
+
+class AIGC_task_rsp_m(BaseModel):
+    result:Result
+
+
 
 def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUserAcctBase,task_info:UserCurrTaskDetail|None,claim_info:User_claim_jnl|None) -> User_appinfo_rsp_m :
     
