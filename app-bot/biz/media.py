@@ -28,11 +28,27 @@ def get_oss_bucket():
    return bucket
 
 
-def get_oss_download_url(key:str):
+def get_oss_download_url(key:str)->str:
     logger.debug("Get oss with key:" + key)
     bucket = get_oss_bucket()
     url =  bucket.sign_url('GET', key, 3600*24*7)
     return url
+
+
+def parse_wkdata_from_oss(oss_key:str)->dict:
+     with tempfile.NamedTemporaryFile(delete=False,suffix=".wav") as tmp_wav_file:
+          logger.info(f"Get voice from oss, filename={tmp_wav_file.name}")
+          get_oss_bucket().get_object_to_file(oss_key,tmp_wav_file.name)
+          audiowav = AudioSegment.from_file(tmp_wav_file,format="wav")
+          base64_audio = base64.b64encode(audiowav.export(format="wav").read())
+
+          tmp_wav_file.close()
+          os.remove(tmp_wav_file.name)
+
+          tmp_wk_json =  parseAudioBase64IntoWorkflow(base64_audio)
+          return tmp_wk_json
+
+
 
 async def parsewav(user_token:str, voice_file:File,context:ContextTypes.DEFAULT_TYPE):
    with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_ogg_file:
@@ -83,7 +99,7 @@ async def save_voice( voice_file:File):
 
 #transfer wkflow content
 def parseAudioBase64IntoWorkflow(base64date:bytes):
-    wk_filename = "musetalk-comfyui-workflow.json"
+    wk_filename = "univoice-wk.json"
     comfyai_path = os.path.abspath(os.path.dirname(__file__))
     wk_path = os.path.join(comfyai_path,"workflows",wk_filename)
     logger.info(f"wk_path:{wk_path}")

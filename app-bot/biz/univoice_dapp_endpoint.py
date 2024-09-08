@@ -14,7 +14,9 @@ from .dal.transaction import User_claim_jnl
 from .dal.global_config import Unvtaskinfo
 from .dal.database import SessionLocal
 from .tonwallet import config
-from .media import get_oss_download_url,get_oss_bucket
+from .media import get_oss_download_url,get_oss_bucket,parse_wkdata_from_oss
+
+
 
 import requests
 import json
@@ -22,6 +24,11 @@ from datetime import datetime
 import time
 import os
 import uuid
+
+import sys
+sys.path.append("..")
+from comfyai import telegram_bot_endpoint
+
 
 
 router = APIRouter()
@@ -424,7 +431,7 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
     return rsp_m
 
 @router.post("/univoice/invokeaigctask.do")
-def do_aigctask(request:user_app_info_m.AIGC_task_req_m,db:Session = Depends(get_db),response_model=user_app_info_m.AIGC_task_rsp_m):
+async def do_aigctask(request:user_app_info_m.AIGC_task_req_m,db:Session = Depends(get_db),response_model=user_app_info_m.AIGC_task_rsp_m):
     result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
     prd_item:UserTaskProducer = user_buss_crud.fetch_product_detail(db=db,prd_id=request.prd_id)
     if prd_item is None:
@@ -433,7 +440,20 @@ def do_aigctask(request:user_app_info_m.AIGC_task_req_m,db:Session = Depends(get
         return AIGC_task_rsp_m(result=result)
     try:
         prd_entity_json:dict = json.loads(prd_item.prd_entity)
+        oss_key:str = prd_entity_json["value"]
+        if oss_key is None or  len(oss_key)==0:
+           result.res_code="FAIL"
+           result.res_msg="Product info invalid"
+           return AIGC_task_rsp_m(result=result)
         
+        wk_json = parse_wkdata_from_oss(oss_key=oss_key)
+        wk_client_id = prd_item.prd_id
+        user_token = prd_item.user_id
+        chat_id = prd_item.chat_id
+
+        logger.info(f"prompts client_id={wk_client_id}")
+        wk_json["client_id"] = wk_client_id
+        await telegram_bot_endpoint.extern_prompts_dapp(user_token,chat_id,"dapp",wk_json)    
     
     except Exception as e:
         logger.error(f"Do media AIGC proc error {str(e)}")

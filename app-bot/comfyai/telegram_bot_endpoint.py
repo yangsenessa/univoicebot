@@ -13,6 +13,8 @@ from comfyai.database import SessionLocal, engine
 import requests
 import json
 from comfyai.wsclient.websocket_client_new import WebsocetClient
+from comfyai.wsclient.websocket_client_dapp import WebsocetClient as WebsocetClient_dapp
+
 from telegram.ext import ContextTypes
 from datetime import datetime
 import time
@@ -77,6 +79,67 @@ async def extern_prompts(user_token:str, chat_id:str,context:ContextTypes.DEFAUL
         logger.debug(f"begin create ws client-{wkflow['client_id']}")
     
         await WebsocetClient().start(user_token,chat_id,context,ws_url,call_from,db)
+        time.sleep(1)
+       
+        logger.debug(response.content)
+           
+    except Exception as e:
+        logger.debug(f"some exception when prompts:{str(e)}")
+
+    return response  
+
+async def extern_prompts_dapp(user_token:str, chat_id:str,call_from:str,prd_id:str, wkflow:dict):
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    db = extern_database.get_db_session(engine)
+    #init user router
+    init_user_router(db, user_token)
+
+     #Get node
+    user_ws_router:UserWsRouterInfo
+    user_ws_router = user_crud.fetch_user_ws_router(db,user_token)
+    if(user_ws_router) :
+        comf_url = user_ws_router.comf_url
+        ws_url_ori = str(user_ws_router.ws_url) 
+        ws_url = ws_url_ori.split('=')[0]+'='+(str(wkflow['client_id']))
+    else:
+        raise HTTPException(status_code=400,detail="Invaid router")
+    logger.info(f"Curr router is:{comf_url}")
+    logger.info(f"Curr ws opt is:{ws_url}")
+
+    #origin video can be null with different workflows
+   
+    try:
+        logger.info(f"Begining put .mp4 file to comfyui")
+        put_file_to_comfyui_rawfile(comf_url,"sun.mp4")
+       
+    except Exception as e:
+        logger.error(f"Upload video file err {str(e)}")
+        return
+    
+    logger.debug("begin post:" + "  "+ comf_url) 
+    try:
+        response = requests.post(comf_url,json=wkflow,headers=headers)
+
+        rescontents =  response.json()
+        logger.debug("response -- "+json.dumps(rescontents))
+       
+
+        wk_info =  WorkFlowRouterInfo()  
+        wk_info.prompts_id = rescontents["prompt_id"]
+        wk_info.client_id = user_token
+        wk_info.app_info = get_app_info(wkflow)
+        wk_info.status="progress"
+        wk_info.comfyui_url=comf_url  
+        wk_info.gmt_datetime =  datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    
+        work_flow_crud.create_wk_router(db,wk_info)
+        logger.debug(f"begin create ws client-{wkflow['client_id']}")
+    
+        await WebsocetClient_dapp().start(user_token,chat_id,prd_id,ws_url,call_from,db)
         time.sleep(1)
        
         logger.debug(response.content)

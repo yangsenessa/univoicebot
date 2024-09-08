@@ -43,5 +43,12 @@ class UserTaskProducer(Base):
     duration=Column(Integer)
     gmt_create=Column(DateTime)
 
+class AIGCProducer(Base):
+    __tablename__="unv_aigc_producer"
+    prd_id=Column(String,primary_key=True)
+    aigc_type=Column(String)
+    oss_key=Column(String)
+    gmt_create=Column(DateTime)
+
 
     

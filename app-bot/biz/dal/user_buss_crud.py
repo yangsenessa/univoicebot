@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
+from .user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer,AIGCProducer
 from .global_config import Unvtaskinfo
 from ..tonwallet import config
 from .transaction import User_claim_jnl
@@ -399,6 +399,17 @@ def fetch_finish_task_users(db:Session,user_id:str,end_date:datetime) -> set:
     finally:
         db.close()
     return res_set
+
+def save_prd_aigc(db:Session, aigc_prd:AIGCProducer):
+    try:
+        db.add(aigc_prd)
+        db.commit()
+        db.refresh(aigc_prd)
+    except Exception as e:
+        db.rollback()
+        logger.error(f"db err: {str(e)}")
+    finally:
+        db.close()
 
 
      
