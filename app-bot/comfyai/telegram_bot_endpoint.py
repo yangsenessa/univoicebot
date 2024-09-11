@@ -12,6 +12,8 @@ from comfyai.database import SessionLocal, engine
 
 import requests
 import json
+from threading import Thread
+
 from comfyai.wsclient.websocket_client_new import WebsocetClient
 from comfyai.wsclient.websocket_client_dapp import WebsocetClient as WebsocetClient_dapp
 
@@ -20,6 +22,8 @@ from datetime import datetime
 import time
 from comfyai import database
 import os
+
+
 
 
 extern_database =  database.Database()
@@ -139,7 +143,7 @@ async def extern_prompts_dapp(user_token:str, chat_id:str,call_from:str,prd_id:s
         work_flow_crud.create_wk_router(db,wk_info)
         logger.debug(f"begin create ws client-{wkflow['client_id']}")
     
-        await WebsocetClient_dapp().start(user_token,chat_id,prd_id,ws_url,call_from,db)
+        WebsocetClient_dapp().start(user_token,chat_id,prd_id,ws_url,call_from,db)
         time.sleep(1)
        
         logger.debug(response.content)

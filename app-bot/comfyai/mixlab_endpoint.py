@@ -16,13 +16,14 @@ import json
 from comfyai.wsclient.websocket_client_new import WebsocetClient
 from datetime import datetime
 import time
+import oss2
 import os
 
 
 
 router = APIRouter()
 
-endpoint = 'http://oss-cn-beijing.aliyuncs.com'
+#endpoint = 'http://oss-cn-beijing.aliyuncs.com'
 # Dependency
 def get_db():
     db = SessionLocal()
@@ -37,6 +38,15 @@ def get_oss_download_url(key:str):
     #todo
     url = ""
     return url
+
+endpoint = 'http://oss-us-east-1.aliyuncs.com'
+def get_oss_bucket():
+   bucket_name = 'univoice'
+   access_key_id=os.getenv("OSS_ACCESS_KEY_ID")
+   access_key_secret = os.getenv("OSS_ACCESS_KEY_SECRET")
+   
+   bucket = oss2.Bucket(oss2.Auth(access_key_id, access_key_secret), endpoint, bucket_name=bucket_name)
+   return bucket
 
 
 
@@ -186,8 +196,7 @@ async def do_prompts_process(request:Request,db:Session = Depends(get_db)):
         wk_info.gmt_datetime =  datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         work_flow_crud.create_wk_router(db,wk_info)
         logger.debug("begin create ws client")
-        #t1=threading.Thread(target=WebsocetClient().start,args=(body["client_id"],ws_url,db))
-        #t1.start()
+    
         WebsocetClient().start(body["client_id"],ws_url,"default",db,None)
         time.sleep(1)
        
@@ -423,16 +432,22 @@ def fetch_comf_file(url:str,type:str,filename:str):
 
     res = requests.get(url)
     try:
-        with open(comfyui_file,"rwb") as res_file:
+        with open(comfyui_file,"wb") as res_file:
+           logger.info("Writing result file")
            res_file.write(res.content)
+           res_file.flush()
         if type :
            oss_key=type+"_"+filename
         else:
             oss_key=filename
+        get_oss_bucket().put_object_from_file(oss_key,res_file.name)
+        res_file.close()
+        logger.info(f"Delete tmp_file :{comfyui_file}")
         os.remove(comfyui_file)
+        logger.info(f"oss_key={oss_key}")
         return oss_key
     except Exception as e:
-        print(e)
+        logger.info(f"Fail to save result files:{url}-{e}")
 
 #feich output from comfyui,use in tel-bot
 def fetch_comf_file_raw(url:str,filename:str,type:str):

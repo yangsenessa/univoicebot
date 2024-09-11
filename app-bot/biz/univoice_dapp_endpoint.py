@@ -20,6 +20,8 @@ from .media import get_oss_download_url,get_oss_bucket,parse_wkdata_from_oss
 
 import requests
 import json
+import threading
+
 from datetime import datetime
 import time
 import os
@@ -28,6 +30,7 @@ import uuid
 import sys
 sys.path.append("..")
 from comfyai import telegram_bot_endpoint
+from .taskqueue import aigc_queue
 
 
 
@@ -452,9 +455,11 @@ async def do_aigctask(request:user_app_info_m.AIGC_task_req_m,db:Session = Depen
         chat_id = prd_item.chat_id
 
         logger.info(f"prompts client_id={wk_client_id}")
+
         wk_json["client_id"] = wk_client_id
-        await telegram_bot_endpoint.extern_prompts_dapp(user_token,chat_id,"dapp",wk_json)    
-    
+        #await telegram_bot_endpoint.extern_prompts_dapp(user_token,chat_id,"dapp",prd_item.prd_id,wk_json)  
+        aigc_queue.push((user_token,chat_id,"dapp",prd_item.prd_id,wk_json),task_sec= int(time.time()))  
+        
     except Exception as e:
         logger.error(f"Do media AIGC proc error {str(e)}")
         result.res_code="FAIL"

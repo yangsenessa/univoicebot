@@ -64,12 +64,14 @@ class WebsocetClient(object):
                        logger.info(f"Begin fetching result :{videofileurl}")   
                        try:                                              
                            videofile = mixlab_endpoint.fetch_comf_file_raw(videofileurl[1],videofileurl[0],"output")
+                           logger.info("Fetch videofile :{videofile}")
                            with open(videofile,"rb") as video:
                                oss_key = "AIGC-"+ self.bot_context
                                get_oss_bucket().put_object_from_file(oss_key,video)
                                aigc_prd:AIGCProducer = AIGCProducer(prd_id=self.prdid,aigc_type="MUSETALK"
                                                                     ,oss_key=oss_key,gmt_create=datetime.now())
                                user_buss_crud.save_prd_aigc(db=database.get_db_session(engine_recall),aigc_prd=aigc_prd)
+                               logger.info("Finish AIGC SUCCESS!")
                                 
                        except Exception as e:
                            logger.error(f"Send back video err:{str(e)}")

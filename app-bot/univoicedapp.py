@@ -15,18 +15,10 @@ from biz.botaction import start,callback_inline,voice_upload,show_cus_upgrade,sh
 from biz.tonwallet.config import TOKEN
 from loguru import logger
 import threading
-from threading import Thread
 
 import uvicorn
 
 import globalval as webapp
-
-
-
-
-
-
-
 
 # run!
 #application.run_polling()

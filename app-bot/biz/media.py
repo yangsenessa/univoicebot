@@ -105,7 +105,7 @@ def parseAudioBase64IntoWorkflow(base64date:bytes):
     logger.info(f"wk_path:{wk_path}")
 
     try:
-         with open(wk_path) as json_file:
+         with open(wk_path,"rb") as json_file:
               json_wk_data = json.load(json_file)
               audio_encoded = base64date.decode()
       

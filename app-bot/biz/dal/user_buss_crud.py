@@ -404,7 +404,6 @@ def save_prd_aigc(db:Session, aigc_prd:AIGCProducer):
     try:
         db.add(aigc_prd)
         db.commit()
-        db.refresh(aigc_prd)
     except Exception as e:
         db.rollback()
         logger.error(f"db err: {str(e)}")
