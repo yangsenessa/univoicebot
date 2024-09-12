@@ -435,36 +435,16 @@ def do_voicetaskview(userid=Query(None), db:Session = Depends(get_db)):
 
 @router.post("/univoice/invokeaigctask.do")
 async def do_aigctask(request:user_app_info_m.AIGC_task_req_m,db:Session = Depends(get_db),response_model=user_app_info_m.AIGC_task_rsp_m):
+    
     result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
+
     prd_item:UserTaskProducer = user_buss_crud.fetch_product_detail(db=db,prd_id=request.prd_id)
     if prd_item is None:
         result.res_code="FAIL"
         result.res_msg="Product info invalid"
         return AIGC_task_rsp_m(result=result)
-    try:
-        prd_entity_json:dict = json.loads(prd_item.prd_entity)
-        oss_key:str = prd_entity_json["value"]
-        if oss_key is None or  len(oss_key)==0:
-           result.res_code="FAIL"
-           result.res_msg="Product info invalid"
-           return AIGC_task_rsp_m(result=result)
-        
-        wk_json = parse_wkdata_from_oss(oss_key=oss_key)
-        wk_client_id = prd_item.prd_id
-        user_token = prd_item.user_id
-        chat_id = prd_item.chat_id
-
-        logger.info(f"prompts client_id={wk_client_id}")
-
-        wk_json["client_id"] = wk_client_id
-        #await telegram_bot_endpoint.extern_prompts_dapp(user_token,chat_id,"dapp",prd_item.prd_id,wk_json)  
-        aigc_queue.push((user_token,chat_id,"dapp",prd_item.prd_id,wk_json),task_sec= int(time.time()))  
-        
-    except Exception as e:
-        logger.error(f"Do media AIGC proc error {str(e)}")
-        result.res_code="FAIL"
-        result.res_msg="System error"
-    
+    aigc_queue.push(prd_item.prd_id,task_sec= int(time.time()))  
+  
     return AIGC_task_rsp_m(result=result)
 
 

@@ -23,6 +23,17 @@ import time
 from comfyai import database
 import os
 
+import sys
+sys.path.append("..")
+from biz.dal import user_buss_crud
+from biz.dal.user_buss import UserTaskProducer
+from biz.taskqueue import aigc_queue
+from biz.model import common_app_m
+from biz.model.common_app_m import Result
+from biz.model.user_app_info_m import AIGC_task_rsp_m
+from biz.media import parse_wkdata_from_oss
+
+
 
 
 
@@ -92,12 +103,40 @@ async def extern_prompts(user_token:str, chat_id:str,context:ContextTypes.DEFAUL
 
     return response  
 
-async def extern_prompts_dapp(user_token:str, chat_id:str,call_from:str,prd_id:str, wkflow:dict):
+async def extern_prompts_dapp(prd_id:str):
     headers = {
         "Content-Type": "application/json"
     }
 
     db = extern_database.get_db_session(engine)
+    result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
+    prd_item:UserTaskProducer = user_buss_crud.fetch_product_detail(db=db,prd_id=prd_id)
+    if prd_item is None:
+        result.res_code="FAIL"
+        result.res_msg="Product info invalid"
+        return AIGC_task_rsp_m(result=result)
+    try:
+        prd_entity_json:dict = json.loads(prd_item.prd_entity)
+        oss_key:str = prd_entity_json["value"]
+        if oss_key is None or  len(oss_key)==0:
+           result.res_code="FAIL"
+           result.res_msg="Product info invalid"
+           return AIGC_task_rsp_m(result=result)
+        
+        wk_json = parse_wkdata_from_oss(oss_key=oss_key)
+        wk_client_id = prd_item.prd_id
+        user_token = prd_item.user_id
+        chat_id = prd_item.chat_id
+
+        logger.info(f"prompts client_id={wk_client_id}")
+
+        wk_json["client_id"] = wk_client_id
+        
+    except Exception as e:
+        logger.error(f"Do media AIGC proc error {str(e)}")
+        result.res_code="FAIL"
+        result.res_msg="System error"
+
     #init user router
     init_user_router(db, user_token)
 
@@ -107,7 +146,7 @@ async def extern_prompts_dapp(user_token:str, chat_id:str,call_from:str,prd_id:s
     if(user_ws_router) :
         comf_url = user_ws_router.comf_url
         ws_url_ori = str(user_ws_router.ws_url) 
-        ws_url = ws_url_ori.split('=')[0]+'='+(str(wkflow['client_id']))
+        ws_url = ws_url_ori.split('=')[0]+'='+wk_client_id
     else:
         raise HTTPException(status_code=400,detail="Invaid router")
     logger.info(f"Curr router is:{comf_url}")
@@ -125,7 +164,7 @@ async def extern_prompts_dapp(user_token:str, chat_id:str,call_from:str,prd_id:s
     
     logger.debug("begin post:" + "  "+ comf_url) 
     try:
-        response = requests.post(comf_url,json=wkflow,headers=headers)
+        response = requests.post(comf_url,json=wk_json,headers=headers)
 
         rescontents =  response.json()
         logger.debug("response -- "+json.dumps(rescontents))
@@ -134,16 +173,16 @@ async def extern_prompts_dapp(user_token:str, chat_id:str,call_from:str,prd_id:s
         wk_info =  WorkFlowRouterInfo()  
         wk_info.prompts_id = rescontents["prompt_id"]
         wk_info.client_id = user_token
-        wk_info.app_info = get_app_info(wkflow)
+        wk_info.app_info = get_app_info(wk_json)
         wk_info.status="progress"
         wk_info.comfyui_url=comf_url  
         wk_info.gmt_datetime =  datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     
         work_flow_crud.create_wk_router(db,wk_info)
-        logger.debug(f"begin create ws client-{wkflow['client_id']}")
+        logger.debug(f"begin create ws client-{wk_json['client_id']}")
     
-        WebsocetClient_dapp().start(user_token,chat_id,prd_id,ws_url,call_from,db)
+        WebsocetClient_dapp().start(user_token,chat_id,prd_id,ws_url,"dapp",db)
         time.sleep(1)
        
         logger.debug(response.content)
@@ -151,8 +190,7 @@ async def extern_prompts_dapp(user_token:str, chat_id:str,call_from:str,prd_id:s
     except Exception as e:
         logger.debug(f"some exception when prompts:{str(e)}")
 
-    return response  
-
+    return result  
 
 
 #put_file_to_comfyui_rawfile

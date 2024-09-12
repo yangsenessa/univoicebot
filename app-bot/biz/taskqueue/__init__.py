@@ -37,16 +37,19 @@ queue = DelayQueueAigc(redis_conf)
 def do_pop():
     while True:
        logger.info("Begin AIGC loop")
-       param:tuple = aigc_queue.pop(1)
-       if
-       user_token,chat_id,source,prd_id,wk_json = param
+       params:list = aigc_queue.pop(1)
+       logger.info(f"Pop params :{str(params)}")
+       if params is None or len(params) == 0:
+           time.sleep(5)
+           continue;
+       
                      
        nest_asyncio.apply()
        try:
            loop = asyncio.new_event_loop()
-           loop.run_until_complete(telegram_bot_endpoint.extern_prompts_dapp(user_token,chat_id,source,prd_id,wk_json))
-       except:
-           logger.error(f"Do AIGC error:{param}")
+           loop.run_until_complete(telegram_bot_endpoint.extern_prompts_dapp(params[0]))
+       except Exception as e:
+           logger.error(f"Do AIGC error:{str(params)} -{e}")
             
        finally:
           if loop is not None:
