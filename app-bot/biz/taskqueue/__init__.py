@@ -36,14 +36,12 @@ queue = DelayQueueAigc(redis_conf)
 
 def do_pop():
     while True:
-       logger.info("Begin AIGC loop")
        params:list = aigc_queue.pop(1)
-       logger.info(f"Pop params :{str(params)}")
        if params is None or len(params) == 0:
            time.sleep(5)
            continue;
        
-                     
+       logger.info(f"Pop params :{str(params)}")           
        nest_asyncio.apply()
        try:
            loop = asyncio.new_event_loop()
