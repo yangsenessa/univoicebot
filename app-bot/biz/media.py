@@ -96,10 +96,21 @@ async def save_voice( voice_file:File):
               os.remove(tmp_wav_file.name)
 
               return oss_key
+          
+async def save_voice_dapp( voice_file:File):
+
+     logger.info(f"wav dir: {voice_file.name}")
+     oss_key=str(uuid.uuid4())+str(voice_file.name)
+  
+     logger.info(f'Upload file={voice_file.name}')
+     result = get_oss_bucket().put_object_from_file(oss_key,voice_file.name)
+     voice_file.close()
+     os.remove(voice_file.name)
+     return oss_key
 
 #transfer wkflow content
 def parseAudioBase64IntoWorkflow(base64date:bytes):
-    wk_filename = "univoice-wk.json"
+    wk_filename = "univoice-wk-local.json"
     comfyai_path = os.path.abspath(os.path.dirname(__file__))
     wk_path = os.path.join(comfyai_path,"workflows",wk_filename)
     logger.info(f"wk_path:{wk_path}")

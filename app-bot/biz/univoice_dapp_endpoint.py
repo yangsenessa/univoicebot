@@ -15,12 +15,15 @@ from .dal.global_config import Unvtaskinfo
 from .dal.database import SessionLocal
 from .tonwallet import config
 from .media import get_oss_download_url,get_oss_bucket,parse_wkdata_from_oss
-
-
+from  pydub import AudioSegment
+from  biz.tonwallet.config import TASK_INFO, TOKEN
+from  .taskqueue import queue
+from . import media
 
 import requests
 import json
 import threading
+import tempfile
 
 from datetime import datetime
 import time
@@ -486,8 +489,183 @@ def do_getusercount(channelid=Query(None),begintime=Query(None),endtime=Query(No
        res = {"result_code":"SUCCESS", "user_num":str(num)}
     
     return res
+
+@router.post("/univoice/uploadvoice.do", response_model=Result)
+async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db:Session=Depends(get_db)):
+    logger.info(f"Upload voice file by :{user_id}")
+    result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_audio_file:
+        audio = AudioSegment.from_file(voice_file.file)
+        time_duration = audio.duration_seconds
+
+        audio.export(tmp_audio_file.name, format="wav")  
+        os.fsync(tmp_audio_file.fileno())
+        logger.info(f"wav dir: {tmp_audio_file.name}")
+
+        user_info = fet_user_info(user_id, db) 
+        task_id="VOICE-UPLOAD"
+        task_flag = False
+        cid:str
+        rsp_msg:str
+        user_level = user_info.level
+        gpu_level = user_info.gpu_level
+
+        task_info = match_user_task(task_id, user_level)
+        task_duration = task_info["duration"]
+
+        if time_duration > task_duration:
+            logger.info("Voice duation beyond...")
+            rsp_msg=f"You need to limit the lenth of voice less than {task_duration} second."
+            result.res_code="FAIL"
+            result.res_msg=rsp_msg
+            return result
+        task_curr_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id,task_id)
+        
+        if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_DEAILING:
+            timebegin = task_curr_detail.gmt_modified
+            timeend = datetime.now()
+      
+            time_remain = config.cal_task_claim_time(task_curr_detail.gpu_level,task_id) - (timeend-timebegin).seconds
+            rsp_msg=f"Please wait  {time_remain} seconds for your next voice."
+            result.res_code="FAIL"
+            result.res_msg=rsp_msg
+            return result
+        
+        if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
+            timebegin = task_curr_detail.gmt_modified
+            timeend = datetime.now()
+      
+            time_remain = config.cal_task_claim_time(task_curr_detail.gpu_level,task_id) - (timeend-timebegin).seconds
+            rsp_msg="You would claim first"
+            result.res_code="FAIL"
+            result.res_msg=rsp_msg
+            return result
+        
+        if task_curr_detail != None and task_curr_detail.progress_status == config.PROGRESS_FINISH:
+            logger.info("Deploy new task")
+            deploy_user_curr_task(user_info,config.TASK_VOICE_UPLOAD,db)
+        
+        task_details = user_buss_crud.fetch_user_curr_tase_detail_status(db,user_id,config.PROGRESS_INIT)
+        for task_detail in task_details:
+            if task_detail.task_id == config.TASK_VOICE_UPLOAD :
+                cid = await media.save_voice_dapp(tmp_audio_file)
+                task_id = task_detail.task_id
+                task_flag=user_buss_crud.update_user_curr_task_detail(db,user_id,task_id,user_level,gpu_level,config.PROGRESS_DEAILING)
+
+        if not task_flag:
+            logger.error(f"user_id={user_id} haven't task with action={config.TASK_VOICE_UPLOAD}")
+            rsp_msg="You haven't voice upload task"
+            result.res_code="FAIL"
+            result.res_msg=rsp_msg
+            return result 
+    logger.info(f"user_id={user_id} process task")
+        
+    #create producer entity
+    entity=dict()
+    entity["type"]="osskey"
+    entity["value"]=cid
+    entity_str = json.dumps(entity)
+    prd_id = hash(entity_str)
+
+    user_task_producer = UserTaskProducer(prd_id=prd_id,
+                                          user_id=user_id,
+                                          chat_id=user_id,
+                                          task_id=task_id,
+                                          prd_entity=entity_str,
+                                          duration=time_duration,
+                                          gmt_create=config.get_datetime())
+
+    user_buss_crud.create_task_producer(db,user_task_producer)
+    queue.push(user_id,task_sec= int(time.time())+config.cal_task_claim_time(gpu_level,task_id))
+    
+    hours = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
+    replaymsg = "Upload success,you can claim after "+ hours+" hours later"
+
+    result.res_msg(replaymsg)
+    return result
+
+        
+
+
     
     
+def fet_user_info(user_id:str,db:Session):
+    return user_buss_crud.get_user(db,user_id)
+
+def match_user_task(action:str, level:str ):
+     task_rule:dict
+     task_rule = TASK_INFO[action]
+     if level in task_rule.keys():
+        return task_rule[level]
+    
+     if "ALL" in task_rule.keys():
+        return task_rule["ALL"]
+     return None
+
+def match_gpu_info(level:str):
+    gpu_info:dict
+    gpu_info = config.GPU_LEVEL_INFO[level]
+    return gpu_info
+
+def deploy_user_curr_task(user_info:BotUserInfo,task_action:str,db:Session):
+       user_id:str = user_info.tele_user_id
+       chat_id:str = user_id
+       level:str = user_info.level
+       gpu_level:str = user_info.gpu_level
+
+
+       logger.info(f"Now deploy the task of :{task_action}")
+       task_info = match_user_task(action=task_action,level=level)
+       gpu_info = match_gpu_info(gpu_level)
+       if not task_info or not gpu_info:
+           logger.error(f"user_id={user_id} - chat_id={chat_id} can't match any tasks!")
+           return
+       task_id = task_action
+       base_reward = float(task_info["token"])
+       flatter = float(gpu_info["flatter"])
+
+       reward_amt = str(int(base_reward * flatter)) 
+       '''If task has finished ,delete it and rebuild it'''
+       curr_task_detail:UserCurrTaskDetail
+       progress_status = config.PROGRESS_INIT
+       curr_task_detail = user_buss_crud.fetch_user_curr_task_detail(db, user_id,task_id)
+       if curr_task_detail != None and  curr_task_detail.progress_status == config.PROGRESS_DEAILING:
+           logger.info(f"Load curr task detail {curr_task_detail.task_id}-{curr_task_detail.progress_status}")
+           
+           timebegin = curr_task_detail.gmt_modified
+           timeend = datetime.now()
+           if (timeend-timebegin).seconds >config.cal_task_claim_time(gpu_level,task_id):
+               user_buss_crud.deal_task_claim(db,user_id)
+               progress_status = config.PROGRESS_WAIT_CUS_CLAIM
+               time_remain = 0
+           else:
+               time_remain = config.cal_task_claim_time(gpu_level,task_id) - (timeend-timebegin).seconds
+               progress_status = config.PROGRESS_DEAILING
+           return progress_status, time_remain
+       if curr_task_detail != None and  curr_task_detail.progress_status ==config.PROGRESS_WAIT_CUS_CLAIM:
+           return config.PROGRESS_WAIT_CUS_CLAIM, 0
+       
+       if curr_task_detail != None  and  curr_task_detail.progress_status == config.PROGRESS_FINISH:
+           progress_status = curr_task_detail.progress_status
+           logger.info(f"Entering delete curr-detail")
+           user_buss_crud.remove_curr_task_detail(db,curr_task_detail)
+
+       curr_task_detail_new = UserCurrTaskDetail(user_id=user_id, chat_id=chat_id,task_id=task_id,
+                                            token_amount=reward_amt,user_level=level,gpu_level=gpu_level,
+                                            progress_status= config.PROGRESS_INIT, gmt_create=config.get_datetime(),
+                                            gmt_modified=config.get_datetime())
+       curr_task_detail_deployed_flag = user_buss_crud.create_user_curr_task_detail(db,curr_task_detail_new)
+
+       if curr_task_detail_deployed_flag:
+           time_remain = config.cal_task_claim_time(gpu_level,task_id)
+           logger.info(f"user_id:{user_id}-chat_id:{chat_id} deployed task success")
+       else:
+           logger.info(f"user_id:{user_id} - chat_id:{chat_id} has already in task progress")
+
+       if not time_remain:
+           time_remain = 0
+       return progress_status,time_remain
 
 
 
