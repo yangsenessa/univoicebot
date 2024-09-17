@@ -580,7 +580,7 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
     queue.push(user_id,task_sec= int(time.time())+config.cal_task_claim_time(gpu_level,task_id))
     
     hours = config.GPU_LEVEL_INFO[gpu_level]["wait_h"]
-    replaymsg = "Upload success,you can claim after "+ hours+" hours later"
+    replaymsg = "Upload success,you can claim after "+ str(hours) +" hours later"
 
     result.res_msg(replaymsg)
     return result
