@@ -527,6 +527,7 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
       
             time_remain = config.cal_task_claim_time(task_curr_detail.gpu_level,task_id) - (timeend-timebegin).seconds
             rsp_msg=f"Please wait  {time_remain} seconds for your next voice."
+            logger.info("Need to wait to be claimed")
             result.res_code="SUCCESS"
             result.res_msg=rsp_msg
             return result
@@ -534,9 +535,9 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
         if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
             timebegin = task_curr_detail.gmt_modified
             timeend = datetime.now()
-      
             time_remain = config.cal_task_claim_time(task_curr_detail.gpu_level,task_id) - (timeend-timebegin).seconds
             rsp_msg="You would claim first"
+            logger.info("Have some tokens to be claimed")
             result.res_code="FAIL"
             result.res_msg=rsp_msg
             return result
