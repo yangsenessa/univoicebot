@@ -17,7 +17,6 @@ from .tonwallet import config
 from .media import get_oss_download_url,get_oss_bucket,parse_wkdata_from_oss
 from  pydub import AudioSegment
 from  biz.tonwallet.config import TASK_INFO, TOKEN
-from  .taskqueue import queue
 from . import media
 
 import requests
@@ -33,7 +32,7 @@ import uuid
 import sys
 sys.path.append("..")
 from comfyai import telegram_bot_endpoint
-from .taskqueue import aigc_queue
+from  .taskqueue import queue,aigc_queue
 
 
 

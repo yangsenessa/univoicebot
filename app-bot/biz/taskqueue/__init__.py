@@ -32,7 +32,7 @@ from comfyai import telegram_bot_endpoint
 
 redis_conf = {'host': '8.141.81.75', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 aigc_queue = DelayQueueAigc(redis_conf)
-queue = DelayQueueAigc(redis_conf)
+queue = DelayQueue(redis_conf)
 
 def do_pop():
     while True:
