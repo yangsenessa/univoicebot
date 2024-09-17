@@ -528,7 +528,7 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
       
             time_remain = config.cal_task_claim_time(task_curr_detail.gpu_level,task_id) - (timeend-timebegin).seconds
             rsp_msg=f"Please wait  {time_remain} seconds for your next voice."
-            result.res_code="FAIL"
+            result.res_code="SUCCESS"
             result.res_msg=rsp_msg
             return result
         
