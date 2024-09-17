@@ -98,6 +98,9 @@ class Voicetaskview_rsp_m(BaseModel):
     GPU_LEVEL:Gpu_level_m
     producer_group:list
 
+class VoiceUpload_rsp_m(BaseModel):
+    result:Result
+
 class CommunicationInfo_m(BaseModel):
     target:str
     curr_num:str

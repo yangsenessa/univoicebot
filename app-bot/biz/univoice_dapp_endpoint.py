@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from .model.common_app_m import Result
 from .model import common_app_m
 from .model import user_app_info_m
-from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m,Vsd_level_m,Gpu_level_m,Producer_item_m,Voicetaskview_rsp_m,AIGC_task_rsp_m
+from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m,Vsd_level_m,Gpu_level_m,Producer_item_m,Voicetaskview_rsp_m,AIGC_task_rsp_m,VoiceUpload_rsp_m
 from .dal import user_buss_crud, statement_query
 from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
 from .dal.transaction import User_claim_jnl
@@ -489,7 +489,7 @@ def do_getusercount(channelid=Query(None),begintime=Query(None),endtime=Query(No
     
     return res
 
-@router.post("/univoice/uploadvoice.do", response_model=Result)
+@router.post("/univoice/uploadvoice.do", response_model=VoiceUpload_rsp_m)
 async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db:Session=Depends(get_db)):
     logger.info(f"Upload voice file by :{user_id}")
     result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
@@ -518,7 +518,8 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
             rsp_msg=f"You need to limit the lenth of voice less than {task_duration} second."
             result.res_code="FAIL"
             result.res_msg=rsp_msg
-            return result
+            res_model = VoiceUpload_rsp_m(result=result)
+            return res_model
         task_curr_detail = user_buss_crud.fetch_user_curr_task_detail(db,user_id,task_id)
         
         if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_DEAILING:
@@ -530,7 +531,8 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
             logger.info("Need to wait to be claimed")
             result.res_code="SUCCESS"
             result.res_msg=rsp_msg
-            return result
+            res_model = VoiceUpload_rsp_m(result=result)
+            return res_model
         
         if task_curr_detail!= None and task_curr_detail.progress_status == config.PROGRESS_WAIT_CUS_CLAIM:
             timebegin = task_curr_detail.gmt_modified
@@ -540,7 +542,8 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
             logger.info("Have some tokens to be claimed")
             result.res_code="FAIL"
             result.res_msg=rsp_msg
-            return result
+            res_model = VoiceUpload_rsp_m(result=result)
+            return res_model
         
         if task_curr_detail != None and task_curr_detail.progress_status == config.PROGRESS_FINISH:
             logger.info("Deploy new task")
@@ -558,7 +561,8 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
             rsp_msg="You haven't voice upload task"
             result.res_code="FAIL"
             result.res_msg=rsp_msg
-            return result 
+            res_model = VoiceUpload_rsp_m(result=result)
+            return res_model 
     logger.info(f"user_id={user_id} process task")
         
     #create producer entity
@@ -583,7 +587,8 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
     replaymsg = "Upload success,you can claim after "+ str(hours) +" hours later"
 
     result.res_msg = replaymsg
-    return result
+    res_model = VoiceUpload_rsp_m(result=result)
+    return res_model
 
         
 
