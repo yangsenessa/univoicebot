@@ -1,6 +1,4 @@
 import random
-from telegram import Update,InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler ,filters, MessageHandler,CallbackQueryHandler
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -49,4 +47,4 @@ if __name__ == '__main__':
     webapp._init()
     webapp.set_value("name","dapp")
     #uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=True,workers=5, ssl_keyfile="./key.pem", ssl_certfile="./cert.pem")
-    uvicorn.run(app="main:app", host="0.0.0.0", port=4000, workers=5)
+    uvicorn.run(app="main:app", host="0.0.0.0", port=4000)
