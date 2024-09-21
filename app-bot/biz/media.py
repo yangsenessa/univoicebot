@@ -110,7 +110,7 @@ async def save_voice_dapp( voice_file:File):
 
 #transfer wkflow content
 def parseAudioBase64IntoWorkflow(base64date:bytes):
-    wk_filename = "univoice-wk-local.json"
+    wk_filename = "univoice-wk.json"
     comfyai_path = os.path.abspath(os.path.dirname(__file__))
     wk_path = os.path.join(comfyai_path,"workflows",wk_filename)
     logger.info(f"wk_path:{wk_path}")
