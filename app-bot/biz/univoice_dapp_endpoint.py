@@ -455,7 +455,7 @@ async def do_aigctask(request:user_app_info_m.AIGC_task_req_m,db:Session = Depen
 @router.get("/univoice/getcommoninfo.do",response_model=user_app_info_m.CommonInfo_rsp_m)
 def do_getcommoninfo(db:Session = Depends(get_db)):
     #Need counting by redis
-    user_num:str = "38913" 
+    user_num:str = "45752" 
     communication_info:dict = config.get_curr_communication_info(user_num)
     res_communication_m=user_app_info_m.CommunicationInfo_m(target=str(communication_info['target']),
                                                             curr_num=user_num,
