@@ -153,14 +153,15 @@ async def extern_prompts_dapp(prd_id:str):
     logger.info(f"Curr ws opt is:{ws_url}")
 
     #origin video can be null with different workflows
+    #Not need for avatar
    
-    try:
-        logger.info(f"Begining put .mp4 file to comfyui")
-        put_file_to_comfyui_rawfile(comf_url,"sun.mp4")
+    #try:
+    #    logger.info(f"Begining put .mp4 file to comfyui")
+    #    put_file_to_comfyui_rawfile(comf_url,"sun.mp4")
        
-    except Exception as e:
-        logger.error(f"Upload video file err {str(e)}")
-        return
+    #except Exception as e:
+    #    logger.error(f"Upload video file err {str(e)}")
+    #    return
     
     logger.debug("begin post:" + "  "+ comf_url) 
     try:
