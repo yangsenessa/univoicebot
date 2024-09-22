@@ -186,9 +186,9 @@
 		"147": {
 			"inputs": {
 				"audios": {
-					"base64": [],
-				"seed":1000
+					"base64": []
 				},
+				"seed":1000,
 				"start_time": 0,
 				"duration": -1,
 				"audio_base64": null
