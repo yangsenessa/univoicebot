@@ -294,6 +294,7 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
     output:dict
     prompt_id:str
     filenames:str|None = None
+    gw_filenames:str|None = None
     data = msg["data"]
     if "output" in data.keys():
         output = data["output"]
@@ -340,9 +341,9 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
             logger.debug(f"db exception:{str(e)}")
 
     if  status =="executed" and filenames:
-        return True,filenames 
+        return True,filenames,gw_filenames
     else:
-        return False, None
+        return False, None,None
 
 #for FastApi only
 def construct_comf_file_url(url:str,file_names:str):
@@ -440,6 +441,7 @@ def fetch_comf_file(url:str,type:str,filename:str):
            oss_key=type+"_"+filename
         else:
             oss_key=filename
+        oss_key = "AIGC_" + oss_key
         get_oss_bucket().put_object_from_file(oss_key,res_file.name)
         res_file.close()
         logger.info(f"Delete tmp_file :{comfyui_file}")

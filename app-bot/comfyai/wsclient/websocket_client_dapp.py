@@ -55,24 +55,19 @@ class WebsocetClient(object):
             if(not self.isfinal_curr_node(message,'162')):
                 return
             engine_recall = database.get_db_connection()
-            flag, filenames = mixlab_endpoint.detail_recall(self.url,self.sid,message,database.get_db_session(engine_recall))
-            
-            if(flag):
-                if(self.callfrom == 'telegram-bot' or self.callfrom =='telegram-miniapp'):
-                   fileurllist  = mixlab_endpoint.construct_comf_file_url_bot(self.url,filenames)
-                   for videofileurl in fileurllist:
-                       logger.info(f"Begin fetching result :{videofileurl}")   
-                       try:                                              
-                           videofile = mixlab_endpoint.fetch_comf_file_raw(videofileurl[1],videofileurl[0],"output")
-                           logger.info("Fetch videofile :{videofile}")
-                           with open(videofile,"rb") as video:
-                               oss_key = "AIGC-"+ self.bot_context
-                               get_oss_bucket().put_object_from_file(oss_key,video)
-                               aigc_prd:AIGCProducer = AIGCProducer(prd_id=self.prdid,aigc_type="MUSETALK"
-                                                                    ,oss_key=oss_key,gmt_create=datetime.now())
-                               user_buss_crud.save_prd_aigc(db=database.get_db_session(engine_recall),aigc_prd=aigc_prd)
-                               logger.info("Finish AIGC SUCCESS!")
-                                
+            flag, filenames,oss_key_list_str = mixlab_endpoint.detail_recall(self.url,self.sid,message,database.get_db_session(engine_recall))
+            oss_key_list:list = json.loads(oss_key_list_str)
+
+            if flag and len(oss_key_list)>0: 
+                if(self.callfrom == 'telegram-bot' or self.callfrom =='telegram-miniapp' or self.callfrom=='dapp'):
+                   for video_oss_key in oss_key_list:
+                       logger.info(f"Begin fetched oss  :{video_oss_key}")   
+                       try: 
+                           aigc_prd:AIGCProducer = AIGCProducer(prd_id=self.prdid,aigc_type="MUSETALK"
+                                                                    ,oss_key=video_oss_key,gmt_create=datetime.now())
+                           user_buss_crud.save_prd_aigc(db=database.get_db_session(engine_recall),aigc_prd=aigc_prd)
+                           logger.info("Finish AIGC SUCCESS!")
+                                             
                        except Exception as e:
                            logger.error(f"Send back video err:{str(e)}")
                            
