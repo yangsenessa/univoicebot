@@ -443,13 +443,17 @@ def fetch_comf_file(url:str,type:str,filename:str):
             oss_key=filename
         oss_key = "AIGC_" + oss_key
         get_oss_bucket().put_object_from_file(oss_key,res_file.name)
-        res_file.close()
         logger.info(f"Delete tmp_file :{comfyui_file}")
         os.remove(comfyui_file)
         logger.info(f"oss_key={oss_key}")
         return oss_key
     except Exception as e:
         logger.info(f"Fail to save result files:{url}-{e}")
+    finally:
+        res_file.close()
+        os.remove(comfyui_file)
+
+
 
 #feich output from comfyui,use in tel-bot
 def fetch_comf_file_raw(url:str,filename:str,type:str):
