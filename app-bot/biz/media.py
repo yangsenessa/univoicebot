@@ -123,6 +123,7 @@ def parseAudioBase64IntoWorkflow(base64date:bytes):
               audioitem=[]
               audioitem.append(f"data:audio/wav;base64,{audio_encoded}")
               json_wk_data["prompt"]["147"]["inputs"]["audios"]["base64"] = audioitem
+              json_wk_data['client_id']=str(uuid.uuid4)
 
               tmp_wk_file = "tmp_" + wk_filename
               tmp_wk_path = os.path.join(comfyai_path,"workflows", tmp_wk_file)

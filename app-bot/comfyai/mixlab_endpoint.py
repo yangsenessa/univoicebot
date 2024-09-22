@@ -331,7 +331,8 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
             logger.debug("prompt_id:"+prompt_id)
             if filenames:
                gw_filenames = construct_comf_file_url(url,filenames)
-               work_flow_crud.update_wk_router(db,sid,prompt_id,detail,gw_filenames,url,status)
+               if gw_filenames != None:
+                   work_flow_crud.update_wk_router(db,sid,prompt_id,detail,gw_filenames,url,status)
 
             else:
                work_flow_crud.update_wk_router(db,sid,prompt_id,detail,None,url,status)
@@ -340,7 +341,7 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
            
             logger.debug(f"db exception:{str(e)}")
 
-    if  status =="executed" and filenames:
+    if  status =="executed" and gw_filenames:
         return True,filenames,gw_filenames
     else:
         return False, None,None
@@ -375,6 +376,8 @@ def construct_comf_file_url(url:str,file_names:str):
 
         logger.debug("FILE URL FOR CLIENT:" + fileurl)   
         ossKey_item = fetch_comf_file(fileurl, item["type"],item["filename"])
+        if ossKey_item == None:
+            return None
         file_item.append(ossKey_item)
 
     return json.dumps(file_item)
@@ -446,13 +449,14 @@ def fetch_comf_file(url:str,type:str,filename:str):
         logger.info(f"Delete tmp_file :{comfyui_file}")
         os.remove(comfyui_file)
         logger.info(f"oss_key={oss_key}")
-        return oss_key
+        
     except Exception as e:
         logger.info(f"Fail to save result files:{url}-{e}")
+        oss_key=None
     finally:
         res_file.close()
         os.remove(comfyui_file)
-
+    return oss_key;
 
 
 #feich output from comfyui,use in tel-bot
