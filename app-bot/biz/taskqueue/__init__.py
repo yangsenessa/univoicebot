@@ -52,6 +52,7 @@ def do_pop():
        finally:
           if loop is not None:
              loop.close()
+       logger.info("To next poll")
        time.sleep(10)
         
 #Thread(target=do_pop).start()
