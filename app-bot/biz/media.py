@@ -11,6 +11,7 @@ import subprocess
 import re
 import oss2
 import uuid
+import time
 
 import sys
 sys.path.append('..')
@@ -110,7 +111,7 @@ async def save_voice_dapp( voice_file:File):
 
 #transfer wkflow content
 def parseAudioBase64IntoWorkflow(base64date:bytes):
-    wk_filename = "univoice-wk-new.json"
+    wk_filename = "univoice-wk-local.json"
     comfyai_path = os.path.abspath(os.path.dirname(__file__))
     wk_path = os.path.join(comfyai_path,"workflows",wk_filename)
     logger.info(f"wk_path:{wk_path}")
@@ -123,7 +124,7 @@ def parseAudioBase64IntoWorkflow(base64date:bytes):
               audioitem=[]
               audioitem.append(f"data:audio/wav;base64,{audio_encoded}")
               json_wk_data["prompt"]["147"]["inputs"]["audios"]["base64"] = audioitem
-              json_wk_data["prompt"]["147"]["inputs"]["seed"] = int(json_wk_data["prompt"]["147"]["inputs"]["seed"])+1
+              json_wk_data["prompt"]["147"]["inputs"]["seed"] = time.time_ns()
 
               tmp_wk_file = "tmp_" + wk_filename
               tmp_wk_path = os.path.join(comfyai_path,"workflows", tmp_wk_file)

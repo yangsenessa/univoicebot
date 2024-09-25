@@ -20,6 +20,7 @@ from comfyai.wsclient.websocket_client_dapp import WebsocetClient as WebsocetCli
 from telegram.ext import ContextTypes
 from datetime import datetime
 import time
+import uuid
 from comfyai import database
 import os
 

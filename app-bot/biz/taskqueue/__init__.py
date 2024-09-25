@@ -47,12 +47,11 @@ def do_pop():
            loop = asyncio.new_event_loop()
            loop.run_until_complete(telegram_bot_endpoint.extern_prompts_dapp(params[0]))
        except Exception as e:
-           logger.error(f"Do AIGC error:{str(params)} -{e}")
-            
+           logger.error(f"Do AIGC error:{str(params)} -{e}")           
        finally:
           if loop is not None:
              loop.close()
-       logger.info("To next poll")
+             logger.info("To next poll")
        time.sleep(10)
         
 #Thread(target=do_pop).start()
