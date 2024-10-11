@@ -30,7 +30,7 @@ from biz.tonwallet import config
 from comfyai import telegram_bot_endpoint
 
 
-redis_conf = {'host': '8.141.81.75', 'port': 6379, 'db': 0,'passwd':'mixlab'}
+redis_conf = {'host': '54.209.157.83', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 aigc_queue = DelayQueueAigc(redis_conf)
 queue = DelayQueue(redis_conf)
 
