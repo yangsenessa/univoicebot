@@ -35,7 +35,7 @@ panel_btn = [[InlineKeyboardButton(text="🗣 play",callback_data="opr-play")],
              [InlineKeyboardButton(text="✨ Join Group",callback_data="opr-join"),InlineKeyboardButton(text="👏 Invite Frens",callback_data="opr-invite")]
              ]
 
-redis_conf = {'host': '8.141.81.75', 'port': 6379, 'db': 0,'passwd':'mixlab'}
+redis_conf = {'host': '54.209.157.83', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 queue = DelayQueue(redis_conf)
 
 trequest = HTTPXRequest(connection_pool_size=500)
