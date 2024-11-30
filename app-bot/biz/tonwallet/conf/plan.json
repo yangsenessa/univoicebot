@@ -2,62 +2,62 @@
     "VOICE-UPLOAD":{
         "1":{
              "duration":5,
-             "token":5000,
+             "token":0,
              "consume":0
         },
         "2":{
             "duration":10,
-            "token":10000,
+            "token":0,
             "consume":5000
         },
         "3":{
             "duration":15,
-            "token":15000,
+            "token":0,
             "consume":10000
         },
         "4":{
             "duration":20,
-            "token":20000,
+            "token":0,
             "consume":15000
         },
         "5":{
             "duration":25,
-            "token":25000,
+            "token":0,
             "consume":20000
         },
         "6":{
             "duration":30,
-            "token":30000,
+            "token":0,
             "consume":25000
         },
         "7":{
             "duration":35,
-            "token":35000,
+            "token":0,
             "consume":30000
         },
         "8":{
             "duration":40,
-            "token":40000,
+            "token":0,
             "consume":35000
         },
         "9":{
             "duration":45,
-            "token":45000,
+            "token":0,
             "consume":40000
         },
         "10":{
             "duration":50,
-            "token":50000,
+            "token":0,
             "consume":45000
         },
         "11":{
             "duration":55,
-            "token":55000,
+            "token":0,
             "consume":50000
         },
         "12":{
             "duration":60,
-            "token":60000,
+            "token":0,
             "consume":55000
         }
     },
