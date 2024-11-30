@@ -638,8 +638,7 @@ async def voice_upload(update:Update, context:CustomContext) -> None:
     time_duration = update.effective_message.voice.duration
    
     if await voice_judge(update, context):
-        logger.info(f"{update.effective_user.id} get levels...")   
-        
+        logger.info(f"{update.effective_user.id} get levels...")           
         return
 
     user_id = update.effective_user.id
