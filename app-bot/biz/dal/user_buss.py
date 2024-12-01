@@ -50,5 +50,22 @@ class AIGCProducer(Base):
     oss_key=Column(String)
     gmt_create=Column(DateTime)
 
+class AIGCLabled(Base):
+    __tablename__="unv_aigc_lable"
+    promt_id=Column(String,primary_key=True)
+    client_id=Column(String)
+    ai_node=Column(String)
+    app_info=Column(String)
+    wk_id=Column(String)
+    voice_key=Column(String)
+    deduce_asset_key=Column(String)
+    status=Column(String)
+    gmt_datatime=Column(DateTime)
+
+
+     
+
+
+
 
     

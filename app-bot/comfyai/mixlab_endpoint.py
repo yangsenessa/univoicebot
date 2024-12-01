@@ -295,6 +295,7 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
     prompt_id:str
     filenames:str|None = None
     gw_filenames:str|None = None
+    is_file=True
     data = msg["data"]
     if "output" in data.keys():
         output = data["output"]
@@ -303,6 +304,7 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
             filenames = json.dumps(output["images"])
         elif  "text" in output.keys():
             filenames = json.dumps(output["text"])
+            is_file = False
 #{
 #    "node": "155",
 #   "output": {
@@ -329,12 +331,14 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
         try:
             prompt_id = msg["data"]["prompt_id"]    
             logger.debug("prompt_id:"+prompt_id)
-            if filenames:
+            if filenames and is_file:
                gw_filenames = construct_comf_file_url(url,filenames)
                if gw_filenames != None:
                    work_flow_crud.update_wk_router(db,sid,prompt_id,detail,gw_filenames,url,status)
+            elif filenames:
+               work_flow_crud.update_wk_router(db,sid,prompt_id,detail,gw_filenames,url,status)
 
-            else:
+            else :
                work_flow_crud.update_wk_router(db,sid,prompt_id,detail,None,url,status)
 
         except Exception as e:

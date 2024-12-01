@@ -30,7 +30,7 @@ from biz.tonwallet import config
 from comfyai import telegram_bot_endpoint
 
 
-redis_conf = {'host': '8.141.81.75', 'port': 6379, 'db': 0,'passwd':'mixlab'}
+redis_conf = {'host': '54.209.157.83', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 aigc_queue = DelayQueueAigc(redis_conf)
 queue = DelayQueue(redis_conf)
 
@@ -45,7 +45,7 @@ def do_pop():
        nest_asyncio.apply()
        try:
            loop = asyncio.new_event_loop()
-           loop.run_until_complete(telegram_bot_endpoint.extern_prompts_dapp(params[0]))
+           loop.run_until_complete(telegram_bot_endpoint.extern_prompts_dapp_voice_labled(params[0]))
        except Exception as e:
            logger.error(f"Do AIGC error:{str(params)} -{e}")           
        finally:

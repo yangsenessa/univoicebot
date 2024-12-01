@@ -49,6 +49,14 @@ def parse_wkdata_from_oss(oss_key:str)->dict:
           tmp_wk_json =  parseAudioBase64IntoWorkflow(base64_audio)
           return tmp_wk_json
 
+def get_voicefile_from_oss(oss_key:str)->str:
+     with tempfile.NamedTemporaryFile(delete=False,suffix=".wav") as tmp_wav_file:
+          logger.info(f"Get voice from oss, filename={tmp_wav_file.name}")
+          get_oss_bucket().get_object_to_file(oss_key,tmp_wav_file.name)
+          voicefilename = tmp_wav_file.name
+          tmp_wav_file.close()
+          return voicefilename
+
 
 
 async def parsewav(user_token:str, voice_file:File,context:ContextTypes.DEFAULT_TYPE):
@@ -135,6 +143,29 @@ def parseAudioBase64IntoWorkflow(base64date:bytes):
               return json_wk_data
               
     
+    except Exception as e:
+         logger.error(f"Some exception happend:  {str(e)}")
+
+#transfer wkflow content inout with file
+def parseAudioFileNameIntoWorkflow(voicefilename:str):
+    wk_filename = "univoice-lable.json"
+    comfyai_path = os.path.abspath(os.path.dirname(__file__))
+    wk_path = os.path.join(comfyai_path,"workflows",wk_filename)
+    logger.info(f"wk_path:{wk_path}")
+
+    try:
+         with open(wk_path,"rb") as json_file:
+              json_wk_data = json.load(json_file)
+           
+              json_wk_data["prompt"]["2"]["inputs"]["audio"]= voicefilename
+              tmp_wk_file = "tmp_" + wk_filename
+              tmp_wk_path = os.path.join(comfyai_path,"workflows", tmp_wk_file)
+
+              with open(tmp_wk_path,"w") as tmp_json_file:
+                   json.dump(json_wk_data,tmp_json_file)
+                   tmp_json_file.flush()
+              return json_wk_data
+                
     except Exception as e:
          logger.error(f"Some exception happend:  {str(e)}")
          

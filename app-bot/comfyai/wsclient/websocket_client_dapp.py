@@ -18,7 +18,7 @@ from datetime import datetime
 import sys
 sys.path.append("..")
 sys.path.append("..")
-from biz.dal.user_buss import UserTaskProducer,AIGCProducer
+from biz.dal.user_buss import UserTaskProducer,AIGCLabled
 from biz.dal import user_buss_crud
 
 
@@ -52,26 +52,39 @@ class WebsocetClient(object):
         print("####### on_message #######")
         print("message：%s" % message)
         if self.if_execute_type(message):
-            if(not self.isfinal_curr_node(message,'162')):
+            if(not self.isfinal_curr_node(message,'26')):
                 return
             engine_recall = database.get_db_connection()
             flag, filenames,oss_key_list_str = mixlab_endpoint.detail_recall(self.url,self.sid,message,database.get_db_session(engine_recall))
             oss_key_list:list = json.loads(oss_key_list_str)
 
-            if flag and len(oss_key_list)>0: 
-                if(self.callfrom == 'telegram-bot' or self.callfrom =='telegram-miniapp' or self.callfrom=='dapp'):
-                   for video_oss_key in oss_key_list:
-                       logger.info(f"Begin fetched oss  :{video_oss_key}")   
-                       try: 
-                           aigc_prd:AIGCProducer = AIGCProducer(prd_id=self.prdid,aigc_type="MUSETALK"
-                                                                    ,oss_key=video_oss_key,gmt_create=datetime.now())
-                           user_buss_crud.save_prd_aigc(db=database.get_db_session(engine_recall),aigc_prd=aigc_prd)
-                           logger.info("Finish AIGC SUCCESS!")
+            try: 
+                detail_json = json.loads(message)
+                prompt_id = detail_json['data']['prompt_id']
+
+                userTaskProducer=user_buss_crud.fetch_product_detail(db=database.get_db_session(engine_recall),prd_id=self.prdid)
+                prd_entity = userTaskProducer.prd_entity
+                prd_entity_json:dict = json.loads(prd_entity)
+                oss_key:str = prd_entity_json["value"]
+
+                aigc_labled:AIGCLabled =  AIGCLabled (
+                    promt_id= prompt_id,
+                    client_id='Univoice',
+                    ai_node='Mixlab',
+                    app_info='univoice.pro',
+                    wk_id='univoice-lable.json',
+                    voice_key=oss_key,
+                    deduce_asset_key=filenames,
+                    status='executed',
+                    gmt_datatime=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                )
+                user_buss_crud.save_aigclabled(db=database.get_db_session(engine_recall),aigc_labled=aigc_labled)
+                logger.info("Finish AIGC SUCCESS!")
                                              
-                       except Exception as e:
-                           logger.error(f"Send back video err:{str(e)}")
+            except Exception as e:
+                logger.error(f"Send back video err:{str(e)}") 
                            
-                self.ws.close()
+            self.ws.close()
 
     def on_error(self,*error):
         print("####### on_error #######")
