@@ -199,6 +199,8 @@ async def extern_prompts_dapp(prd_id:str):
 def put_file_to_comfyui_rawfile(url:str,filename:str):
     comfyui_file_url = url.replace("prompt","upload/image")
     filelocalpath=filename
+
+    abs_filename = os.path.basename(filelocalpath)
     
     with open(filelocalpath,'rb') as video_template:
 
@@ -207,7 +209,7 @@ def put_file_to_comfyui_rawfile(url:str,filename:str):
           "age": 100
          }
         files = [
-                 ('image', (filename,video_template)),
+                 ('image', (abs_filename,video_template)),
                 ]
 
         response = requests.post(comfyui_file_url, data=data,  files=files)
