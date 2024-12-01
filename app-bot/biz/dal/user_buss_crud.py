@@ -361,6 +361,18 @@ def fet_product_list(db:Session, user_id:str) :
     finally:
         db.close()
 
+#fetch pool
+def fet_product_pool(db:Session):
+    try:
+        product_list = db.query(UserTaskProducer).all()
+        return product_list
+    except Exception as e:
+        logger.error(f"fetch product error e={str(e)}")
+        return None
+    finally:
+        db.close()
+
+
 
 def fetch_product_detail(db:Session, prd_id:str)-> UserTaskProducer:
     try:

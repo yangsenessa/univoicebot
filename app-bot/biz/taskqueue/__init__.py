@@ -34,6 +34,15 @@ redis_conf = {'host': '54.209.157.83', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 aigc_queue = DelayQueueAigc(redis_conf)
 queue = DelayQueue(redis_conf)
 
+def do_aigc():
+    pool:list= telegram_bot_endpoint.get_pool_of_prdtask()
+    for item in pool :
+        aigc_queue.push(item.prd_id,task_sec= int(time.time()))  
+        break
+    do_pop()
+
+
+
 def do_pop():
     while True:
        params:list = aigc_queue.pop(1)

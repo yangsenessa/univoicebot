@@ -11,7 +11,7 @@ from biz import univoice_dapp_endpoint
 from biz.media import parsewav
 from biz.botaction import start,callback_inline,voice_upload,show_cus_upgrade,sharelink_task
 from biz.tonwallet.config import TOKEN
-from biz.taskqueue import do_pop
+from biz.taskqueue import do_aigc
 from loguru import logger
 import threading
 
@@ -49,4 +49,4 @@ if __name__ == '__main__':
     webapp.set_value("name","dapp")
     #uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=True,workers=5, ssl_keyfile="./key.pem", ssl_certfile="./cert.pem")
     #uvicorn.run(app="main:app", host="0.0.0.0", port=4000)
-    do_pop()
+    do_aigc()

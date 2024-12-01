@@ -240,6 +240,12 @@ def init_user_router(db:Session, client_id:str):
     work_flow_crud.add_comfyui_weight(db,node)
     return (node,comf_url,ws_url)
 
+#load prd_id from taskpool
+def get_pool_of_prdtask():
+    db = extern_database.get_db_session(engine)
+    return user_buss_crud.fet_product_pool(db)
+
+
 #lable workflow
 async def extern_prompts_dapp_voice_labled(prd_id:str):
     headers = {
