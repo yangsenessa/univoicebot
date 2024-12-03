@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 import json
 from loguru import logger
 from comfyai import mixlab_endpoint
+from comfyai.canister import call_canister
+from comfyai.canister.candid import WorkLoad
 from telegram.ext import ContextTypes
 from telegram import File
 import asyncio
@@ -56,7 +58,10 @@ class WebsocetClient(object):
                 return
             engine_recall = database.get_db_connection()
             flag, filenames,oss_key_list_str = mixlab_endpoint.detail_recall(self.url,self.sid,message,database.get_db_session(engine_recall))
-            oss_key_list:list = json.loads(oss_key_list_str)
+            if oss_key_list_str:
+                oss_key_list:list = json.loads(oss_key_list_str)
+
+            logger.info("Deduce tags:{}", filenames)
 
             try: 
                 detail_json = json.loads(message)
@@ -66,6 +71,19 @@ class WebsocetClient(object):
                 prd_entity = userTaskProducer.prd_entity
                 prd_entity_json:dict = json.loads(prd_entity)
                 oss_key:str = prd_entity_json["value"]
+
+                workload = WorkLoad(
+                   promt_id= prompt_id,
+                    client_id='Univoice',
+                    ai_node='Mixlab',
+                    app_info='univoice.pro',
+                    wk_id='univoice-lable.json',
+                    voice_key=oss_key,
+                    deduce_asset_key=filenames,
+                    status='executed',
+                    gmt_datatime=datetime.now().second
+                )
+                call_canister.call_canister_workflow(workLoad=workload)
 
                 aigc_labled:AIGCLabled =  AIGCLabled (
                     promt_id= prompt_id,
@@ -114,7 +132,7 @@ class WebsocetClient(object):
         if "type" in  detail_json.keys():
             status=detail_json["type"]
         
-        return "status" != status
+        return "status" != status and "executed" == status
     
     def isfinal_curr_node(self,message,node_id:str):
         detail_json = json.loads(message)

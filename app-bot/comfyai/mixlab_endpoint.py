@@ -304,6 +304,7 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
             filenames = json.dumps(output["images"])
         elif  "text" in output.keys():
             filenames = json.dumps(output["text"])
+            logger.debug("voice tags:{}", filenames)
             is_file = False
 #{
 #    "node": "155",
@@ -344,8 +345,10 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
         except Exception as e:
            
             logger.debug(f"db exception:{str(e)}")
+    
 
-    if  status =="executed" and gw_filenames:
+    logger.debug(f"With status ={status}")
+    if  status =="executed":
         return True,filenames,gw_filenames
     else:
         return False, None,None
