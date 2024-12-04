@@ -111,6 +111,13 @@ class CommonInfo_rsp_m(BaseModel):
     result:Result
     communication_info:CommunicationInfo_m
 
+class UserBindIcp_req_m(BaseModel):
+    userid:str
+    principalid:str
+
+class UserBindIcp_rsp_m(BaseModel):
+    result:Result
+
 class AIGC_task_req_m(BaseModel):
     prd_id:str
     task_id:str  #MUSE_TALK

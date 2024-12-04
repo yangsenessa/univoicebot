@@ -489,6 +489,22 @@ def do_getusercount(channelid=Query(None),begintime=Query(None),endtime=Query(No
     
     return res
 
+@router.post("/univoice/linkicp.do")
+async def do_linkicp(request:user_app_info_m.UserBindIcp_req_m,db:Session = Depends(get_db),response_model=user_app_info_m.UserBindIcp_rsp_m):
+    
+    result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
+
+    userinfo:BotUserInfo = user_buss_crud.get_user(db=db,user_id=request.userid)
+    if userinfo is None:
+        result.res_code="FAIL"
+        result.res_msg="User author invalid"
+        return user_app_info_m.UserBindIcp_rsp_m(result=result)
+    userinfo.wallet_id=request.principalid 
+    user_buss_crud.update_user_info(db,user_info=userinfo)
+  
+    return user_app_info_m.UserBindIcp_rsp_m(result=result)
+
+
 @router.post("/univoice/uploadvoice.do", response_model=VoiceUpload_rsp_m)
 async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db:Session=Depends(get_db)):
     logger.info(f"Upload voice file by :{user_id}")
