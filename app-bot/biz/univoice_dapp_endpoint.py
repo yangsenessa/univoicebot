@@ -494,6 +494,7 @@ async def do_linkicp(request:user_app_info_m.UserBindIcp_req_m,db:Session = Depe
     
     result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
 
+    logger.info(f"Begin to bind for {request.userid} {request.principalid}")
     userinfo:BotUserInfo = user_buss_crud.get_user(db=db,user_id=request.userid)
     if userinfo is None:
         result.res_code="FAIL"
@@ -501,6 +502,7 @@ async def do_linkicp(request:user_app_info_m.UserBindIcp_req_m,db:Session = Depe
         return user_app_info_m.UserBindIcp_rsp_m(result=result)
     userinfo.wallet_id=request.principalid 
     user_buss_crud.update_user_info(db,user_info=userinfo)
+    logger.info("End update")
   
     return user_app_info_m.UserBindIcp_rsp_m(result=result)
 
