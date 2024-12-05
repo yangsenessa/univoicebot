@@ -490,11 +490,11 @@ def do_getusercount(channelid=Query(None),begintime=Query(None),endtime=Query(No
     return res
 
 @router.post("/univoice/linkicp.do")
-async def do_linkicp(request:user_app_info_m.UserBindIcp_req_m,db:Session = Depends(get_db),response_model=user_app_info_m.UserBindIcp_rsp_m):
+async def do_linkicp(request,db:Session = Depends(get_db),response_model=user_app_info_m.UserBindIcp_rsp_m):
     
     result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
 
-    logger.info(f"Begin to bind for {request.userid} {request.principalid}")
+    logger.info(f"Begin to bind for {request} {request.userid} {request.principalid}")
     userinfo:BotUserInfo = user_buss_crud.get_user(db=db,user_id=request.userid)
     if userinfo is None:
         result.res_code="FAIL"
