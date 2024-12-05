@@ -490,7 +490,7 @@ def do_getusercount(channelid=Query(None),begintime=Query(None),endtime=Query(No
     return res
 
 @router.post("/univoice/linkicp.do")
-async def do_linkicp(request,db:Session = Depends(get_db),response_model=user_app_info_m.UserBindIcp_rsp_m):
+async def do_linkicp(request:dict,db:Session = Depends(get_db),response_model=user_app_info_m.UserBindIcp_rsp_m):
     
     result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
 
