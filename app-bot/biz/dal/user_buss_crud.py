@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer,AIGCProducer
+from .user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer,AIGCProducer,AIGCLabled
 from .global_config import Unvtaskinfo
 from ..tonwallet import config
 from .transaction import User_claim_jnl
@@ -361,6 +361,18 @@ def fet_product_list(db:Session, user_id:str) :
     finally:
         db.close()
 
+#fetch pool
+def fet_product_pool(db:Session):
+    try:
+        product_list = db.query(UserTaskProducer).all()
+        return product_list
+    except Exception as e:
+        logger.error(f"fetch product error e={str(e)}")
+        return None
+    finally:
+        db.close()
+
+
 
 def fetch_product_detail(db:Session, prd_id:str)-> UserTaskProducer:
     try:
@@ -403,6 +415,16 @@ def fetch_finish_task_users(db:Session,user_id:str,end_date:datetime) -> set:
 def save_prd_aigc(db:Session, aigc_prd:AIGCProducer):
     try:
         db.add(aigc_prd)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        logger.error(f"db err: {str(e)}")
+    finally:
+        db.close()
+
+def save_aigclabled(db:Session,aigc_labled:AIGCLabled):
+    try:
+        db.add(aigc_labled)
         db.commit()
     except Exception as e:
         db.rollback()

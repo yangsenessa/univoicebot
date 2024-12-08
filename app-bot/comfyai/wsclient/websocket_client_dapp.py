@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 import json
 from loguru import logger
 from comfyai import mixlab_endpoint
+from comfyai.canister import call_canister
+from comfyai.canister.candid import WorkLoad
 from telegram.ext import ContextTypes
 from telegram import File
 import asyncio
@@ -18,7 +20,7 @@ from datetime import datetime
 import sys
 sys.path.append("..")
 sys.path.append("..")
-from biz.dal.user_buss import UserTaskProducer,AIGCProducer
+from biz.dal.user_buss import UserTaskProducer,AIGCLabled
 from biz.dal import user_buss_crud
 
 
@@ -52,31 +54,55 @@ class WebsocetClient(object):
         print("####### on_message #######")
         print("message：%s" % message)
         if self.if_execute_type(message):
-            if(not self.isfinal_curr_node(message,'162')):
+            if(not self.isfinal_curr_node(message,'26')):
                 return
             engine_recall = database.get_db_connection()
-            flag, filenames = mixlab_endpoint.detail_recall(self.url,self.sid,message,database.get_db_session(engine_recall))
-            
-            if(flag):
-                if(self.callfrom == 'telegram-bot' or self.callfrom =='telegram-miniapp'):
-                   fileurllist  = mixlab_endpoint.construct_comf_file_url_bot(self.url,filenames)
-                   for videofileurl in fileurllist:
-                       logger.info(f"Begin fetching result :{videofileurl}")   
-                       try:                                              
-                           videofile = mixlab_endpoint.fetch_comf_file_raw(videofileurl[1],videofileurl[0],"output")
-                           logger.info("Fetch videofile :{videofile}")
-                           with open(videofile,"rb") as video:
-                               oss_key = "AIGC-"+ self.bot_context
-                               get_oss_bucket().put_object_from_file(oss_key,video)
-                               aigc_prd:AIGCProducer = AIGCProducer(prd_id=self.prdid,aigc_type="MUSETALK"
-                                                                    ,oss_key=oss_key,gmt_create=datetime.now())
-                               user_buss_crud.save_prd_aigc(db=database.get_db_session(engine_recall),aigc_prd=aigc_prd)
-                               logger.info("Finish AIGC SUCCESS!")
-                                
-                       except Exception as e:
-                           logger.error(f"Send back video err:{str(e)}")
+            flag, filenames,oss_key_list_str = mixlab_endpoint.detail_recall(self.url,self.sid,message,database.get_db_session(engine_recall))
+            if oss_key_list_str:
+                oss_key_list:list = json.loads(oss_key_list_str)
+
+            logger.info("Deduce tags:{}", filenames)
+
+            try: 
+                detail_json = json.loads(message)
+                prompt_id = detail_json['data']['prompt_id']
+
+                userTaskProducer=user_buss_crud.fetch_product_detail(db=database.get_db_session(engine_recall),prd_id=self.prdid)
+                prd_entity = userTaskProducer.prd_entity
+                prd_entity_json:dict = json.loads(prd_entity)
+                oss_key:str = prd_entity_json["value"]
+
+                workload = WorkLoad(
+                   promt_id= prompt_id,
+                    client_id='Univoice',
+                    ai_node='Mixlab',
+                    app_info='univoice.pro',
+                    wk_id='univoice-lable.json',
+                    voice_key=oss_key,
+                    deduce_asset_key=filenames,
+                    status='executed',
+                    gmt_datatime=datetime.now().second
+                )
+                call_canister.call_canister_workflow(workLoad=workload)
+
+                aigc_labled:AIGCLabled =  AIGCLabled (
+                    promt_id= prompt_id,
+                    client_id='Univoice',
+                    ai_node='Mixlab',
+                    app_info='univoice.pro',
+                    wk_id='univoice-lable.json',
+                    voice_key=oss_key,
+                    deduce_asset_key=filenames,
+                    status='executed',
+                    gmt_datatime=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                )
+                user_buss_crud.save_aigclabled(db=database.get_db_session(engine_recall),aigc_labled=aigc_labled)
+                logger.info("Finish AIGC SUCCESS!")
+                                             
+            except Exception as e:
+                logger.error(f"Send back video err:{str(e)}") 
                            
-                self.ws.close()
+            self.ws.close()
 
     def on_error(self,*error):
         print("####### on_error #######")
@@ -106,7 +132,7 @@ class WebsocetClient(object):
         if "type" in  detail_json.keys():
             status=detail_json["type"]
         
-        return "status" != status
+        return "status" != status and "executed" == status
     
     def isfinal_curr_node(self,message,node_id:str):
         detail_json = json.loads(message)

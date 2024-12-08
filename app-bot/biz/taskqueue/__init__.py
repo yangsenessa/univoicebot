@@ -34,6 +34,15 @@ redis_conf = {'host': '54.209.157.83', 'port': 6379, 'db': 0,'passwd':'mixlab'}
 aigc_queue = DelayQueueAigc(redis_conf)
 queue = DelayQueue(redis_conf)
 
+def do_aigc():
+    pool:list= telegram_bot_endpoint.get_pool_of_prdtask()
+    for item in pool :
+        aigc_queue.push(item.prd_id,task_sec= int(time.time()))  
+        break
+    do_pop()
+
+
+
 def do_pop():
     while True:
        params:list = aigc_queue.pop(1)
@@ -45,13 +54,13 @@ def do_pop():
        nest_asyncio.apply()
        try:
            loop = asyncio.new_event_loop()
-           loop.run_until_complete(telegram_bot_endpoint.extern_prompts_dapp(params[0]))
+           loop.run_until_complete(telegram_bot_endpoint.extern_prompts_dapp_voice_labled(params[0]))
        except Exception as e:
-           logger.error(f"Do AIGC error:{str(params)} -{e}")
-            
+           logger.error(f"Do AIGC error:{str(params)} -{e}")           
        finally:
           if loop is not None:
              loop.close()
-       time.sleep(300)
+             logger.info("To next poll")
+       time.sleep(10)
         
 #Thread(target=do_pop).start()

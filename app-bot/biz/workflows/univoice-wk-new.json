@@ -355,7 +355,7 @@
       },
       "184": {
         "inputs": {
-          "file_path": "D:\\project\\gitrealease\\new\\storage\\WORKFLOWS\\avatar001\\avatar001",
+          "file_path": "/root/WORKFLOWS/avatar001/avatar001",
           "white_bg": "disable",
           "sort_by": "file_name",
           "index_variable": -1,
@@ -1910,7 +1910,7 @@
                 "Node name for S&R": "LoadImagesFromPath"
               },
               "widgets_values": [
-                "D:\\project\\gitrealease\\new\\storage\\WORKFLOWS\\avatar001\\avatar001",
+                "/root/WORKFLOWS/avatar001/avatar001",
                 "disable",
                 "file_name",
                 -1,

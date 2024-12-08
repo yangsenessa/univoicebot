@@ -294,6 +294,8 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
     output:dict
     prompt_id:str
     filenames:str|None = None
+    gw_filenames:str|None = None
+    is_file=True
     data = msg["data"]
     if "output" in data.keys():
         output = data["output"]
@@ -302,6 +304,8 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
             filenames = json.dumps(output["images"])
         elif  "text" in output.keys():
             filenames = json.dumps(output["text"])
+            logger.debug("voice tags:{}", filenames)
+            is_file = False
 #{
 #    "node": "155",
 #   "output": {
@@ -328,21 +332,26 @@ def detail_recall(url:str,sid:str,detail:str,db:Session):
         try:
             prompt_id = msg["data"]["prompt_id"]    
             logger.debug("prompt_id:"+prompt_id)
-            if filenames:
+            if filenames and is_file:
                gw_filenames = construct_comf_file_url(url,filenames)
+               if gw_filenames != None:
+                   work_flow_crud.update_wk_router(db,sid,prompt_id,detail,gw_filenames,url,status)
+            elif filenames:
                work_flow_crud.update_wk_router(db,sid,prompt_id,detail,gw_filenames,url,status)
 
-            else:
+            else :
                work_flow_crud.update_wk_router(db,sid,prompt_id,detail,None,url,status)
 
         except Exception as e:
            
             logger.debug(f"db exception:{str(e)}")
+    
 
-    if  status =="executed" and filenames:
-        return True,filenames 
+    logger.debug(f"With status ={status}")
+    if  status =="executed":
+        return True,filenames,gw_filenames
     else:
-        return False, None
+        return False, None,None
 
 #for FastApi only
 def construct_comf_file_url(url:str,file_names:str):
@@ -374,6 +383,8 @@ def construct_comf_file_url(url:str,file_names:str):
 
         logger.debug("FILE URL FOR CLIENT:" + fileurl)   
         ossKey_item = fetch_comf_file(fileurl, item["type"],item["filename"])
+        if ossKey_item == None:
+            return None
         file_item.append(ossKey_item)
 
     return json.dumps(file_item)
@@ -440,14 +451,19 @@ def fetch_comf_file(url:str,type:str,filename:str):
            oss_key=type+"_"+filename
         else:
             oss_key=filename
+        oss_key = "AIGC_" + oss_key
         get_oss_bucket().put_object_from_file(oss_key,res_file.name)
-        res_file.close()
-        logger.info(f"Delete tmp_file :{comfyui_file}")
-        os.remove(comfyui_file)
         logger.info(f"oss_key={oss_key}")
-        return oss_key
+        
     except Exception as e:
         logger.info(f"Fail to save result files:{url}-{e}")
+        oss_key=None
+    finally:
+        logger.info(f"Delete tmp_file :{comfyui_file}")
+        res_file.close()    
+        os.remove(comfyui_file)
+    return oss_key;
+
 
 #feich output from comfyui,use in tel-bot
 def fetch_comf_file_raw(url:str,filename:str,type:str):
