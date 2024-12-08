@@ -7,16 +7,19 @@ from sqlalchemy.orm import Session
 from .model.common_app_m import Result
 from .model import common_app_m
 from .model import user_app_info_m
-from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m,Vsd_level_m,Gpu_level_m,Producer_item_m,Voicetaskview_rsp_m,AIGC_task_rsp_m,VoiceUpload_rsp_m
+from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m,Vsd_level_m, \
+           Gpu_level_m,Producer_item_m,Voicetaskview_rsp_m,AIGC_task_rsp_m,VoiceUpload_rsp_m,GenAI_rsp_m
 from .dal import user_buss_crud, statement_query
 from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
 from .dal.transaction import User_claim_jnl
 from .dal.global_config import Unvtaskinfo
 from .dal.database import SessionLocal
 from .tonwallet import config
-from .media import get_oss_download_url,get_oss_bucket,parse_wkdata_from_oss
+from .media import get_oss_download_url,get_oss_bucket,get_voicefile_from_oss,save_genAI_result
 from  pydub import AudioSegment
 from  biz.tonwallet.config import TASK_INFO, TOKEN
+from siliconflow import audiotovideo
+from siliconflow.bussmodel import GenAIResult, GenAItype
 from . import media
 
 import requests
@@ -449,6 +452,43 @@ async def do_aigctask(request:user_app_info_m.AIGC_task_req_m,db:Session = Depen
   
     return AIGC_task_rsp_m(result=result)
 
+@router.post("/univoice/dogenai.do")
+async def dogenai(request:user_app_info_m.AIGC_task_req_m,db:Session = Depends(get_db),
+                         response_model=user_app_info_m.GenAI_rsp_m):
+    sys_result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
+    prd_id:str = request.prd_id
+    prd_item:UserTaskProducer = user_buss_crud.fetch_product_detail(db=db,prd_id=request.prd_id)
+
+    if prd_item is None:
+        sys_result.res_code = "FAIL"
+        sys_result.res_msg= "Product info invalid"
+        return  GenAI_rsp_m(sys_result=sys_result,result=None)
+
+    
+    try:
+       prd_entity_json:dict = json.loads(prd_item.prd_entity)
+       oss_key:str = prd_entity_json["value"]
+       if oss_key is None or  len(oss_key)==0:
+           sys_result.res_code="FAIL"
+           sys_result.res_msg="Product info invalid"
+           return GenAI_rsp_m(sys_result=sys_result,result=None)
+
+       voice_file = get_voicefile_from_oss(oss_key=oss_key)
+       genAIResult:GenAIResult = audiotovideo.do_process(voice_file,GenAItype.All)
+       if (not genAIResult.img_path) and (not genAIResult.video_path) :
+          out_img_key, out_video_key = save_genAI_result(genAIResult.img_path, genAIResult.video_path)
+          genAIResult.img_path = out_img_key
+          genAIResult.video_path = out_video_key
+          return GenAI_rsp_m(sys_result=sys_result, result = genAIResult)
+       else:
+          sys_result.res_code="FAIL"
+          sys_result.res_msg="Gen AI error"
+          return GenAI_rsp_m(sys_result= sys_result, result = genAIResult)
+    except Exception as e:
+        logger.error(f"Do media AIGC proc error {str(e)}")
+        sys_result.res_code="FAIL"
+        sys_result.res_msg="System error"
+        return GenAI_rsp_m(sys_result=sys_result,result=None)
 
 
 
@@ -605,13 +645,11 @@ async def do_voice_upload(voice_file:UploadFile=File(...), user_id:str=Form(),db
     replaymsg = "Upload success,you can claim after "+ str(hours) +" hours later"
 
     result.res_msg = replaymsg
-    res_model = VoiceUpload_rsp_m(result=result)
+    res_model = VoiceUpload_rsp_m(result=result,prd_id=prd_id)
     return res_model
 
         
 
-
-    
     
 def fet_user_info(user_id:str,db:Session):
     return user_buss_crud.get_user(db,user_id)

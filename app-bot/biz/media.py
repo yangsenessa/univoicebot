@@ -15,7 +15,6 @@ import time
 
 import sys
 sys.path.append('..')
-from comfyai import telegram_bot_endpoint
 
 endpoint = 'http://oss-us-east-1.aliyuncs.com'
 
@@ -105,6 +104,37 @@ async def save_voice( voice_file:File):
               os.remove(tmp_wav_file.name)
 
               return oss_key
+          
+## save ai result         
+async def save_genAI_result(out_img:str, out_mp4:str):
+      out_img_key:str
+      out_mp4_key:str
+
+      with open(out_img,"rb") as tmp_img_file:
+          oss_key=str(uuid.uuid4())+str(tmp_img_file.name)
+  
+          logger.info(f'Upload file={tmp_img_file.name}')
+          get_oss_bucket().put_object_from_file(oss_key,tmp_img_file.name)
+          tmp_img_file.close()
+          #os.remove(tmp_img_file.name)
+       
+          tmp_img_file.close()
+          #os.remove(tmp_img_file.name)
+          out_img_key = oss_key
+
+      with open(out_mp4,"rb") as tmp_video_file:
+          oss_key=str(uuid.uuid4())+str(tmp_video_file.name)
+  
+          logger.info(f'Upload file={tmp_video_file.name}')
+          get_oss_bucket().put_object_from_file(oss_key,tmp_video_file.name)
+          tmp_video_file.close()
+          os.remove(tmp_video_file.name)
+       
+          tmp_video_file.close()
+          os.remove(tmp_video_file.name)
+
+          out_mp4_key = oss_key
+      return out_img_key, out_mp4_key
           
 async def save_voice_dapp( voice_file:File):
 

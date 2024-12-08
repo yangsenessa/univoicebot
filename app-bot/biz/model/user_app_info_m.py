@@ -5,6 +5,7 @@ from ..dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,User
 from ..dal.transaction import User_claim_jnl
 from datetime import datetime
 from ..tonwallet import config
+from siliconflow.bussmodel import GenAIResult
 
 
 
@@ -99,6 +100,7 @@ class Voicetaskview_rsp_m(BaseModel):
     producer_group:list
 
 class VoiceUpload_rsp_m(BaseModel):
+    prd_id:str
     result:Result
 
 class CommunicationInfo_m(BaseModel):
@@ -125,12 +127,13 @@ class AIGC_task_req_m(BaseModel):
 class AIGC_task_rsp_m(BaseModel):
     result:Result
 
+class GenAI_rsp_m(BaseModel):
+    sys_result:Result
+    result:GenAIResult|None
+
 
 
 def construct_userinfp_res(result:Result,user_info:BotUserInfo, user_acct:BotUserAcctBase,task_info:UserCurrTaskDetail|None,claim_info:User_claim_jnl|None) -> User_appinfo_rsp_m :
-    
-
-    
     user_acct_info_m = AcctInfo(user_id=user_info.tele_user_id,
                               wallet_addr=user_acct.wallet_id,
                               VSD_level = user_info.level,

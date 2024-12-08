@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from comfyai import usermanner_endpoint
 from comfyai import mixlab_endpoint
 from comfyai import wsserver_endpoint
-from comfyai import telegram_bot_endpoint
 from biz import univoice_dapp_endpoint
 from biz.media import parsewav
 from biz.botaction import start,callback_inline,voice_upload,show_cus_upgrade,sharelink_task
@@ -48,5 +47,5 @@ if __name__ == '__main__':
     webapp._init()
     webapp.set_value("name","dapp")
     #uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=True,workers=5, ssl_keyfile="./key.pem", ssl_certfile="./cert.pem")
-    #uvicorn.run(app="main:app", host="0.0.0.0", port=4000)
-    do_aigc()
+    uvicorn.run(app="main:app", host="0.0.0.0", port=4000,reload=True,workers=5)
+    #do_aigc()
