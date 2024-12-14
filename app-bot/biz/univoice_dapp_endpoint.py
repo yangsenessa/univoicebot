@@ -10,7 +10,7 @@ from .model import user_app_info_m
 from .model.user_app_info_m import User_appinfo_rsp_m, Finish_user_boost_task_rsp_m,AddTaskInfo,Invite_friends_rsp_m,Vsd_level_m, \
            Gpu_level_m,Producer_item_m,Voicetaskview_rsp_m,AIGC_task_rsp_m,VoiceUpload_rsp_m,GenAI_rsp_m
 from .dal import user_buss_crud, statement_query
-from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer
+from .dal.user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer,V_miners
 from .dal.transaction import User_claim_jnl
 from .dal.global_config import Unvtaskinfo
 from .dal.database import SessionLocal
@@ -545,6 +545,15 @@ async def do_linkicp(request:user_app_info_m.UserBindIcp_req_m,db:Session = Depe
     logger.info("End update")
   
     return user_app_info_m.UserBindIcp_rsp_m(result=result)
+
+@router.post("/univoice/queryminers.do", response_model=list)
+async def do_queryminers(db:Session=Depends(get_db)):
+    logger.info(f"From icp query miners")
+    reslist= user_buss_crud.query_all_miners(db)
+    logger.debug(f"miners = {reslist}")
+    return reslist
+    
+
 
 
 @router.post("/univoice/uploadvoice.do", response_model=VoiceUpload_rsp_m)

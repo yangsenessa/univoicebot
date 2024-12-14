@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, BIGINT, Integer, String,DateTime
+from sqlalchemy import Boolean, Column, BIGINT, Integer, String,DateTime,Table,MetaData
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -61,6 +61,23 @@ class AIGCLabled(Base):
     deduce_asset_key=Column(String)
     status=Column(String)
     gmt_datatime=Column(DateTime)
+
+
+class View(Table):
+    is_view = True
+
+class V_miners:
+     __view__ = View(
+        'unv_v_miners', Base.metadata,
+        Column('tele_user_id', String, primary_key=True),
+        Column('wallet_id', String),
+        Column('wallet_id', String)
+    )
+
+
+
+
+
 
 
      

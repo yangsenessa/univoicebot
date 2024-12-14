@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from .user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer,AIGCProducer,AIGCLabled
+from .database import Database
+from .user_buss import BotUserInfo, BotUserAcctBase,UserCurrTaskDetail,UserTaskProducer,AIGCProducer,AIGCLabled,V_miners
 from .global_config import Unvtaskinfo
 from ..tonwallet import config
 from .transaction import User_claim_jnl
@@ -8,6 +9,8 @@ from loguru import logger
 import uuid
 import json
 
+
+extern_database =  Database()
 
 def get_user(db:Session, user_id:str):
     try:
@@ -431,6 +434,22 @@ def save_aigclabled(db:Session,aigc_labled:AIGCLabled):
         logger.error(f"db err: {str(e)}")
     finally:
         db.close()
+
+def query_all_miners(db:Session)->list:
+
+    with extern_database.get_db_connection().connect() as conn:
+        result_proxy = conn.execute("SELECT wallet_id FROM unv_v_miners")
+        extern_database
+        res_tup =  result_proxy.fetchall()
+        res_list:list = []
+        for row in res_tup:
+            item = row[0]
+            res_list.append(item)
+        return res_list
+
+
+
+
 
 
      

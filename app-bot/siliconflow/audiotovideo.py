@@ -67,7 +67,7 @@ class AudioToVideo:
 
                 with open(audio_path, 'rb') as f:
                     files = {
-                        'file': ('audio.mp3', ProgressFileWrapper(f), 'audio/mpeg'),
+                        'file': ('audio.wav', ProgressFileWrapper(f), 'audio/wav'),
                         'model': (None, MODEL_AUDIO)
                     }
                     
