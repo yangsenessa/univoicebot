@@ -18,6 +18,7 @@ from .tonwallet import config
 from .media import get_oss_download_url,get_oss_bucket,get_voicefile_from_oss,save_genAI_result
 from  pydub import AudioSegment
 from  biz.tonwallet.config import TASK_INFO, TOKEN
+from  .canister import call_canister, candid
 from siliconflow import audiotovideo
 from siliconflow.bussmodel import GenAIResult, GenAItype
 from . import media
@@ -551,7 +552,11 @@ async def do_queryminers(db:Session=Depends(get_db)):
     logger.info(f"From icp query miners")
     reslist= user_buss_crud.query_all_miners(db)
     logger.debug(f"miners = {reslist}")
-    return reslist
+    nftUnivoicePricipal = candid.NftUnivoicePricipal(
+        owners = reslist
+    )
+    return call_canister.call_canister_workflow(nftUnivoicePricipal=nftUnivoicePricipal)
+
     
 
 
