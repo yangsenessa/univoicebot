@@ -546,7 +546,7 @@ async def do_linkicp(request:user_app_info_m.UserBindIcp_req_m,db:Session = Depe
   
     return user_app_info_m.UserBindIcp_rsp_m(result=result)
 
-@router.post("/univoice/queryminers.do", response_model=list)
+@router.get("/univoice/queryminers.do", response_model=list)
 async def do_queryminers(db:Session=Depends(get_db)):
     logger.info(f"From icp query miners")
     reslist= user_buss_crud.query_all_miners(db)
