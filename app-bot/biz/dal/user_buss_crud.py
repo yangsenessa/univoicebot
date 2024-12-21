@@ -436,7 +436,6 @@ def save_aigclabled(db:Session,aigc_labled:AIGCLabled):
         db.close()
 
 def query_all_miners(db:Session)->list:
-
     with extern_database.get_db_connection().connect() as conn:
         result_proxy = conn.execute("SELECT wallet_id FROM unv_v_miners")
         extern_database
@@ -446,6 +445,16 @@ def query_all_miners(db:Session)->list:
             item = row[0]
             res_list.append(item)
         return res_list
+    
+def query_all_identity_users(db:Session) ->list:
+    with extern_database.get_db_connection().connect() as conn:
+        result_proxy = conn.execute("SELECT tele_user_id, wallet_id ,tele_user_name FROM unv_v_miners")
+        extern_database
+        res_tup =  result_proxy.fetchall()
+        res_list:list = []
+        for row in res_tup:
+            res_list.append((row[0],row[1], row[2]))
+        return res_list 
 
 
 

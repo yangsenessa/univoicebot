@@ -79,6 +79,19 @@ def fetch_task_info(user_id:str, db:Session):
      curr_task = user_buss_crud.fetch_user_curr_task_detail(db, user_id, task_id=config.TASK_VOICE_UPLOAD)
      return curr_task
 
+##sync userinfo
+def sync_userinfo(db:Session):
+    identity_users:list = user_buss_crud.query_all_identity_users(db)
+    candid_list:list = []
+    for item in identity_users :
+        candid_item =  candid.UserIdentityInfo(
+                   user_id = item[0],
+                   principal_txt = item[1],
+                   user_nick = item[2]
+               )
+        candid_list.append(candid_item)
+    
+    return call_canister.call_canister_sync_user(candid_list)
 
 
 #getuserappinfo
