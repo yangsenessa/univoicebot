@@ -85,13 +85,17 @@ def sync_userinfo(db:Session):
     candid_list:list = []
     for item in identity_users :
         candid_item =  candid.UserIdentityInfo(
-                   user_id = item[0],
-                   principal_txt = item[1],
-                   user_nick = item[2]
+                   user_id = str(item[0]),
+                   principalid_txt = str(item[1]),
+                   user_nick = str(item[2]) 
                )
-        candid_list.append(candid_item)
-    
+        logger.info(f"Sync user info {candid_item.user_nick}" )
+        candid_list.append(candid_item)    
     return call_canister.call_canister_sync_user(candid_list)
+
+@router.get("/univoice/syncuserinfo.do" )
+def do_syncuserinfo(db:Session = Depends(get_db)):
+    return sync_userinfo(db)
 
 
 #getuserappinfo
