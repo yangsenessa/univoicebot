@@ -46,9 +46,20 @@ class WebsocetClient(object):
         self.db = None
         self.sid =None
         self.prdid =None
+        self.client_id = None
         self.callfrom = "default"
         self.tele_bot_chatid = None
-        
+
+   #{
+   # "node": "26",
+   # "display_node": "26",
+   # "output": {
+   #     "text": [
+   #         "{\"tags\": [\"中立\"], \"total_duration\": 3.57, \"total_gap_duration\": 2.79, \"emotion_changes\": {\"EMO_UNKNOWN\": 4}, \"most_frequent_emotion\": \"EMO_UNKNOWN\", \"audio_types\": [\"Speech\"], \"languages\": [\"ja\", \"en\", \"zh\"]}"
+   #     ]
+   #},
+   #"prompt_id": "42dae333-5976-4692-8513-c178ae9fc60f"
+   #}  
 
     def on_message(self, source,message):
         print("####### on_message #######")
@@ -60,34 +71,20 @@ class WebsocetClient(object):
             flag, filenames,oss_key_list_str = mixlab_endpoint.detail_recall(self.url,self.sid,message,database.get_db_session(engine_recall))
             if oss_key_list_str:
                 oss_key_list:list = json.loads(oss_key_list_str)
-
+ 
             logger.info("Deduce tags:{}", filenames)
 
             try: 
                 detail_json = json.loads(message)
                 prompt_id = detail_json['data']['prompt_id']
-
+                
                 userTaskProducer=user_buss_crud.fetch_product_detail(db=database.get_db_session(engine_recall),prd_id=self.prdid)
                 prd_entity = userTaskProducer.prd_entity
                 prd_entity_json:dict = json.loads(prd_entity)
                 oss_key:str = prd_entity_json["value"]
-
-                workload = WorkLoad(
-                   promt_id= prompt_id,
-                    client_id='Univoice',
-                    ai_node='Mixlab',
-                    app_info='univoice.pro',
-                    wk_id='univoice-lable.json',
-                    voice_key=oss_key,
-                    deduce_asset_key=filenames,
-                    status='executed',
-                    gmt_datatime=datetime.now().second
-                )
-                call_canister.call_canister_workflow(workLoad=workload)
-
                 aigc_labled:AIGCLabled =  AIGCLabled (
                     promt_id= prompt_id,
-                    client_id='Univoice',
+                    client_id=self.client_id,
                     ai_node='Mixlab',
                     app_info='univoice.pro',
                     wk_id='univoice-lable.json',
@@ -98,6 +95,21 @@ class WebsocetClient(object):
                 )
                 user_buss_crud.save_aigclabled(db=database.get_db_session(engine_recall),aigc_labled=aigc_labled)
                 logger.info("Finish AIGC SUCCESS!")
+
+                workload = WorkLoad(
+                    promt_id= prompt_id,
+                    client_id=self.client_id,
+                    ai_node='Mixlab',
+                    app_info='univoice.pro',
+                    wk_id='univoice-lable.json',
+                    voice_key=oss_key,
+                    deduce_asset_key=filenames,
+                    status='executed',
+                    gmt_datatime=datetime.now().second
+                )
+                call_canister.call_canister_workflow(workLoad=workload)
+
+                
                                              
             except Exception as e:
                 logger.error(f"Send back video err:{str(e)}") 
@@ -156,6 +168,7 @@ class WebsocetClient(object):
         self.callfrom = call_from
         self.tele_bot_chatid = chat_id
         self.prdid = prd_id
+        self.client_id = client_id
         # self.ws.on_open = self.on_open  # 也可以先创建对象再这样指定回调函数。run_forever 之前指定回调函数即可。
         #threading.Thread(target=self.ws.run_forever()) 
         self.ws.run_forever()

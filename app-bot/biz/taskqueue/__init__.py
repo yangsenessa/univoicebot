@@ -36,9 +36,9 @@ queue = DelayQueue(redis_conf)
 
 def do_aigc():
     pool:list= telegram_bot_endpoint.get_pool_of_prdtask()
-    for item in pool :
-        aigc_queue.push(item.prd_id,task_sec= int(time.time()))  
-        break
+    #for item in pool :
+    #    aigc_queue.push(item.prd_id,task_sec= int(time.time()))  
+        #break
     do_pop()
 
 
@@ -48,7 +48,7 @@ def do_pop():
        params:list = aigc_queue.pop(1)
        if params is None or len(params) == 0:
            time.sleep(5)
-           continue;
+           continue
        
        logger.info(f"Pop params :{str(params)}")           
        nest_asyncio.apply()

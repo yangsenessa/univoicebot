@@ -184,7 +184,7 @@ async def extern_prompts_dapp(prd_id:str):
         work_flow_crud.create_wk_router(db,wk_info)
         logger.debug(f"begin create ws client-{wk_json['client_id']}")
     
-        WebsocetClient_dapp().start(user_token,chat_id,prd_id,ws_url,"dapp",db)
+        WebsocetClient_dapp().start(user_token,chat_id,prd_id,ws_url,"dapp",wk_json['client_id'],db)
         time.sleep(1)
        
         logger.debug(response.content)
@@ -272,13 +272,12 @@ async def extern_prompts_dapp_voice_labled(prd_id:str):
         voicefilename = get_voicefile_from_oss(oss_key=oss_key)
         
         wk_json = parseAudioFileNameIntoWorkflow(voicefilename)
-        #wk_client_id = prd_item.prd_id
-        wk_client_id = oss_key
+        wk_client_id = wk_json["client_id"]
+        #wk_client_id = oss_key
         user_token = prd_item.user_id
         chat_id = prd_item.chat_id
-
-        logger.info(f"prompts client_id={wk_client_id}")
-        wk_json["client_id"] = wk_client_id
+        client_id = wk_json["client_id"]
+        logger.info(f"prompts client_id={client_id}")
         
     except Exception as e:
         logger.error(f"Do media AIGC proc error {str(e)}")
@@ -329,7 +328,7 @@ async def extern_prompts_dapp_voice_labled(prd_id:str):
         work_flow_crud.create_wk_router(db,wk_info)
         logger.debug(f"begin create ws client-{wk_json['client_id']}")
     
-        WebsocetClient_dapp().start(user_token,chat_id,prd_id,ws_url,"dapp",db)
+        WebsocetClient_dapp().start(wk_client_id,chat_id,prd_id,ws_url,"dapp",db)
         time.sleep(1)
        
         logger.debug(response.content)
