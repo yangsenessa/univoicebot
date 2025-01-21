@@ -1,4 +1,6 @@
 import asyncio
+
+
 from ic.agent import *
 from ic.identity import *
 from ic.client import *
@@ -9,7 +11,12 @@ from loguru import logger
 
 from .candid import WorkLoad, parseTojson
 
-
+'''Calls an Internet Computer (IC) canister to push workflow record data.
+    workLoad (WorkLoad): WorkLoad object containing the workflow data to be pushed to the canister.
+1. Defines record types for the canister call
+2. Encodes and pushes the workload data to the canister
+    The canister ID used is "bw4dl-smaaa-aaaaa-qaacq-cai"
+    Exception: If canister call fails'''
 def call_canister_workflow(workLoad:WorkLoad):
     logger.info("Begin call Ic canister")
     content = parseTojson(workLoad.__dict__)
@@ -40,6 +47,50 @@ def call_canister_workflow(workLoad:WorkLoad):
         )
     
     logger.info(f'call canister ret = {ret}')
+
+
+"""
+Retrieves workflow data from an Internet Computer (IC) canister using the specified workflow ID.
+Args:
+    workflow_id (str): The unique identifier of the workflow to retrieve.
+Returns:
+    str: The raw response data from the canister containing the requested workflow information.
+The function performs the following steps:
+1. Establishes connection to local IC client (port 4943)
+2. Loads PEM certificate from 'outter.pem' file for authentication
+3. Creates an identity from the PEM certificate
+4. Initializes an agent with the identity and client
+5. Queries the canister with the workflow_id parameter
+Note:
+    Requires a valid PEM certificate in 'outter.pem' file
+    Connects to a local IC client by default
+Raises:
+    FileNotFoundError: If 'outter.pem' file is not found
+    Exception: If canister query fails
+"""
+def call_canister_get_workflow(workflow_id: str) -> str:
+    logger.info("Begin call Ic canister to get workflow")
+    client = Client("http://127.0.0.1:4943")
+
+    with open('outter.pem','rb') as f:
+        bpem = f.read()
+        pemStr = bpem.decode()
+
+    iden = Identity.from_pem(pemStr)
+    ag = Agent(iden, client)
+
+    params = [
+            {'type': Types.Text, 'value': workflow_id},
+        ]
+        
+    ret = ag.query_raw(
+        "bkyz2-fmaaa-aaaaa-qaaaq-cai",
+        "fetch_workflow_data",
+        encode(params)
+    )
+
+    logger.info(f'call canister get workflow ret = {ret}')
+    return ret
 
 
 
