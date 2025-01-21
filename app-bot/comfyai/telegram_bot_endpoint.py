@@ -32,7 +32,7 @@ from biz.taskqueue import aigc_queue
 from biz.model import common_app_m
 from biz.model.common_app_m import Result
 from biz.model.user_app_info_m import AIGC_task_rsp_m
-from biz.media import parse_wkdata_from_oss,get_voicefile_from_oss,parseAudioFileNameIntoWorkflow
+from biz.media import parse_wkdata_from_oss,get_voicefile_from_oss,parseAudioFileNameIntoWorkflow,parseAudioFileNameInfoWorkflowFromCanister
 
 
 
@@ -271,7 +271,8 @@ async def extern_prompts_dapp_voice_labled(prd_id:str):
         
         voicefilename = get_voicefile_from_oss(oss_key=oss_key)
         
-        wk_json = parseAudioFileNameIntoWorkflow(voicefilename)
+        #wk_json = parseAudioFileNameIntoWorkflow(voicefilename)
+        wk_json = parseAudioFileNameInfoWorkflowFromCanister(voicefilename)
         wk_client_id = wk_json["client_id"]
         #wk_client_id = oss_key
         user_token = prd_item.user_id

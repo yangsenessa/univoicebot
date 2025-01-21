@@ -3,6 +3,8 @@ from telegram import Update
 from telegram import File
 from pydub import AudioSegment
 from telegram.ext import ContextTypes
+from comfyai.canister import call_canister
+
 import tempfile
 import os
 import base64
@@ -168,6 +170,31 @@ def parseAudioFileNameIntoWorkflow(voicefilename:str):
                 
     except Exception as e:
          logger.error(f"Some exception happend:  {str(e)}")
+
+
+def parseAudioFileNameInfoWorkflowFromCanister(voicefilename: str):
+     try:
+          # Get workflow json string from canister
+          wk_flow_id ="jzpwm-zsjcq-ugkzp-nr7au-bydmm-c7rqk-tzp2r-gtode-fws2v-ehkfl-cqe-1737481071418102354"
+          json_str = call_canister.call_canister_get_workflow(wk_flow_id)
+          json_wk_data = json.loads(json_str)
+               
+          # Update the audio input
+          json_wk_data["prompt"]["2"]["inputs"]["audio"] = voicefilename
+
+          # Save to temporary file
+          comfyai_path = os.path.abspath(os.path.dirname(__file__))
+          tmp_wk_file = "tmp_univoice-lable.json"
+          tmp_wk_path = os.path.join(comfyai_path, "workflows", tmp_wk_file)
+
+          with open(tmp_wk_path, "w") as tmp_json_file:
+                    json.dump(json_wk_data, tmp_json_file)
+                    tmp_json_file.flush()
+          return json_wk_data
+
+     except Exception as e:
+               logger.error(f"Some exception happened: {str(e)}")
+      
          
 #load video default
 def loadVideoDefault():
