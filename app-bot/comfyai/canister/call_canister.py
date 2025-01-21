@@ -82,13 +82,14 @@ def call_canister_get_workflow(workflow_id: str) -> str:
         ]
         
     ret = ag.query_raw(
-        "bkyz2-fmaaa-aaaaa-qaaaq-cai",
+        "by6od-j4aaa-aaaaa-qaadq-cai",
         "fetch_workflow_data",
         encode(params)
     )
-
-    logger.info(f'call canister get workflow ret = {ret}')
-    return ret
+    if type(ret) is not list:
+        return ret
+        
+    return list(map(lambda item: item["value"], ret))
 
 
 

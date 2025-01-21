@@ -176,7 +176,8 @@ def parseAudioFileNameInfoWorkflowFromCanister(voicefilename: str):
      try:
           # Get workflow json string from canister
           wk_flow_id ="jzpwm-zsjcq-ugkzp-nr7au-bydmm-c7rqk-tzp2r-gtode-fws2v-ehkfl-cqe-1737481071418102354"
-          json_str = call_canister.call_canister_get_workflow(wk_flow_id)
+          json_str:list = call_canister.call_canister_get_workflow(wk_flow_id)[0]
+          logger.info(f"Workflow json string: {json_str}")
           json_wk_data = json.loads(json_str)
                
           # Update the audio input
