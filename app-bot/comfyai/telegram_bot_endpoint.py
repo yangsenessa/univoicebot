@@ -32,7 +32,7 @@ from biz.taskqueue import aigc_queue
 from biz.model import common_app_m
 from biz.model.common_app_m import Result
 from biz.model.user_app_info_m import AIGC_task_rsp_m
-from biz.media import parse_wkdata_from_oss,get_voicefile_from_oss,parseAudioFileNameIntoWorkflow,parseAudioFileNameInfoWorkflowFromCanister
+from biz.media import parse_wkdata_from_oss,get_voicefile_from_oss,parseAudioFileNameInfoWorkflowFromCanister,parseAudioFileNameInfoWorkflowFromCanisterForTraining
 
 
 
@@ -248,8 +248,8 @@ def get_pool_of_prdtask():
     return user_buss_crud.fet_product_pool(db)
 
 
-#lable workflow
-async def extern_prompts_dapp_voice_labled(prd_id:str):
+#identify workflow
+async def extern_prompts_dapp_voice_identify(prd_id:str):
     headers = {
         "Content-Type": "application/json"
     }
@@ -269,10 +269,16 @@ async def extern_prompts_dapp_voice_labled(prd_id:str):
            result.res_msg="Product info invalid"
            return AIGC_task_rsp_m(result=result)
         
+        logger.info(f"Starting voice file processing for oss_key: {oss_key}")
         voicefilename = get_voicefile_from_oss(oss_key=oss_key)
         
         #wk_json = parseAudioFileNameIntoWorkflow(voicefilename)
-        wk_json = parseAudioFileNameInfoWorkflowFromCanister(voicefilename)
+        logger.info(f"Begin parse audio file name:{voicefilename}")
+        wk_json, wk_flow_id = parseAudioFileNameInfoWorkflowFromCanister(voicefilename)
+        if wk_json is None or len(wk_flow_id) == 0:
+            result.res_code="FAIL"
+            result.res_msg="System error"
+            return AIGC_task_rsp_m(result=result)
         wk_client_id = wk_json["client_id"]
         #wk_client_id = oss_key
         user_token = prd_item.user_id
@@ -284,6 +290,7 @@ async def extern_prompts_dapp_voice_labled(prd_id:str):
         logger.error(f"Do media AIGC proc error {str(e)}")
         result.res_code="FAIL"
         result.res_msg="System error"
+        return result
 
     #init user router
     init_user_router(db, user_token)
@@ -329,7 +336,106 @@ async def extern_prompts_dapp_voice_labled(prd_id:str):
         work_flow_crud.create_wk_router(db,wk_info)
         logger.debug(f"begin create ws client-{wk_json['client_id']}")
     
-        WebsocetClient_dapp().start(wk_client_id,chat_id,prd_id,ws_url,"dapp",db)
+        WebsocetClient_dapp().start(wk_client_id,chat_id,prd_id,ws_url,"dapp",wk_flow_id,db)
+        time.sleep(1)
+       
+        logger.debug(response.content)
+           
+    except Exception as e:
+        logger.debug(f"some exception when prompts:{str(e)}")
+
+    return result  
+
+
+#lable workflow
+async def extern_prompts_dapp_voice_labled(prd_id:str):
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    db = extern_database.get_db_session(engine)
+    result:Result = common_app_m.buildResult("SUCCESS","SUCCESS")
+    prd_item:UserTaskProducer = user_buss_crud.fetch_product_detail(db=db,prd_id=prd_id)
+    if prd_item is None:
+        result.res_code="FAIL"
+        result.res_msg="Product info invalid"
+        return AIGC_task_rsp_m(result=result)
+    try:
+        prd_entity_json:dict = json.loads(prd_item.prd_entity)
+        oss_key:str = prd_entity_json["value"]
+        if oss_key is None or  len(oss_key)==0:
+           result.res_code="FAIL"
+           result.res_msg="Product info invalid"
+           return AIGC_task_rsp_m(result=result)
+        
+        logger.info(f"Starting voice file processing for oss_key: {oss_key}")
+        voicefilename = get_voicefile_from_oss(oss_key=oss_key)
+        
+        #wk_json = parseAudioFileNameIntoWorkflow(voicefilename)
+        logger.info(f"Begin parse audio file name:{voicefilename}")
+        wk_json, wk_flow_id = parseAudioFileNameInfoWorkflowFromCanisterForTraining(voicefilename)
+        if wk_json is None or len(wk_flow_id) == 0:
+            result.res_code="FAIL"
+            result.res_msg="System error"
+            return AIGC_task_rsp_m(result=result)
+        wk_client_id = wk_json["client_id"]
+        #wk_client_id = oss_key
+        user_token = prd_item.user_id
+        chat_id = prd_item.chat_id
+        client_id = wk_json["client_id"]
+        logger.info(f"prompts client_id={client_id}")
+        
+    except Exception as e:
+        logger.error(f"Do media AIGC proc error {str(e)}")
+        result.res_code="FAIL"
+        result.res_msg="System error"
+        return result
+
+    #init user router
+    init_user_router(db, user_token)
+
+     #Get node
+    user_ws_router:UserWsRouterInfo
+    user_ws_router = user_crud.fetch_user_ws_router(db,user_token)
+    if(user_ws_router) :
+        comf_url = user_ws_router.comf_url
+        ws_url_ori = str(user_ws_router.ws_url) 
+        ws_url = ws_url_ori.split('=')[0]+'='+wk_client_id
+    else:
+        raise HTTPException(status_code=400,detail="Invaid router")
+    logger.info(f"Curr router is:{comf_url}")
+    logger.info(f"Curr ws opt is:{ws_url}")
+
+   
+    try:
+        logger.info(f"Begining put .wav file to comfyui")
+        put_file_to_comfyui_rawfile(comf_url,voicefilename)
+       
+    except Exception as e:
+        logger.error(f"Upload video file err {str(e)}")
+        return
+    
+    logger.debug("begin post:" + "  "+ comf_url) 
+    try:
+        response = requests.post(comf_url,json=wk_json,headers=headers)
+
+        rescontents =  response.json()
+        logger.debug("response -- "+json.dumps(rescontents))
+       
+
+        wk_info =  WorkFlowRouterInfo()  
+        wk_info.prompts_id = rescontents["prompt_id"]
+        wk_info.client_id = user_token
+        wk_info.app_info = get_app_info(wk_json)
+        wk_info.status="progress"
+        wk_info.comfyui_url=comf_url  
+        wk_info.gmt_datetime =  datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    
+        work_flow_crud.create_wk_router(db,wk_info)
+        logger.debug(f"begin create ws client-{wk_json['client_id']}")
+    
+        WebsocetClient_dapp().start(wk_client_id,chat_id,prd_id,ws_url,"dapp",wk_flow_id,db)
         time.sleep(1)
        
         logger.debug(response.content)

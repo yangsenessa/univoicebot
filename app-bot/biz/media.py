@@ -19,7 +19,11 @@ import sys
 sys.path.append('..')
 from comfyai import telegram_bot_endpoint
 
+#outter
 endpoint = 'http://oss-us-east-1.aliyuncs.com'
+
+#inner
+#endpoint = 'http://oss-us-east-1-internal.aliyuncs.com'
 
 #oss
 def get_oss_bucket():
@@ -55,6 +59,7 @@ def get_voicefile_from_oss(oss_key:str)->str:
      with tempfile.NamedTemporaryFile(delete=False,suffix=".wav") as tmp_wav_file:
           logger.info(f"Get voice from oss, filename={tmp_wav_file.name}")
           get_oss_bucket().get_object_to_file(oss_key,tmp_wav_file.name)
+          logger.info(f"Get file from oss success")
           voicefilename = tmp_wav_file.name
           tmp_wav_file.close()
           return voicefilename
@@ -171,31 +176,79 @@ def parseAudioFileNameIntoWorkflow(voicefilename:str):
     except Exception as e:
          logger.error(f"Some exception happend:  {str(e)}")
 
-
 def parseAudioFileNameInfoWorkflowFromCanister(voicefilename: str):
      try:
-          # Get workflow json string from canister
-          wk_flow_id ="jzpwm-zsjcq-ugkzp-nr7au-bydmm-c7rqk-tzp2r-gtode-fws2v-ehkfl-cqe-1737481071418102354"
-          json_str:list = call_canister.call_canister_get_workflow(wk_flow_id)[0]
-          logger.info(f"Workflow json string: {json_str}")
-          json_wk_data = json.loads(json_str)
-               
-          # Update the audio input
-          json_wk_data["prompt"]["2"]["inputs"]["audio"] = voicefilename
+          # Load workflow IDs from canister
+          json_wk_data:dict=None
+          wk_flow_ids = call_canister.call_canister_query_wait_identity_workflows()
+          logger.info(f"Workflow IDs: {wk_flow_ids}")  
+          if not wk_flow_ids or len(wk_flow_ids) == 0:
+                  return ({}, [])
+          for wk_flow_id in wk_flow_ids:
+               if not wk_flow_id or wk_flow_id == "":
+                    continue
+               # Get workflow json string from canister
+               logger.info(f"Get workflow json string from canister: {wk_flow_id}")
+               json_str = call_canister.call_canister_get_workflow(wk_flow_id)[0]
+               # todo：mock canister call
+               call_canister.call_canister_workflow_mock(wk_flow_id)
 
-          # Save to temporary file
-          comfyai_path = os.path.abspath(os.path.dirname(__file__))
-          tmp_wk_file = "tmp_univoice-lable.json"
-          tmp_wk_path = os.path.join(comfyai_path, "workflows", tmp_wk_file)
+               #logger.info(f"Workflow json string: {json_str}")
+               json_wk_data = json.loads(json_str)
 
-          with open(tmp_wk_path, "w") as tmp_json_file:
+               # Update the audio input
+               json_wk_data["prompt"]["2"]["inputs"]["audio"] = voicefilename
+
+               # Save to temporary file
+               comfyai_path = os.path.abspath(os.path.dirname(__file__))
+               tmp_wk_file = f"tmp_univoice-lable_{wk_flow_id}.json"
+               tmp_wk_path = os.path.join(comfyai_path, "workflows", tmp_wk_file)
+
+               with open(tmp_wk_path, "w") as tmp_json_file:
                     json.dump(json_wk_data, tmp_json_file)
                     tmp_json_file.flush()
-          return json_wk_data
+                         
+               return (json_wk_data, wk_flow_ids)
 
      except Exception as e:
                logger.error(f"Some exception happened: {str(e)}")
       
+def parseAudioFileNameInfoWorkflowFromCanisterForTraining(voicefilename: str):
+     try:
+          # Load workflow IDs from canister
+          json_wk_data:dict=None
+          wk_flow_ids = call_canister.call_canister_query_wait_training_workflows()
+          logger.info(f"Workflow IDs: {wk_flow_ids}") 
+          if not wk_flow_ids or len(wk_flow_ids) == 0:
+               return ({}, [])
+          for wk_flow_id in wk_flow_ids:
+               if not wk_flow_id or wk_flow_id == "":
+                    continue
+               # Get workflow json string from canister
+               logger.info(f"Get workflow json string from canister: {wk_flow_id}")
+               json_str = call_canister.call_canister_get_workflow(wk_flow_id)[0]
+               # todo：mock canister call
+               call_canister.call_canister_workflow_mock(wk_flow_id)
+
+               #logger.info(f"Workflow json string: {json_str}")
+               json_wk_data = json.loads(json_str)
+
+               # Update the audio input
+               json_wk_data["prompt"]["2"]["inputs"]["audio"] = voicefilename
+
+               # Save to temporary file
+               comfyai_path = os.path.abspath(os.path.dirname(__file__))
+               tmp_wk_file = f"tmp_univoice-lable_{wk_flow_id}.json"
+               tmp_wk_path = os.path.join(comfyai_path, "workflows", tmp_wk_file)
+
+               with open(tmp_wk_path, "w") as tmp_json_file:
+                    json.dump(json_wk_data, tmp_json_file)
+                    tmp_json_file.flush()
+                         
+               return (json_wk_data, wk_flow_ids)
+
+     except Exception as e:
+               logger.error(f"Some exception happened: {str(e)}")
          
 #load video default
 def loadVideoDefault():

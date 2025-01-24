@@ -35,8 +35,9 @@ aigc_queue = DelayQueueAigc(redis_conf)
 queue = DelayQueue(redis_conf)
 
 def do_aigc():
-    pool:list= telegram_bot_endpoint.get_pool_of_prdtask()
+    #pool:list= telegram_bot_endpoint.get_pool_of_prdtask()
     #for item in pool :
+    #    logger.info(f"Push item to aigc queue:{item.prd_id}")
     #    aigc_queue.push(item.prd_id,task_sec= int(time.time()))  
         #break
     do_pop()
@@ -54,7 +55,11 @@ def do_pop():
        nest_asyncio.apply()
        try:
            loop = asyncio.new_event_loop()
+           logger.info(f"Identity Processing params: {params}")
+           loop.run_until_complete(telegram_bot_endpoint.extern_prompts_dapp_voice_identify(params[0]))
+           logger.info(f"Labled processing params: {params}")
            loop.run_until_complete(telegram_bot_endpoint.extern_prompts_dapp_voice_labled(params[0]))
+
        except Exception as e:
            logger.error(f"Do AIGC error:{str(params)} -{e}")           
        finally:

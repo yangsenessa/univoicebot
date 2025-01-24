@@ -48,6 +48,7 @@ class WebsocetClient(object):
         self.prdid =None
         self.client_id = None
         self.callfrom = "default"
+        self.wk_flow_id = None
         self.tele_bot_chatid = None
 
    #{
@@ -87,7 +88,7 @@ class WebsocetClient(object):
                     client_id=self.client_id,
                     ai_node='Mixlab',
                     app_info='univoice.pro',
-                    wk_id='univoice-lable.json',
+                    wk_id=self.wk_flow_id,
                     voice_key=oss_key,
                     deduce_asset_key=filenames,
                     status='executed',
@@ -101,16 +102,14 @@ class WebsocetClient(object):
                     client_id=self.client_id,
                     ai_node='Mixlab',
                     app_info='univoice.pro',
-                    wk_id='univoice-lable.json',
+                    wk_id=self.wk_flow_id,
                     voice_key=oss_key,
                     deduce_asset_key=filenames,
                     status='executed',
                     gmt_datatime=datetime.now().second
                 )
                 call_canister.call_canister_workflow(workLoad=workload)
-
-                
-                                             
+                                        
             except Exception as e:
                 logger.error(f"Send back video err:{str(e)}") 
                            
@@ -153,7 +152,7 @@ class WebsocetClient(object):
 
 
 
-    def start(self,client_id:str,chat_id:str,prd_id:str,ws_url:str,call_from:str,db:Session):
+    def start(self,client_id:str,chat_id:str,prd_id:str,ws_url:str,call_from:str,wk_flow_id:str,db:Session):
     
         logger.debug("Begin create WebSocketApp:" + ws_url)
         self.ws = websocket.WebSocketApp(ws_url,
@@ -169,6 +168,7 @@ class WebsocetClient(object):
         self.tele_bot_chatid = chat_id
         self.prdid = prd_id
         self.client_id = client_id
+        self.wk_flow_id = wk_flow_id
         # self.ws.on_open = self.on_open  # 也可以先创建对象再这样指定回调函数。run_forever 之前指定回调函数即可。
         #threading.Thread(target=self.ws.run_forever()) 
         self.ws.run_forever()

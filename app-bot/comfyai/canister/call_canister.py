@@ -39,7 +39,7 @@ def call_canister_workflow(workLoad:WorkLoad):
          {'type': types, 'value': vals},
         ]
     ret = ag.update_raw(
-        "bw4dl-smaaa-aaaaa-qaacq-cai",
+        "by6od-j4aaa-aaaaa-qaadq-cai",
         "push_workload_record",
         encode(params)
         )
@@ -91,8 +91,66 @@ def call_canister_get_workflow(workflow_id: str) -> str:
         
     return list(map(lambda item: item["value"], ret))
 
+def call_canister_query_wait_identity_workflows() -> list:
+    logger.info("Begin call Ic canister to query wait identity workflows")
+    client = Client("http://127.0.0.1:4943")
+
+    with open('outter.pem', 'rb') as f:
+        bpem = f.read()
+        pemStr = bpem.decode()
+
+        iden = Identity.from_pem(pemStr)
+        ag = Agent(iden, client)
+
+        ret = ag.query_raw(
+            "by6od-j4aaa-aaaaa-qaadq-cai",
+            "query_wait_identity_workflows",
+            encode([])
+        )
+        
+        if type(ret) is not list:
+            return []
+        
+        return list(map(lambda item: item["value"], ret))[0]
+    
+def call_canister_query_wait_training_workflows() -> list:
+    logger.info("Begin call Ic canister to query wait training workflows")
+    client = Client("http://127.0.0.1:4943")
+
+    with open('outter.pem', 'rb') as f:
+        bpem = f.read()
+        pemStr = bpem.decode()
+
+        iden = Identity.from_pem(pemStr)
+        ag = Agent(iden, client)
+
+        ret = ag.query_raw(
+            "by6od-j4aaa-aaaaa-qaadq-cai",
+            "query_wait_training_workflows",
+            encode([])
+        )
+        
+        if type(ret) is not list:
+            return []
+        
+        return list(map(lambda item: item["value"], ret))[0]
 
 
+def call_canister_workflow_mock(wk_flow_id:str):
+    mock_workload = WorkLoad(
+        promt_id="b9c71f27e19f4f93877ca46dcff419e5",
+        client_id="b9c71f27e19f4f93877ca46dcff419e5",
+        ai_node="test_node",
+        app_info="test_app",
+        wk_id=wk_flow_id,
+        voice_key="{\"tags\": [\"中立\"], \"total_duration\": 3.57, \"total_gap_duration\": 2.79, \"emotion_changes\": {\"EMO_UNKNOWN\": 4}, \"most_frequent_emotion\": \"EMO_UNKNOWN\", \"audio_types\": [\"Speech\"], \"languages\": [\"ja\", \"en\", \"zh\"]}",
+        deduce_asset_key="test_asset",
+        status="pending",
+        gmt_datatime=int(time.time())
+    ) 
+    logger.info("Waiting for mock workload: {}", mock_workload)
+    time.sleep(10)
+    call_canister_workflow(mock_workload)
 
 
 
