@@ -35,7 +35,7 @@ aigc_queue = DelayQueueAigc(redis_conf)
 queue = DelayQueue(redis_conf)
 
 def do_aigc():
-    #pool:list= telegram_bot_endpoint.get_pool_of_prdtask()
+    pool:list= telegram_bot_endpoint.get_pool_of_prdtask()
     #for item in pool :
     #    logger.info(f"Push item to aigc queue:{item.prd_id}")
     #    aigc_queue.push(item.prd_id,task_sec= int(time.time()))  

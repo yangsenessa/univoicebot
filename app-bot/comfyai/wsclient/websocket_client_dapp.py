@@ -106,7 +106,7 @@ class WebsocetClient(object):
                     voice_key=oss_key,
                     deduce_asset_key=filenames,
                     status='executed',
-                    gmt_datatime=datetime.now().second
+                    gmt_datatime=int(datetime.now().timestamp())
                 )
                 call_canister.call_canister_workflow(workLoad=workload)
                                         

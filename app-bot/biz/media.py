@@ -191,7 +191,7 @@ def parseAudioFileNameInfoWorkflowFromCanister(voicefilename: str):
                logger.info(f"Get workflow json string from canister: {wk_flow_id}")
                json_str = call_canister.call_canister_get_workflow(wk_flow_id)[0]
                # todo：mock canister call
-               call_canister.call_canister_workflow_mock(wk_flow_id)
+               #call_canister.call_canister_workflow_mock(wk_flow_id)
 
                #logger.info(f"Workflow json string: {json_str}")
                json_wk_data = json.loads(json_str)
@@ -208,7 +208,7 @@ def parseAudioFileNameInfoWorkflowFromCanister(voicefilename: str):
                     json.dump(json_wk_data, tmp_json_file)
                     tmp_json_file.flush()
                          
-               return (json_wk_data, wk_flow_ids)
+               return (json_wk_data, wk_flow_id)
 
      except Exception as e:
                logger.error(f"Some exception happened: {str(e)}")
@@ -228,7 +228,7 @@ def parseAudioFileNameInfoWorkflowFromCanisterForTraining(voicefilename: str):
                logger.info(f"Get workflow json string from canister: {wk_flow_id}")
                json_str = call_canister.call_canister_get_workflow(wk_flow_id)[0]
                # todo：mock canister call
-               call_canister.call_canister_workflow_mock(wk_flow_id)
+               #call_canister.call_canister_workflow_mock(wk_flow_id)
 
                #logger.info(f"Workflow json string: {json_str}")
                json_wk_data = json.loads(json_str)
@@ -245,7 +245,7 @@ def parseAudioFileNameInfoWorkflowFromCanisterForTraining(voicefilename: str):
                     json.dump(json_wk_data, tmp_json_file)
                     tmp_json_file.flush()
                          
-               return (json_wk_data, wk_flow_ids)
+               return (json_wk_data, wk_flow_id)
 
      except Exception as e:
                logger.error(f"Some exception happened: {str(e)}")
