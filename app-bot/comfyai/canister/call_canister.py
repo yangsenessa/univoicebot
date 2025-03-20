@@ -69,7 +69,7 @@ Raises:
 def call_canister_get_workflow(workflow_id: str) -> str:
     logger.info("Begin call Ic canister to get workflow")
     client = Client("http://127.0.0.1:4943")
-
+    #client = Client()
     with open('outter.pem','rb') as f:
         bpem = f.read()
         pemStr = bpem.decode()
